@@ -1,0 +1,11 @@
+# Ignore Node and environment files
+node_modules/
+.env
+.env.local
+dist/
+build/
+.vscode/
+.DS_Store
+
+# Optional: OS/system files
+Thumbs.db

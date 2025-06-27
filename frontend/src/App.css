@@ -1,0 +1,54 @@
+/* Tailwind CSS Directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Animations for the App */
+
+/* Typing animation for question text cursor */
+@keyframes blink {
+    from, to { opacity: 0; }
+    50% { opacity: 1; }
+}
+
+.blinking-cursor {
+    animation: blink 1s step-end infinite;
+}
+
+/* Fade in/out animation for motivational quotes during loading */
+@keyframes fadeInOut {
+    0% { opacity: 0; transform: translateY(10px); }
+    10% { opacity: 1; transform: translateY(0); }
+    90% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-10px); }
+}
+
+.quote-animation {
+    animation: fadeInOut 3.5s forwards; 
+}
+
+/* Fade in and slide up animation for description sections */
+@keyframes fadeInSlideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animated-section {
+    animation: fadeInSlideUp 0.6s ease-out forwards;
+    opacity: 0; /* Ensures the element is hidden before animation starts */
+}
+
+/* Important Note: 
+The 'Inter' font is typically configured within your tailwind.config.js file
+under the `theme.extend.fontFamily` section. 
+You do NOT need to add @font-face here if you've done that and imported 
+Tailwind's base styles. If you haven't, you would add it here:
+
+@font-face {
+    font-family: 'Inter';
+    src: url('/fonts/Inter-Regular.woff2') format('woff2'); /* Adjust path as needed */
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+*/
