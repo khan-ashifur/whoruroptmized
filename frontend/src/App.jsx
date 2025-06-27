@@ -49,7 +49,7 @@ const questions = [
     // Category 3: Nature — Thinking (T) vs Feeling (F)
     { question: "সিদ্ধান্ত নেয়ার সময় আপনি কি বেশি যুক্তি ব্যবহার করেন?", traitPair: ['T', 'F'] },
     { question: "অন্যের অনুভূতির ওপর আপনি কি মনোযোগ দেন?", traitPair: ['F', 'T'] },
-    { question: "কঠিন সিদ্ধান্তে আপনি আগে যুক্তি ভাবেন?", traitPair: ['T', 'F'] }, // Rephrased for scale
+    { question: "ক কঠিন সিদ্ধান্তে আপনি আগে যুক্তি ভাবেন?", traitPair: ['T', 'F'] }, // Rephrased for scale
     { question: "সমালোচনা পেলে কি আপনি ব্যক্তিগতভাবে নেন?", traitPair: ['F', 'T'] },
     { question: "আপনি কি সহজে অন্যের দৃষ্টিভঙ্গি বুঝতে পারেন?", traitPair: ['F', 'T'] },
     { question: "আপনার বন্ধুরা আপনাকে বাস্তববাদী ভাবে চেনে?", traitPair: ['T', 'F'] }, // Rephrased for scale
@@ -141,6 +141,11 @@ export default function App() {
         userAnswersRef.current = userAnswers;
     }, [userAnswers]);
 
+    // Log the total number of questions when the component mounts
+    useEffect(() => {
+        console.log("App component initialized. Total questions:", questions.length);
+    }, []);
+
     // Effect for question fade-in animation
     useEffect(() => {
         if (screen === 'test') {
@@ -182,39 +187,43 @@ export default function App() {
     const showMessage = (msg, type = 'error') => {
         setMessage(msg);
         setMessageType(type);
-        if (msg !== "অনুগ্রহ করে এই প্রশ্নের উত্তর দিন।") {
-            setTimeout(() => {
-                setMessage('');
-            }, 3000);
+        // Do not clear the message immediately if it's an error about missing answers.
+        // For other messages, clear after 3 seconds.
+        if (msg !== "অনুগ্রহ করে সব প্রশ্নের উত্তর দিন।" && msg !== "অনুগ্রহ করে এই প্রশ্নের উত্তর দিন।") {
+             setTimeout(() => {
+                 setMessage('');
+             }, 3000);
         }
     };
 
     const selectAnswer = (selectedScaleIndex) => {
         if (submittingFlag) return; 
 
-        setMessage('');
+        setMessage(''); // Clear any previous messages when a new answer is selected
         
-        setUserAnswers(prevAnswers => {
-            const newAnswers = { ...prevAnswers, [currentQuestionIndex]: selectedScaleIndex };
-            userAnswersRef.current = newAnswers; 
-            return newAnswers; 
-        });
+        // Optimistically update the answers state and ref
+        const newAnswers = { ...userAnswers, [currentQuestionIndex]: selectedScaleIndex };
+        setUserAnswers(newAnswers); 
+        userAnswersRef.current = newAnswers; // Update ref immediately for synchronous access
 
-        // Use a timeout to allow state to update and for a brief visual feedback before moving
-        setTimeout(() => {
-            const isLastQuestion = (currentQuestionIndex === questions.length - 1);
-            const currentAnswersCount = Object.keys(userAnswersRef.current).length; 
-            const expectedAnswersCount = questions.length;
+        const isLastQuestion = (currentQuestionIndex === questions.length - 1);
+        
+        console.log(`Question ${currentQuestionIndex} answered with value: ${selectedScaleIndex}. Is this the last question? ${isLastQuestion}`);
+        console.log(`UserAnswersRef state AFTER setting new answer (length: ${Object.keys(userAnswersRef.current).length}):`, userAnswersRef.current);
 
-            if (isLastQuestion && currentAnswersCount === expectedAnswersCount) {
+
+        if (isLastQuestion) {
+            console.log("It's the last question. Scheduling submission with a small delay.");
+            // Add a very small timeout to ensure React's state update is fully committed
+            // before submitTest reads userAnswersRef.current.
+            setTimeout(() => { 
+                console.log(`Inside last question's setTimeout. Invoking submitTest(). UserAnswersRef length at this point: ${Object.keys(userAnswersRef.current).length}`);
                 submitTest(); 
-            } else if (!isLastQuestion) {
-                setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
-            } else {
-                // This else block is for debugging. In normal flow, it shouldn't be reached.
-                console.warn("DEBUG: selectAnswer finished, but not submitting or moving. currentQI:", currentQuestionIndex, "answersCount:", currentAnswersCount, "expected:", expectedAnswersCount);
-            }
-        }, 300); // Reduced delay since answer animation is removed
+            }, 50); // Minimal delay
+        } else {
+            console.log("Moving to next question.");
+            setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
+        }
     };
 
     const previousQuestion = () => {
@@ -229,7 +238,7 @@ export default function App() {
         const tempScores = {
             'E': 0, 'I': 0, 'S': 0, 'N': 0,
             'T': 0, 'F': 0, 'J': 0, 'P': 0,
-            'A': 0, 'X': 0
+            'A': 0, 'X': 0 
         };
 
         for (let qIndex = 0; qIndex < questions.length; qIndex++) {
@@ -243,10 +252,6 @@ export default function App() {
                 }
 
                 const [trait1, trait2] = question.traitPair;
-                // Normalize answer value: 1-7 scale, neutral at 4.
-                // Score difference from neutral (4) to contribute to traits.
-                // Example: answerValue 7 (fully agree) means (7-4)=3 points for trait1.
-                // Example: answerValue 1 (fully disagree) means (1-4)=-3, so 3 points for trait2.
                 const scoreValue = answerValue - 4; 
 
                 if (scoreValue > 0) { 
@@ -262,41 +267,48 @@ export default function App() {
         type += (tempScores['S'] >= tempScores['N']) ? 'S' : 'N';
         type += (tempScores['T'] >= tempScores['F']) ? 'T' : 'F';
         type += (tempScores['J'] >= tempScores['P']) ? 'J' : 'P';
-        // A for Assertive, X for Turbulent (originally T for turbulent, changed to X to avoid conflict with Thinking)
-        type += (tempScores['A'] >= tempScores['X']) ? 'A' : 'X';
-
+        
         return type;
     }, []); 
 
     const submitTest = useCallback(() => { 
-        if (submittingFlag) return; // Prevent multiple submissions
+        if (submittingFlag) {
+            console.log("Submission already in progress, preventing duplicate call.");
+            return; // Prevent multiple submissions
+        }
         setSubmittingFlag(true); 
 
-        const answersToSubmit = userAnswersRef.current; 
+        const answersToSubmit = userAnswersRef.current; // Use ref for latest state
+        console.log("--- SUBMIT TEST INITIATED ---");
+        console.log("Answers captured for submission:", answersToSubmit);
+        const currentAnswersCount = Object.keys(answersToSubmit).length;
+        console.log(`Number of answers captured: ${currentAnswersCount} / ${questions.length}`);
 
-        // Check if all questions are answered
-        if (Object.keys(answersToSubmit).length !== questions.length) {
+        // Crucial: Check if ALL questions have been answered.
+        if (currentAnswersCount !== questions.length) {
             showMessage("অনুগ্রহ করে সব প্রশ্নের উত্তর দিন।", 'error');
-            console.error("Not all questions answered:", answersToSubmit);
+            console.error(`Submission failed: Not all questions answered. Expected ${questions.length}, but got ${currentAnswersCount}.`);
             setSubmittingFlag(false); 
             return; 
         }
         
         const finalCalculatedType = calculatePersonalityType(); 
+        console.log("Calculated personality type (4-letter):", finalCalculatedType);
 
-        // Basic validation for the calculated type
+        // Validate the calculated type against the predefined list
         const validTypes = Object.keys(personalityTypesData);
         if (!validTypes.includes(finalCalculatedType)) {
-            console.error("Calculated type is not a standard MBTI type:", finalCalculatedType);
-            // Fallback to a default or error type if invalid, or show a message
+            console.error(`Submission failed: Calculated type "${finalCalculatedType}" is not a standard MBTI type.`);
             showMessage("ব্যক্তিত্বের ধরণ নির্ণয় করা যায়নি। অনুগ্রহ করে পুনরায় চেষ্টা করুন।", 'error');
             setSubmittingFlag(false);
             return;
         }
 
+        console.log(`Successfully calculated type: ${finalCalculatedType}. Transitioning to result screen.`);
         setResultType(finalCalculatedType);
         setScreen('result'); 
         setSubmittingFlag(false); 
+        console.log("--- SUBMIT TEST COMPLETED ---");
     }, [submittingFlag, calculatePersonalityType]); 
 
     const restartTest = () => {
@@ -317,15 +329,23 @@ export default function App() {
 
     // Effect to trigger AI description fetch when screen changes to 'result'
     useEffect(() => {
+        console.log(`Effect: screen is '${screen}', resultType is '${resultType}', structuredDescription is ${structuredDescription ? 'set' : 'null'}, isGeneratingDescription is ${isGeneratingDescription}`);
         // Fetch initial description only if on result screen, resultType is set,
         // no structured description is already loaded, and not already generating.
         if (screen === 'result' && resultType && !structuredDescription && !isGeneratingDescription) {
+            console.log(`Calling fetchFullDescriptionFromAI for initial description with type: '${resultType}'`);
             fetchFullDescriptionFromAI(resultType, 'initial_description');
+        } else if (screen === 'result' && !resultType && !isGeneratingDescription) {
+            // This case might happen if resultType somehow gets cleared or isn't set
+            // and we're not already generating.
+            console.error("Result screen entered without a valid resultType or while generating. This might indicate an earlier calculation error or double trigger.");
+            showMessage("ব্যক্তিত্বের ধরণ নির্ণয় করা যায়নি। অনুগ্রহ করে পুনরায় চেষ্টা করুন।", 'error');
         }
     }, [screen, resultType, structuredDescription, isGeneratingDescription]); 
 
     // Function to fetch detailed AI description (main or sub-prompt)
     const fetchFullDescriptionFromAI = async (type, promptKey) => {
+        console.log(`fetchFullDescriptionFromAI called for promptKey: '${promptKey}', type: '${type}'`);
         if (promptKey === 'initial_description') {
             setIsGeneratingDescription(true);
             setStructuredDescription(null); // Clear previous main description
@@ -335,6 +355,7 @@ export default function App() {
         }
         
         setMessage('বিস্তারিত বর্ণনা তৈরি হচ্ছে... অনুগ্রহ করে অপেক্ষা করুন।', 'info');
+        console.log("Displaying loading message for AI generation.");
 
         let promptText = "";
         let responseSchema = {};
@@ -413,6 +434,9 @@ export default function App() {
         }
 
         try {
+            console.log(`Prompt text being sent: ${promptText.substring(0, 100)}...`); // Log first 100 chars
+            console.log("Response schema being used:", JSON.stringify(responseSchema, null, 2));
+
             const chatHistory = [{ role: "user", parts: [{ text: promptText }] }];
             const payload = {
                 contents: chatHistory,
@@ -425,6 +449,7 @@ export default function App() {
             const apiKey = ""; // Canvas will automatically provide the API key
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
+            console.log("Fetching AI content from API...");
             const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -433,41 +458,54 @@ export default function App() {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.error || `API error! Status: ${response.status}`);
+                console.error(`API response not OK. Status: ${response.status}`, errorData);
+                throw new Error(errorData.error?.message || `API error! Status: ${response.status}`);
             }
 
             const result = await response.json();
+            console.log("Raw AI response received:", result);
             
             if (result.candidates && result.candidates.length > 0 &&
                 result.candidates[0].content && result.candidates[0].content.parts &&
                 result.candidates[0].content.parts.length > 0) {
                 const jsonString = result.candidates[0].content.parts[0].text;
+                console.log("AI response JSON string:", jsonString);
                 const parsedData = JSON.parse(jsonString);
+                console.log("Parsed AI data:", parsedData);
 
                 if (promptKey === 'initial_description') {
                     setStructuredDescription(parsedData);
+                    console.log("Structured description state updated successfully.");
                 } else {
                     setSubPromptResult(parsedData); 
+                    console.log("Sub-prompt result state updated successfully.");
                 }
                 setMessage(''); // Clear loading message
+                console.log("Loading message cleared after successful fetch.");
             } else {
-                throw new Error("Invalid response structure from AI.");
+                console.error("Invalid or empty response structure from AI. Candidates or content parts missing.");
+                showMessage("বিস্তারিত বর্ণনা লোড করতে সমস্যা হয়েছে। (অবৈধ প্রতিক্রিয়া)", 'error'); // More specific error
+                throw new Error("Invalid or empty response structure from AI.");
             }
 
         } catch (error) {
-            console.error("বিস্তারিত বর্ণনা আনতে ব্যর্থ:", error);
-            setMessage(`Error: ${error.message || 'Failed to fetch description'}. Please try again.`, 'error');
+            console.error(`Error in fetchFullDescriptionFromAI: ${error.message}`, error);
+            setMessage(`Error: ${error.message || 'Failed to fetch description'}. অনুগ্রহ করে পুনরায় চেষ্টা করুন।`, 'error');
             // Set a fallback description or message if AI call fails
             if (promptKey === 'initial_description') {
                 setStructuredDescription({general_summary: "বিস্তারিত বর্ণনা লোড করতে সমস্যা হয়েছে। অনুগ্রহ করে পুনরায় চেষ্টা করুন।", strengths: [], challenges: [], career_advice: [], relationship_tips: [], self_improvement_habits: [], coach_message: ""});
+                console.log("Set fallback structured description.");
             } else {
                 setSubPromptResult({message: "বিস্তারিত তথ্য লোড করতে সমস্যা হয়েছে। অনুগ্রহ করে পুনরায় চেষ্টা করুন।", items: []});
+                console.log("Set fallback sub-prompt result.");
             }
         } finally {
             if (promptKey === 'initial_description') {
                 setIsGeneratingDescription(false);
+                console.log("Finished initial description generation attempt.");
             } else {
                 setIsGeneratingSubPrompt(false);
+                console.log("Finished sub-prompt generation attempt.");
             }
         }
     };
@@ -698,6 +736,7 @@ export default function App() {
                                         // Main result description sections (no individual section animation)
                                         structuredDescription ? (
                                             <React.Fragment>
+                                                {console.log("Rendering structuredDescription:", structuredDescription)}
                                                 {structuredDescription.general_summary && (
                                                     <div className="mb-4 text-base sm:text-lg">
                                                         <h3 className="text-xl sm:text-2xl font-bold mb-2">আপনার ব্যক্তিত্বের সারসংক্ষেপ:</h3>
@@ -741,6 +780,7 @@ export default function App() {
                                                         </ul>
                                                     </div>
                                                 )}
+                                                {/* Corrected access from structuredDescription.relationship.tips to structuredDescription.relationship_tips */}
                                                 {structuredDescription.relationship_tips && structuredDescription.relationship_tips.length > 0 && (
                                                     <div className="mt-6 text-base sm:text-lg">
                                                         <h3 className="text-xl sm:text-2xl font-bold mb-2">সম্পর্ক ও বন্ধুত্ব:</h3>
