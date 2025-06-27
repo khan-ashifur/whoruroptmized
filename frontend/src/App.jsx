@@ -383,11 +383,12 @@ export default function App() {
                             required: ["description", "advice"]
                         }
                     },
+                    // Removed 'optional: true' as it's not supported by Gemini's schema for direct property definition
                     career_advice: {
                         type: "ARRAY",
                         items: {
                             type: "OBJECT",
-                            properties: { field: { type: "STRING" }, reason: { type: "STRING" }, action: { type: "STRING", optional: true } },
+                            properties: { field: { type: "STRING" }, reason: { type: "STRING" }, action: { type: "STRING" } }, // 'optional: true' removed
                             required: ["field", "reason"]
                         }
                     },
@@ -446,10 +447,10 @@ export default function App() {
                 }
             };
 
-            const apiKey = ""; // Canvas will automatically provide the API key
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+            // Pointing to your new backend server endpoint
+            const apiUrl = `http://localhost:3001/generate-content`; 
 
-            console.log("Fetching AI content from API...");
+            console.log("Fetching AI content from backend API:", apiUrl);
             const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -458,20 +459,21 @@ export default function App() {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                console.error(`API response not OK. Status: ${response.status}`, errorData);
-                throw new Error(errorData.error?.message || `API error! Status: ${response.status}`);
+                console.error(`Backend API response not OK. Status: ${response.status}`, errorData);
+                throw new Error(errorData.error || `Backend API error! Status: ${response.status}`);
             }
 
             const result = await response.json();
-            console.log("Raw AI response received:", result);
+            console.log("Raw response from backend:", result);
             
+            // The backend is already set up to return the direct Gemini result, so we just use it.
             if (result.candidates && result.candidates.length > 0 &&
                 result.candidates[0].content && result.candidates[0].content.parts &&
                 result.candidates[0].content.parts.length > 0) {
                 const jsonString = result.candidates[0].content.parts[0].text;
-                console.log("AI response JSON string:", jsonString);
+                console.log("AI response JSON string from backend:", jsonString);
                 const parsedData = JSON.parse(jsonString);
-                console.log("Parsed AI data:", parsedData);
+                console.log("Parsed AI data from backend:", parsedData);
 
                 if (promptKey === 'initial_description') {
                     setStructuredDescription(parsedData);
@@ -483,14 +485,20 @@ export default function App() {
                 setMessage(''); // Clear loading message
                 console.log("Loading message cleared after successful fetch.");
             } else {
-                console.error("Invalid or empty response structure from AI. Candidates or content parts missing.");
+                console.error("Invalid or empty response structure from backend. Candidates or content parts missing.");
                 showMessage("বিস্তারিত বর্ণনা লোড করতে সমস্যা হয়েছে। (অবৈধ প্রতিক্রিয়া)", 'error'); // More specific error
-                throw new Error("Invalid or empty response structure from AI.");
+                throw new Error("Invalid or empty response structure from backend.");
             }
 
         } catch (error) {
             console.error(`Error in fetchFullDescriptionFromAI: ${error.message}`, error);
-            setMessage(`Error: ${error.message || 'Failed to fetch description'}. অনুগ্রহ করে পুনরায় চেষ্টা করুন।`, 'error');
+            // Check if it's a network error (e.g., backend not running)
+            if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                setMessage('ব্যাকএন্ড সার্ভার উপলব্ধ নেই। অনুগ্রহ করে নিশ্চিত করুন যে আপনার Node.js সার্ভার চলছে।', 'error');
+                console.error("Network error: Backend server might not be running.");
+            } else {
+                setMessage(`Error: ${error.message || 'Failed to fetch description'}. অনুগ্রহ করে পুনরায় চেষ্টা করুন।`, 'error');
+            }
             // Set a fallback description or message if AI call fails
             if (promptKey === 'initial_description') {
                 setStructuredDescription({general_summary: "বিস্তারিত বর্ণনা লোড করতে সমস্যা হয়েছে। অনুগ্রহ করে পুনরায় চেষ্টা করুন।", strengths: [], challenges: [], career_advice: [], relationship_tips: [], self_improvement_habits: [], coach_message: ""});
@@ -722,7 +730,7 @@ export default function App() {
                                             <button onClick={handleBackToMainResult} className="mb-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-all duration-300 transform hover:scale-105 text-sm sm:text-base">
                                                 ← ফলাফলে ফিরে যান
                                             </button>
-                                            <h3 className="text-2xl sm:text-3xl font-bold mb-4 text-pink-700">সম্পর্ক ও বন্ধুত্ব:</h3>
+                                            <h3 className="text-2xl sm:text-3xl font-bold mb-4 text-pink-700">সম্প সম্পর্ক ও বন্ধুত্ব:</h3>
                                             <p className="mb-4 text-base sm:text-lg">{subPromptResult.relationship_insight || subPromptResult.message}</p>
                                             {subPromptResult.actionable_tips && subPromptResult.actionable_tips.length > 0 && (
                                                 <ul className="list-disc list-inside mx-auto text-left space-y-2 text-base sm:text-lg max-w-full">
@@ -736,7 +744,7 @@ export default function App() {
                                         // Main result description sections (no individual section animation)
                                         structuredDescription ? (
                                             <React.Fragment>
-                                                {console.log("Rendering structuredDescription:", structuredDescription)}
+                                                {console.log("Rendering structuredDescription content. Data present:", structuredDescription)}
                                                 {structuredDescription.general_summary && (
                                                     <div className="mb-4 text-base sm:text-lg">
                                                         <h3 className="text-xl sm:text-2xl font-bold mb-2">আপনার ব্যক্তিত্বের সারসংক্ষেপ:</h3>
@@ -780,7 +788,7 @@ export default function App() {
                                                         </ul>
                                                     </div>
                                                 )}
-                                                {/* Corrected access from structuredDescription.relationship.tips to structuredDescription.relationship_tips */}
+                                                {/* Corrected access to structuredDescription.relationship_tips */}
                                                 {structuredDescription.relationship_tips && structuredDescription.relationship_tips.length > 0 && (
                                                     <div className="mt-6 text-base sm:text-lg">
                                                         <h3 className="text-xl sm:text-2xl font-bold mb-2">সম্পর্ক ও বন্ধুত্ব:</h3>
@@ -826,18 +834,7 @@ export default function App() {
                                     {!isGeneratingDescription && !isGeneratingSubPrompt && subScreen === null && (
                                         <div className="mt-8 pt-4 border-t border-gray-200 w-full">
                                             <h3 className="text-xl sm:text-2xl font-bold mb-4 text-gray-700">আরও জানতে চান?</h3>
-                                            <div className="flex flex-col sm:flex-row justify-center gap-4 mb-6">
-                                                <button onClick={handleCareerAdviceClick} className="px-6 py-3 bg-blue-600 text-white font-bold rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 text-base sm:text-lg">
-                                                    ক্যারিয়ার পরামর্শ
-                                                </button>
-                                                <button onClick={handleRelationshipTipsClick} className="px-6 py-3 bg-pink-600 text-white font-bold rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 text-base sm:text-lg">
-                                                    সম্পর্ক উন্নত করুন
-                                                </button>
-                                            </div>
-                                            <div className="bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-lg text-sm sm:text-base mb-4">
-                                                বিস্তারিত রিপোর্ট এবং অতিরিক্ত সুবিধা পেতে আপনার ইমেল জমা দিতে পারেন। (পেমেন্ট গেটওয়ে ইন্টিগ্রেশন এখানে হবে)
-                                            </div>
-                                            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                                            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
                                                 <input
                                                     type="email"
                                                     placeholder="আপনার ইমেইল দিন"
