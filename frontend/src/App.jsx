@@ -86,11 +86,11 @@ const questions = [
 const choices = [
     { value: 1, unselectedBorderColor: 'border-purple-500' }, // Deeper Purple
     { value: 2, unselectedBorderColor: 'border-purple-300' }, // Lighter Purple
-    { value: 3, unselectedBorderColor: 'border-gray-300' },   // Towards Gray
-    { value: 4, unselectedBorderColor: 'border-gray-400' },   // Middle Gray
-    { value: 5, unselectedBorderColor: 'border-green-300' },  // Towards Green
-    { value: 6, unselectedBorderColor: 'border-green-500' },  // Lighter Green
-    { value: 7, unselectedBorderColor: 'border-green-700' },  // Deeper Green
+    { value: 3, unselectedBorderColor: 'border-gray-300' },   // Towards Gray
+    { value: 4, unselectedBorderColor: 'border-gray-400' },   // Middle Gray
+    { value: 5, unselectedBorderColor: 'border-green-300' },  // Towards Green
+    { value: 6, unselectedBorderColor: 'border-green-500' },  // Lighter Green
+    { value: 7, unselectedBorderColor: 'border-green-700' },  // Deeper Green
 ];
 
 // Motivational quotes to display during loading
@@ -116,9 +116,7 @@ export default function App() {
     const [screen, setScreen] = useState('start'); // 'start', 'test', 'result', 'sub_quiz_career', 'sub_quiz_relationship'
     const [subScreen, setSubScreen] = useState(null); // 'career', 'relationship', 'sub_result'
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0); 
-    const [displayedQuestionText, setDisplayedQuestionText] = useState(''); 
-    const [index, setIndex] = useState(0); 
-    const [showCursor, setShowCursor] = useState(true); 
+    const [questionVisible, setQuestionVisible] = useState(false); // For fade-in animation of question
     const [userAnswers, setUserAnswers] = useState({}); 
     const [resultType, setResultType] = useState(''); 
     const [structuredDescription, setStructuredDescription] = useState(null); // Changed to null initially
@@ -126,8 +124,6 @@ export default function App() {
     const [messageType, setMessageType] = useState('error');
     const [isGeneratingDescription, setIsGeneratingDescription] = useState(false); 
 
-    const [animatedDescriptionSections, setAnimatedDescriptionSections] = useState([]);
-    const [renderedDescriptionSections, setRenderedDescriptionSections] = useState([]);
     const [submittingFlag, setSubmittingFlag] = useState(false); 
 
     // States for motivational quotes
@@ -145,47 +141,16 @@ export default function App() {
         userAnswersRef.current = userAnswers;
     }, [userAnswers]);
 
-
-    // Get the current question text dynamically for typing animation
-    const fullQuestionText = questions[currentQuestionIndex]?.question || '';
-
-    // Effect for typing animation reset when question changes
+    // Effect for question fade-in animation
     useEffect(() => {
         if (screen === 'test') {
-            setDisplayedQuestionText(''); 
-            setIndex(0); 
-            setShowCursor(false); 
-        }
-    }, [currentQuestionIndex, screen]); 
-
-
-    // Effect for typing animation itself (question)
-    useEffect(() => {
-        if (screen === 'test' && index < fullQuestionText.length) {
-            const typingTimer = setTimeout(() => {
-                setDisplayedQuestionText((prev) => prev + fullQuestionText[index]);
-                setIndex((prev) => prev + 1);
-            }, 40); 
-
-            return () => clearTimeout(typingTimer);
-        } else if (screen === 'test' && index === fullQuestionText.length) {
-            setShowCursor(true); 
-        }
-    }, [index, fullQuestionText, screen]);
-
-
-    // Effect for AI description section animation (Main result)
-    useEffect(() => {
-        if (screen === 'result' && animatedDescriptionSections.length > 0 && renderedDescriptionSections.length < animatedDescriptionSections.length) {
+            setQuestionVisible(false); // Hide to trigger re-animation on question change
             const timer = setTimeout(() => {
-                setRenderedDescriptionSections((prev) => [...prev, animatedDescriptionSections[prev.length]]);
-            }, 150); 
-
+                setQuestionVisible(true); // Show with fade-in
+            }, 50); // Small delay to ensure CSS transition resets
             return () => clearTimeout(timer);
-        } else if (screen === 'result' && animatedDescriptionSections.length > 0 && renderedDescriptionSections.length === animatedDescriptionSections.length) {
-            setMessage(''); 
         }
-    }, [screen, animatedDescriptionSections, renderedDescriptionSections]);
+    }, [currentQuestionIndex, screen]);
 
     // Effect for motivational quotes rotation
     useEffect(() => {
@@ -213,7 +178,6 @@ export default function App() {
             clearTimeout(quoteFadeOutTimer);
         };
     }, [isGeneratingDescription, isGeneratingSubPrompt, currentQuoteIndex]); 
-
 
     const showMessage = (msg, type = 'error') => {
         setMessage(msg);
@@ -250,7 +214,7 @@ export default function App() {
                 // This else block is for debugging. In normal flow, it shouldn't be reached.
                 console.warn("DEBUG: selectAnswer finished, but not submitting or moving. currentQI:", currentQuestionIndex, "answersCount:", currentAnswersCount, "expected:", expectedAnswersCount);
             }
-        }, 500); // 500ms delay to register the click visually
+        }, 300); // Reduced delay since answer animation is removed
     };
 
     const previousQuestion = () => {
@@ -304,7 +268,6 @@ export default function App() {
         return type;
     }, []); 
 
-
     const submitTest = useCallback(() => { 
         if (submittingFlag) return; // Prevent multiple submissions
         setSubmittingFlag(true); 
@@ -336,7 +299,6 @@ export default function App() {
         setSubmittingFlag(false); 
     }, [submittingFlag, calculatePersonalityType]); 
 
-
     const restartTest = () => {
         setCurrentQuestionIndex(0);
         setUserAnswers({});
@@ -346,8 +308,6 @@ export default function App() {
         setMessageType('error');
         setIsGeneratingDescription(false);
         setScreen('start');
-        setAnimatedDescriptionSections([]); 
-        setRenderedDescriptionSections([]); 
         setSubmittingFlag(false); 
         setCurrentQuoteIndex(0); 
         setQuoteVisible(true);
@@ -375,8 +335,6 @@ export default function App() {
         }
         
         setMessage('বিস্তারিত বর্ণনা তৈরি হচ্ছে... অনুগ্রহ করে অপেক্ষা করুন।', 'info');
-        setAnimatedDescriptionSections([]); 
-        setRenderedDescriptionSections([]); 
 
         let promptText = "";
         let responseSchema = {};
@@ -488,16 +446,6 @@ export default function App() {
 
                 if (promptKey === 'initial_description') {
                     setStructuredDescription(parsedData);
-                    // Prepare sections for animated display
-                    const sectionsToAnimate = [];
-                    if (parsedData.general_summary) sectionsToAnimate.push({ type: 'summary', content: parsedData.general_summary });
-                    if (parsedData.strengths && parsedData.strengths.length > 0) sectionsToAnimate.push({ type: 'strengths', content: parsedData.strengths });
-                    if (parsedData.challenges && parsedData.challenges.length > 0) sectionsToAnimate.push({ type: 'challenges', content: parsedData.challenges });
-                    if (parsedData.career_advice && parsedData.career_advice.length > 0) sectionsToAnimate.push({ type: 'career_advice', content: parsedData.career_advice });
-                    if (parsedData.relationship_tips && parsedData.relationship_tips.length > 0) sectionsToAnimate.push({ type: 'relationship_tips', content: parsedData.relationship_tips });
-                    if (parsedData.self_improvement_habits && parsedData.self_improvement_habits.length > 0) sectionsToAnimate.push({ type: 'self_improvement_habits', content: parsedData.self_improvement_habits });
-                    if (parsedData.coach_message) sectionsToAnimate.push({ type: 'coach_message', content: parsedData.coach_message });
-                    setAnimatedDescriptionSections(sectionsToAnimate);
                 } else {
                     setSubPromptResult(parsedData); 
                 }
@@ -512,7 +460,6 @@ export default function App() {
             // Set a fallback description or message if AI call fails
             if (promptKey === 'initial_description') {
                 setStructuredDescription({general_summary: "বিস্তারিত বর্ণনা লোড করতে সমস্যা হয়েছে। অনুগ্রহ করে পুনরায় চেষ্টা করুন।", strengths: [], challenges: [], career_advice: [], relationship_tips: [], self_improvement_habits: [], coach_message: ""});
-                setAnimatedDescriptionSections([{ type: 'summary', content: "বিস্তারিত বর্ণনা লোড করতে সমস্যা হয়েছে। অনুগ্রহ করে পুনরায় চেষ্টা করুন।" }]);
             } else {
                 setSubPromptResult({message: "বিস্তারিত তথ্য লোড করতে সমস্যা হয়েছে। অনুগ্রহ করে পুনরায় চেষ্টা করুন।", items: []});
             }
@@ -544,19 +491,9 @@ export default function App() {
         setMessage(''); 
     };
 
-
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col items-center p-4 sm:p-6 lg:p-8 font-inter">
             <style>{`
-                /* Typing animation for question */
-                @keyframes blink {
-                    from, to { opacity: 0; }
-                    50% { opacity: 1; }
-                }
-                .blinking-cursor {
-                    animation: blink 1s step-end infinite;
-                }
-
                 /* Fade in/out for motivational quotes */
                 @keyframes fadeInOut {
                     0% { opacity: 0; transform: translateY(10px); }
@@ -568,14 +505,13 @@ export default function App() {
                     animation: fadeInOut 3.5s forwards; 
                 }
 
-                /* Fade in and slide up for description sections */
-                @keyframes fadeInSlideUp {
-                    from { opacity: 0; transform: translateY(20px); }
+                /* Fade in for question */
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(10px); }
                     to { opacity: 1; transform: translateY(0); }
                 }
-                .animated-section {
-                    animation: fadeInSlideUp 0.6s ease-out forwards;
-                    opacity: 0; /* Start hidden for animation */
+                .question-fade-in {
+                    animation: fadeIn 0.5s ease-out forwards;
                 }
             `}</style>
 
@@ -652,16 +588,13 @@ export default function App() {
                             </div>
                         )}
 
-                        {/* Question Text with typing animation and blinking cursor */}
-                        <div className="mt-8 mb-10 text-xl sm:text-2xl font-bold text-gray-800 leading-relaxed px-4 min-h-[64px] transition-all duration-300">
-                            {displayedQuestionText}
-                            {showCursor && (
-                                <span className="blinking-cursor">|</span> /* Blinking cursor */
-                            )}
+                        {/* Question Text with fade-in animation */}
+                        <div className={`mt-8 mb-10 text-xl sm:text-2xl font-bold text-gray-800 leading-relaxed px-4 min-h-[64px] transition-opacity duration-500 ${questionVisible ? 'opacity-100 question-fade-in' : 'opacity-0'}`}>
+                            {questions[currentQuestionIndex]?.question || ''}
                         </div>
 
                         {/* Choice Row - Adjusted for horizontal labels and tight spacing */}
-                        <div className={`flex items-center justify-center w-full px-2 sm:px-4 mb-8 transition-opacity duration-300 ${displayedQuestionText.length === fullQuestionText.length ? 'opacity-100' : 'opacity-0'}`}>
+                        <div className={`flex items-center justify-center w-full px-2 sm:px-4 mb-8 transition-opacity duration-300 ${questionVisible ? 'opacity-100' : 'opacity-0'}`}>
                             {/* Left Label - Changed to purple */}
                             <span className="text-xs sm:text-sm md:text-base font-semibold text-purple-600 mr-1 sm:mr-2 whitespace-nowrap">
                                 একদমই একমত না
@@ -695,8 +628,8 @@ export default function App() {
                             <button
                                 onClick={previousQuestion}
                                 className="flex items-center justify-center w-10 h-10 rounded-full bg-white border border-gray-400 text-gray-600
-                                           text-xl hover:bg-gray-100 hover:border-gray-500 hover:scale-105 transition-all duration-200 ease-in-out
-                                           disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                                        text-xl hover:bg-gray-100 hover:border-gray-500 hover:scale-105 transition-all duration-200 ease-in-out
+                                        disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                                 disabled={currentQuestionIndex === 0}
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-5 h-5">
@@ -732,7 +665,7 @@ export default function App() {
                             ) : (
                                 <React.Fragment> {/* Explicit React.Fragment to ensure correct parsing */}
                                     {subScreen === 'career' && subPromptResult ? (
-                                        <div className="animated-section mt-4 text-center">
+                                        <div className="mt-4 text-center">
                                             <button onClick={handleBackToMainResult} className="mb-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-all duration-300 transform hover:scale-105 text-sm sm:text-base">
                                                 ← ফলাফলে ফিরে যান
                                             </button>
@@ -747,7 +680,7 @@ export default function App() {
                                             )}
                                         </div>
                                     ) : subScreen === 'relationship' && subPromptResult ? (
-                                        <div className="animated-section mt-4 text-center">
+                                        <div className="mt-4 text-center">
                                             <button onClick={handleBackToMainResult} className="mb-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-all duration-300 transform hover:scale-105 text-sm sm:text-base">
                                                 ← ফলাফলে ফিরে যান
                                             </button>
@@ -762,114 +695,86 @@ export default function App() {
                                             )}
                                         </div>
                                     ) : (
-                                        // Main result description sections
-                                        structuredDescription && renderedDescriptionSections.length > 0 ? (
+                                        // Main result description sections (no individual section animation)
+                                        structuredDescription ? (
                                             <React.Fragment>
-                                                {renderedDescriptionSections.map((section, idx) => (
-                                                    <div key={idx} className="animated-section mb-4 text-base sm:text-lg" style={{ animationDelay: `${idx * 0.15}s` }}>
-                                                        {section.type === 'summary' && (
-                                                            <React.Fragment>
-                                                                <h3 className="text-xl sm:text-2xl font-bold mb-2">আপনার ব্যক্তিত্বের সারসংক্ষেপ:</h3>
-                                                                <p>{section.content}</p>
-                                                            </React.Fragment>
-                                                        )}
-                                                        {section.type === 'strengths' && section.content.length > 0 && (
-                                                            <div className="mt-6">
-                                                                <h3 className="text-xl sm:text-2xl font-bold mb-2">আপনার ৫টি প্রধান শক্তি:</h3>
-                                                                <ul className="list-disc list-inside space-y-1">
-                                                                    {section.content.map((item, itemIdx) => (
-                                                                        <li key={`strength-${itemIdx}`}>
-                                                                            {typeof item === 'object' && item !== null && item.name && item.explanation ? (
-                                                                                <React.Fragment><strong>{item.name}:</strong> {item.explanation}</React.Fragment>
-                                                                            ) : (
-                                                                                <React.Fragment>{item}</React.Fragment>
-                                                                            )}
-                                                                        </li>
-                                                                    ))}
-                                                                </ul>
-                                                            </div>
-                                                        )}
-                                                        {section.type === 'challenges' && section.content.length > 0 && (
-                                                            <div className="mt-6">
-                                                                <h3 className="text-xl sm:text-2xl font-bold mb-2">আপনার ৩টি চ্যালেঞ্জ:</h3>
-                                                                <ul className="list-disc list-inside space-y-1">
-                                                                    {section.content.map((item, itemIdx) => (
-                                                                        <li key={`challenge-${itemIdx}`}>
-                                                                            {typeof item === 'object' && item !== null && item.description && item.advice ? (
-                                                                                <React.Fragment><strong>{item.description}:</strong> {item.advice}</React.Fragment>
-                                                                            ) : (
-                                                                                <React.Fragment>{item}</React.Fragment>
-                                                                            )}
-                                                                        </li>
-                                                                    ))}
-                                                                </ul>
-                                                            </div>
-                                                        )}
-                                                        {section.type === 'career_advice' && section.content.length > 0 && (
-                                                            <div className="mt-6">
-                                                                <h3 className="text-xl sm:text-2xl font-bold mb-2">ক্যারিয়ার পরামর্শ:</h3>
-                                                                <ul className="list-disc list-inside space-y-1">
-                                                                    {section.content.map((item, itemIdx) => (
-                                                                        <li key={`career-${itemIdx}`}>
-                                                                            {typeof item === 'object' && item !== null && item.field && item.reason ? (
-                                                                                <React.Fragment>
-                                                                                    <strong>{item.field}:</strong> {item.reason}
-                                                                                    {item.action && ` - ${item.action}`}
-                                                                                </React.Fragment>
-                                                                            ) : (
-                                                                                <React.Fragment>{item}</React.Fragment>
-                                                                            )}
-                                                                        </li>
-                                                                    ))}
-                                                                </ul>
-                                                            </div>
-                                                        )}
-                                                        {section.type === 'relationship_tips' && section.content.length > 0 && (
-                                                            <div className="mt-6">
-                                                                <h3 className="text-xl sm:text-2xl font-bold mb-2">সম্পর্ক ও বন্ধুত্ব:</h3>
-                                                                <ul className="list-disc list-inside space-y-1">
-                                                                    {section.content.map((item, itemIdx) => (
-                                                                        <li key={`relationship-${itemIdx}`}>
-                                                                            {typeof item === 'object' && item !== null && item.general_behavior && item.tip ? (
-                                                                                <React.Fragment>
-                                                                                    <strong>{item.general_behavior}:</strong> {item.tip}
-                                                                                </React.Fragment>
-                                                                            ) : (
-                                                                                <React.Fragment>{item}</React.Fragment>
-                                                                            )}
-                                                                        </li>
-                                                                    ))}
-                                                                </ul>
-                                                            </div>
-                                                        )}
-                                                        {section.type === 'self_improvement_habits' && section.content.length > 0 && (
-                                                            <div className="mt-6">
-                                                                <h3 className="text-xl sm:text-2xl font-bold mb-2">আত্মউন্নয়নের অভ্যাস:</h3>
-                                                                <ul className="list-disc list-inside space-y-1">
-                                                                    {section.content.map((item, itemIdx) => (
-                                                                        <li key={`steps-${itemIdx}`}>
-                                                                            {typeof item === 'object' && item !== null && item.habit && item.benefit ? (
-                                                                                <React.Fragment><strong>{item.habit}:</strong> {item.benefit}</React.Fragment>
-                                                                            ) : (
-                                                                                <React.Fragment>{item}</React.Fragment>
-                                                                            )}
-                                                                        </li>
-                                                                    ))}
-                                                                </ul>
-                                                            </div>
-                                                        )}
-                                                        {section.type === 'coach_message' && (
-                                                            <div className="mt-6">
-                                                                <h3 className="text-xl sm:text-2xl font-bold mb-2">কোচের বার্তা:</h3>
-                                                                <p>{section.content}</p>
-                                                            </div>
-                                                        )}
+                                                {structuredDescription.general_summary && (
+                                                    <div className="mb-4 text-base sm:text-lg">
+                                                        <h3 className="text-xl sm:text-2xl font-bold mb-2">আপনার ব্যক্তিত্বের সারসংক্ষেপ:</h3>
+                                                        <p>{structuredDescription.general_summary}</p>
                                                     </div>
-                                                ))}
+                                                )}
+                                                {structuredDescription.strengths && structuredDescription.strengths.length > 0 && (
+                                                    <div className="mt-6 text-base sm:text-lg">
+                                                        <h3 className="text-xl sm:text-2xl font-bold mb-2">আপনার ৫টি প্রধান শক্তি:</h3>
+                                                        <ul className="list-disc list-inside space-y-1">
+                                                            {structuredDescription.strengths.map((item, itemIdx) => (
+                                                                <li key={`strength-${itemIdx}`}>
+                                                                    <strong>{item.name}:</strong> {item.explanation}
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                )}
+                                                {structuredDescription.challenges && structuredDescription.challenges.length > 0 && (
+                                                    <div className="mt-6 text-base sm:text-lg">
+                                                        <h3 className="text-xl sm:text-2xl font-bold mb-2">আপনার ৩টি চ্যালেঞ্জ:</h3>
+                                                        <ul className="list-disc list-inside space-y-1">
+                                                            {structuredDescription.challenges.map((item, itemIdx) => (
+                                                                <li key={`challenge-${itemIdx}`}>
+                                                                    <strong>{item.description}:</strong> {item.advice}
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                )}
+                                                {structuredDescription.career_advice && structuredDescription.career_advice.length > 0 && (
+                                                    <div className="mt-6 text-base sm:text-lg">
+                                                        <h3 className="text-xl sm:text-2xl font-bold mb-2">ক্যারিয়ার পরামর্শ:</h3>
+                                                        <ul className="list-disc list-inside space-y-1">
+                                                            {structuredDescription.career_advice.map((item, itemIdx) => (
+                                                                <li key={`career-${itemIdx}`}>
+                                                                    <strong>{item.field}:</strong> {item.reason}
+                                                                    {item.action && ` - ${item.action}`}
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                )}
+                                                {structuredDescription.relationship_tips && structuredDescription.relationship_tips.length > 0 && (
+                                                    <div className="mt-6 text-base sm:text-lg">
+                                                        <h3 className="text-xl sm:text-2xl font-bold mb-2">সম্পর্ক ও বন্ধুত্ব:</h3>
+                                                        <ul className="list-disc list-inside space-y-1">
+                                                            {structuredDescription.relationship_tips.map((item, itemIdx) => (
+                                                                <li key={`relationship-${itemIdx}`}>
+                                                                    <strong>{item.general_behavior}:</strong> {item.tip}
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                )}
+                                                {structuredDescription.self_improvement_habits && structuredDescription.self_improvement_habits.length > 0 && (
+                                                    <div className="mt-6 text-base sm:text-lg">
+                                                        <h3 className="text-xl sm:text-2xl font-bold mb-2">আত্মউন্নয়নের অভ্যাস:</h3>
+                                                        <ul className="list-disc list-inside space-y-1">
+                                                            {structuredDescription.self_improvement_habits.map((item, itemIdx) => (
+                                                                <li key={`steps-${itemIdx}`}>
+                                                                    <strong>{item.habit}:</strong> {item.benefit}
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                )}
+                                                {structuredDescription.coach_message && (
+                                                    <div className="mt-6 text-base sm:text-lg">
+                                                        <h3 className="text-xl sm:text-2xl font-bold mb-2">কোচের বার্তা:</h3>
+                                                        <p>{structuredDescription.coach_message}</p>
+                                                    </div>
+                                                )}
                                             </React.Fragment>
                                         ) : (
                                             // Fallback for main description if expected but not rendered
-                                            structuredDescription && structuredDescription.general_summary === "" && !isGeneratingDescription && resultType && (
+                                            !isGeneratingDescription && resultType && (
                                                 <p className="text-center text-red-500 text-base sm:text-lg">
                                                     বিস্তারিত বর্ণনা লোড করতে সমস্যা হয়েছে। অনুগ্রহ করে পুনরায় চেষ্টা করুন বা কুইজটি আবার দিন।
                                                 </p>
