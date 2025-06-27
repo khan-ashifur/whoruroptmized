@@ -1,15 +1,11 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+export default {
   content: [
     "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}", // আপনার React কম্পোনেন্ট ফাইলগুলোর পাথ এখানে দিন
+    "./src/**/*.{js,jsx,ts,tsx}",
   ],
   theme: {
-    extend: {
-      fontFamily: { // Inter ফন্ট যোগ করার জন্য
-        inter: ['Inter', 'sans-serif'],
-      },
-    },
+    extend: {},
   },
   plugins: [],
-}
+};
