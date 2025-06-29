@@ -1,62 +1,83 @@
-// Load environment variables from .env file
+// Load environment variables from .env file (for local development)
 require('dotenv').config(); 
 
 const express = require('express');
 const cors = require('cors');
+// const path = require('path'); // Only needed if serving static files from backend
 
 const app = express();
-const port = process.env.PORT || 3001; // Use port 3001 or whatever is available
+// Use Render's assigned PORT in production, or fallback to 3001 for local development
+const port = process.env.PORT || 3001; 
 
 // Middleware
-app.use(cors()); // Enable CORS for all routes, allowing your frontend to connect
-app.use(express.json()); // Enable parsing JSON request bodies
+app.use(cors()); 
+app.use(express.json({ limit: '10mb' })); // Increased limit for large requests
 
 // Define the API key from environment variables
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
-// Check if the API key is provided
 if (!GEMINI_API_KEY) {
-    console.error('Error: GEMINI_API_KEY is not set in the .env file. Please set it to run the backend server.');
-    process.exit(1); // Exit the process if the API key is missing
+    console.error('ত্রুটি: GEMINI_API_KEY .env ফাইলে সেট করা নেই। ব্যাকএন্ড সার্ভার চালানোর জন্য এটি সেট করুন।');
+    process.exit(1); 
 }
 
-// Since Node.js v18+, 'fetch' is globally available.
-// We no longer need to 'require("node-fetch")'.
-// Added a direct check for fetch availability for robust logging.
+// Node.js v18+ থেকে 'fetch' বিশ্বব্যাপী উপলব্ধ।
 if (typeof fetch === 'undefined') {
-    console.error("Critical Error: Native 'fetch' is not globally available in this Node.js environment.");
-    console.error("This usually means you're running Node.js version older than 18 or there's an environment issue.");
+    console.error("গুরুত্বপূর্ণ ত্রুটি: নেটিভ 'fetch' এই Node.js পরিবেশে বিশ্বব্যাপী উপলব্ধ নেই।");
+    console.error("এর অর্থ সাধারণত আপনি Node.js সংস্করণ 18 এর চেয়ে পুরানো চালাচ্ছেন বা পরিবেশগত সমস্যা আছে।");
     process.exit(1);
 } else {
-    console.log(`Native 'fetch' is globally available and its type is: ${typeof fetch}`);
+    console.log(`নেটিভ 'fetch' বিশ্বব্যাপী উপলব্ধ এবং এর টাইপ হলো: ${typeof fetch}`);
 }
 
+// Health check endpoint for debugging
+app.get('/health', (req, res) => {
+    res.json({ 
+        status: 'OK', 
+        timestamp: new Date().toISOString(),
+        port: port,
+        nodeVersion: process.version
+    });
+});
 
-// API endpoint to proxy requests to Gemini
+// Basic root endpoint
+app.get('/', (req, res) => {
+    res.json({ 
+        message: 'WHORU Backend API is running!',
+        endpoints: ['/health', '/generate-content'],
+        status: 'active'
+    });
+});
+
+
+// জেমিনিতে অনুরোধ প্রক্সি করার জন্য API এন্ডপয়েন্ট
 app.post('/generate-content', async (req, res) => {
-    // Log the incoming request body from the frontend
-    console.log('Received request from frontend:', JSON.stringify(req.body, null, 2));
+    console.log('ফ্রন্টএন্ড থেকে অনুরোধ প্রাপ্তি:', JSON.stringify(req.body, null, 2));
 
     try {
-        const { contents, generationConfig } = req.body; // Extract contents and generationConfig from frontend request
+        const { contents, generationConfig } = req.body; 
 
-        // Validate the incoming request payload
         if (!contents || !Array.isArray(contents) || contents.length === 0) {
-            return res.status(400).json({ error: 'Invalid request: "contents" array is required.' });
+            return res.status(400).json({ 
+                error: 'অবৈধ অনুরোধ: "contents" অ্যারে প্রয়োজন।',
+                received: { contents, generationConfig }
+            });
         }
 
-        // Construct the payload for the Gemini API
         const geminiPayload = {
             contents: contents,
-            generationConfig: generationConfig // Pass the schema and other config from the frontend
+            generationConfig: generationConfig || {
+                temperature: 0.7,
+                candidateCount: 1,
+                maxOutputTokens: 2048
+            }
         };
 
         const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
         
-        console.log('Forwarding request to Gemini API:', geminiApiUrl);
-        console.log('Gemini Payload:', JSON.stringify(geminiPayload, null, 2));
-
-        // Make the request to the Gemini API using the native global fetch
+        console.log('জেমিনি API তে অনুরোধ ফরওয়ার্ড করা হচ্ছে:', geminiApiUrl.replace(GEMINI_API_KEY, '[HIDDEN]')); // Hide API key in logs
+        console.log('জেমিনি পেলোড:', JSON.stringify(geminiPayload, null, 2));
+        
         const geminiResponse = await fetch(geminiApiUrl, {
             method: 'POST',
             headers: {
@@ -65,29 +86,67 @@ app.post('/generate-content', async (req, res) => {
             body: JSON.stringify(geminiPayload),
         });
 
-        // Handle non-OK responses from Gemini API
         if (!geminiResponse.ok) {
-            const errorData = await geminiResponse.json();
-            console.error('Error from Gemini API:', errorData);
+            let errorData;
+            try {
+                errorData = await geminiResponse.json();
+            } catch (parseError) {
+                console.error('জেমিনি API থেকে JSON পার্স করতে ব্যর্থ:', parseError);
+                return res.status(geminiResponse.status).json({
+                    error: `জেমিনি API ত্রুটি! স্থিতি: ${geminiResponse.status}`,
+                    details: 'Response was not valid JSON'
+                });
+            }
+            
+            console.error('জেমিনি API থেকে ত্রুটি:', errorData);
             return res.status(geminiResponse.status).json({
-                error: errorData.error?.message || `Gemini API error! Status: ${geminiResponse.status}`
+                error: errorData.error?.message || `জেমিনি API ত্রুটি! স্থিতি: ${geminiResponse.status}`,
+                details: errorData
             });
         }
 
         const geminiResult = await geminiResponse.json();
-        console.log('Response from Gemini API:', JSON.stringify(geminiResult, null, 2));
-
-        // Send the Gemini API's result back to the frontend
+        console.log('জেমিনি API থেকে প্রতিক্রিয়া:', JSON.stringify(geminiResult, null, 2));
+        
+        res.setHeader('Content-Type', 'application/json');
         res.status(200).json(geminiResult);
-
+        
     } catch (error) {
-        console.error('Server error during Gemini API call:', error);
-        res.status(500).json({ error: 'Internal server error: ' + error.message });
+        console.error('জেমিনি API কলে সার্ভার ত্রুটি:', error);
+        
+        res.setHeader('Content-Type', 'application/json');
+        res.status(500).json({ 
+            error: 'অভ্যন্তরীণ সার্ভার ত্রুটি',
+            message: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
     }
 });
 
-// Start the server
-app.listen(port, () => {
-    console.log(`Backend server listening at http://localhost:${port}`);
-    console.log('Remember to start your React frontend and point its API calls to this backend URL.');
+// Global error handler
+app.use((error, req, res, next) => {
+    console.error('Unhandled error:', error);
+    res.status(500).json({
+        error: 'Internal server error',
+        message: error.message
+    });
+});
+
+// 404 handler
+app.use((req, res) => {
+    res.status(404).json({
+        error: 'Endpoint not found',
+        path: req.path,
+        method: req.method
+    });
+});
+
+// সার্ভার চালু করুন
+app.listen(port, '0.0.0.0', () => { // '0.0.0.0' for Render compatibility
+    console.log(`ব্যাকএন্ড সার্ভার http://localhost:${port} এ শুনছে`);
+    console.log('এই সার্ভার শুধুমাত্র API অনুরোধ হ্যান্ডেল করছে। ফ্রন্টএন্ড আলাদাভাবে পরিবেশিত হচ্ছে।'); // Clarified log
+    console.log('Available endpoints:');
+    console.log(`- GET http://localhost:${port}/health`);
+    console.log(`- GET http://localhost:${port}/`);
+    console.log(`- POST http://localhost:${port}/generate-content`);
 });
