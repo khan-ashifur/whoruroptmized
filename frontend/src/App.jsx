@@ -231,9 +231,22 @@ export default function App() {
     };
 
     const handleNextQuestion = () => {
-        // This function is no longer called directly by the button's onClick in the new flow.
-        // The auto-advance logic is now in selectAnswer.
-        // This button now only appears for the last question (Submit).
+        // Check if an answer has been selected for the current question
+        // This check is primarily for manual clicks on the forward button
+        if (userAnswers[currentQuestionIndex] === undefined) {
+            showMessage("অনুগ্রহ করে এই প্রশ্নের উত্তর দিন।", 'error');
+            return;
+        }
+
+        const isLastQuestion = (currentQuestionIndex === questions.length - 1);
+
+        if (isLastQuestion) {
+            console.log("Last question answered. Attempting to submit test via manual next button click.");
+            submitTest(); 
+        } else {
+            console.log("Moving to next question via manual next button click.");
+            setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
+        }
     };
 
     const previousQuestion = () => {
@@ -650,7 +663,7 @@ export default function App() {
                     height: 40px; /* h-10 */
                     border-radius: 9999px; /* rounded-full */
                     background-color: #ffffff; /* bg-white */
-                    border: 2px solid #9ca3af; /* border-gray-400 (adjusted for clarity) */
+                    border: 2px solid #9ca3af; /* border-gray-400 */
                     color: #4b5563; /* text-gray-600 */
                     font-size: 1.25rem; /* text-xl */
                     transition: all 0.2s ease-in-out;
@@ -668,20 +681,6 @@ export default function App() {
                     cursor: not-allowed;
                     transform: scale(1); /* disabled:hover:scale-100 */
                 }
-
-                /* Specific style for enabled "Next" button color */
-                .nav-arrow-button.next-enabled {
-                    background-color: #3b82f6; /* bg-blue-600 */
-                    border-color: #3b82f6; /* border-blue-600 */
-                    color: #ffffff; /* text-white */
-                }
-
-                .nav-arrow-button.next-enabled:hover:not(:disabled) {
-                    background-color: #2563eb; /* hover:bg-blue-700 */
-                    border-color: #2563eb; /* hover:border-blue-700 */
-                    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.5), 0 2px 4px -1px rgba(59, 130, 246, 0.06); /* focus:ring-4 focus:ring-blue-300 like effect */
-                }
-
             `}</style>
 
             {/* Header Section */}
@@ -796,12 +795,10 @@ export default function App() {
 
                             {/* NEXT / SUBMIT Button - Now an icon-only button, with text for "ফলাফল দেখুন" */}
                             <button
-                                onClick={handleNextQuestion} // This is still technically here, but selectAnswer auto-advances
-                                // Apply common class, and then specific styling for enabled/disabled
-                                // Changed styling logic to always use nav-arrow-button styles,
-                                // and only show text for 'ফলাফল দেখুন' on the last question.
+                                onClick={handleNextQuestion} // Call handleNextQuestion for manual navigation
+                                // Use nav-arrow-button styling consistently
                                 className={`nav-arrow-button ${currentQuestionIndex === questions.length - 1 ? 'px-6 py-3 font-semibold text-lg' : ''}`}
-                                disabled={userAnswers[currentQuestionIndex] === undefined}
+                                disabled={userAnswers[currentQuestionIndex] === undefined && currentQuestionIndex !== questions.length - 1} // Only disable if not answered AND not last question
                             >
                                 {currentQuestionIndex === questions.length - 1 ? (
                                     'ফলাফল দেখুন' // Last question, show text
