@@ -1,152 +1,128 @@
-// Load environment variables from .env file (for local development)
-require('dotenv').config(); 
+// Load environment variables from .env file
+require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
-// const path = require('path'); // Only needed if serving static files from backend
+const OpenAI = require('openai'); // Import the OpenAI library
 
 const app = express();
-// Use Render's assigned PORT in production, or fallback to 3001 for local development
-const port = process.env.PORT || 3001; 
+const port = process.env.PORT || 3001; // Use Render's assigned PORT or fallback to 3001
 
 // Middleware
-app.use(cors()); 
-app.use(express.json({ limit: '10mb' })); // Increased limit for large requests
+app.use(cors({
+    origin: process.env.FRONTEND_URL || 'http://localhost:5173' // Allow requests from your frontend origin
+}));
+app.use(express.json()); // To parse JSON request bodies
 
-// Define the API key from environment variables
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-
-if (!GEMINI_API_KEY) {
-    console.error('ত্রুটি: GEMINI_API_KEY .env ফাইলে সেট করা নেই। ব্যাকএন্ড সার্ভার চালানোর জন্য এটি সেট করুন।');
-    process.exit(1); 
-}
-
-// Node.js v18+ থেকে 'fetch' বিশ্বব্যাপী উপলব্ধ।
-if (typeof fetch === 'undefined') {
-    console.error("গুরুত্বপূর্ণ ত্রুটি: নেটিভ 'fetch' এই Node.js পরিবেশে বিশ্বব্যাপী উপলব্ধ নেই।");
-    console.error("এর অর্থ সাধারণত আপনি Node.js সংস্করণ 18 এর চেয়ে পুরানো চালাচ্ছেন বা পরিবেশগত সমস্যা আছে।");
-    process.exit(1);
-} else {
-    console.log(`নেটিভ 'fetch' বিশ্বব্যাপী উপলব্ধ এবং এর টাইপ হলো: ${typeof fetch}`);
-}
-
-// Health check endpoint for debugging
-app.get('/health', (req, res) => {
-    res.json({ 
-        status: 'OK', 
-        timestamp: new Date().toISOString(),
-        port: port,
-        nodeVersion: process.version
-    });
+// Initialize OpenAI client
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY, // Ensure you have OPENAI_API_KEY in your .env
 });
 
-// Basic root endpoint
-app.get('/', (req, res) => {
-    res.json({ 
-        message: 'WHORU Backend API is running!',
-        endpoints: ['/health', '/generate-content'],
-        status: 'active'
-    });
-});
+console.log("Backend server starting...");
+console.log("CORS enabled for origin:", process.env.FRONTEND_URL || 'http://localhost:5173');
 
-
-// জেমিনিতে অনুরোধ প্রক্সি করার জন্য API এন্ডপয়েন্ট
+// API endpoint to generate content
 app.post('/generate-content', async (req, res) => {
-    console.log('ফ্রন্টএন্ড থেকে অনুরোধ প্রাপ্তি:', JSON.stringify(req.body, null, 2));
+    console.log("Request received at /generate-content");
+    console.log("Request body:", JSON.stringify(req.body, null, 2));
+
+    const { contents, generationConfig } = req.body;
+
+    if (!contents || !Array.isArray(contents) || contents.length === 0) {
+        return res.status(400).json({ error: "Invalid request: 'contents' array is missing or empty." });
+    }
+    if (!contents[0].parts || !Array.isArray(contents[0].parts) || contents[0].parts.length === 0 || !contents[0].parts[0].text) {
+        return res.status(400).json({ error: "Invalid request: 'promptText' is missing from contents." });
+    }
+
+    const promptText = contents[0].parts[0].text;
+    const responseSchema = generationConfig?.responseSchema; // Get the schema if provided
+
+    // Validate OpenAI API Key
+    if (!process.env.OPENAI_API_KEY) {
+        console.error("OPENAI_API_KEY is not set in environment variables.");
+        return res.status(500).json({ error: "Server configuration error: OpenAI API Key is missing." });
+    }
 
     try {
-        const { contents, generationConfig } = req.body; 
+        console.log("Sending prompt to OpenAI...");
 
-        if (!contents || !Array.isArray(contents) || contents.length === 0) {
-            return res.status(400).json({ 
-                error: 'অবৈধ অনুরোধ: "contents" অ্যারে প্রয়োজন।',
-                received: { contents, generationConfig }
-            });
+        // Construct the message for OpenAI's chat completion API.
+        // Important: For structured JSON output with OpenAI, it's best practice
+        // to put the schema instructions directly into the prompt message.
+        let fullPrompt;
+        if (responseSchema) {
+            fullPrompt = `${promptText}\n\nStrictly adhere to the following JSON schema for your response:\n${JSON.stringify(responseSchema, null, 2)}\n\nYour entire response MUST be a valid JSON object matching this schema.`;
+        } else {
+            fullPrompt = promptText;
         }
 
-        const geminiPayload = {
-            contents: contents,
-            generationConfig: generationConfig || {
-                temperature: 0.7,
-                candidateCount: 1,
-                maxOutputTokens: 2048
-            }
+        console.log("Full prompt sent to OpenAI (first 500 chars):", fullPrompt.substring(0, 500));
+        
+        const completion = await openai.chat.completions.create({
+            model: "gpt-4o", // Using gpt-4o for best results with JSON and instruction following
+            messages: [{ role: "user", content: fullPrompt }],
+            response_format: { type: "json_object" }, // Crucial for getting JSON output
+            temperature: 0.7, // Adjust creativity as needed
+            max_tokens: 1500, // Adjust based on expected response length
+        });
+
+        const aiResponseContent = completion.choices[0].message.content;
+        console.log("Raw OpenAI response content received (first 500 chars):", aiResponseContent ? aiResponseContent.substring(0, 500) : 'No content');
+
+        // Parse the JSON string received from OpenAI
+        let parsedData;
+        try {
+            parsedData = JSON.parse(aiResponseContent);
+            console.log("Successfully parsed AI response as JSON.");
+        } catch (parseError) {
+            console.error("Failed to parse AI response as JSON:", parseError);
+            console.error("Problematic AI Response:", aiResponseContent);
+            // If parsing fails, try to return a generic error or the raw content if possible
+            return res.status(500).json({ 
+                error: "AI did not return valid JSON. Please try again.",
+                rawAiResponse: aiResponseContent // Optionally send raw response for debugging
+            });
+        }
+        
+        // Format the OpenAI response to match the structure expected by your frontend (App.js)
+        const formattedResponse = {
+            candidates: [
+                {
+                    content: {
+                        parts: [
+                            {
+                                text: JSON.stringify(parsedData) // Frontend expects a JSON string here
+                            }
+                        ]
+                    }
+                }
+            ]
         };
 
-        const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
-        
-        console.log('জেমিনি API তে অনুরোধ ফরওয়ার্ড করা হচ্ছে:', geminiApiUrl.replace(GEMINI_API_KEY, '[HIDDEN]')); // Hide API key in logs
-        console.log('জেমিনি পেলোড:', JSON.stringify(geminiPayload, null, 2));
-        
-        const geminiResponse = await fetch(geminiApiUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(geminiPayload),
-        });
+        res.json(formattedResponse);
 
-        if (!geminiResponse.ok) {
-            let errorData;
-            try {
-                errorData = await geminiResponse.json();
-            } catch (parseError) {
-                console.error('জেমিনি API থেকে JSON পার্স করতে ব্যর্থ:', parseError);
-                return res.status(geminiResponse.status).json({
-                    error: `জেমিনি API ত্রুটি! স্থিতি: ${geminiResponse.status}`,
-                    details: 'Response was not valid JSON'
-                });
-            }
-            
-            console.error('জেমিনি API থেকে ত্রুটি:', errorData);
-            return res.status(geminiResponse.status).json({
-                error: errorData.error?.message || `জেমিনি API ত্রুটি! স্থিতি: ${geminiResponse.status}`,
-                details: errorData
-            });
-        }
-
-        const geminiResult = await geminiResponse.json();
-        console.log('জেমিনি API থেকে প্রতিক্রিয়া:', JSON.stringify(geminiResult, null, 2));
-        
-        res.setHeader('Content-Type', 'application/json');
-        res.status(200).json(geminiResult);
-        
     } catch (error) {
-        console.error('জেমিনি API কলে সার্ভার ত্রুটি:', error);
-        
-        res.setHeader('Content-Type', 'application/json');
-        res.status(500).json({ 
-            error: 'অভ্যন্তরীণ সার্ভার ত্রুটি',
-            message: error.message,
-            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
-        });
+        console.error("Error generating content from OpenAI:", error);
+        // More detailed error logging for OpenAI API specific errors
+        if (error instanceof OpenAI.APIError) {
+            console.error(error.status); // e.g. 401
+            console.error(error.message); // e.g. The authentication token you passed was invalid...
+            console.error(error.code); // e.g. 'invalid_api_key'
+            console.error(error.type); // e.g. 'authentication_error'
+            return res.status(error.status || 500).json({ 
+                error: `OpenAI API Error: ${error.message}`, 
+                code: error.code 
+            });
+        } else {
+            return res.status(500).json({ error: "Failed to generate content: " + error.message });
+        }
     }
 });
 
-// Global error handler
-app.use((error, req, res, next) => {
-    console.error('Unhandled error:', error);
-    res.status(500).json({
-        error: 'Internal server error',
-        message: error.message
-    });
-});
-
-// 404 handler
-app.use((req, res) => {
-    res.status(404).json({
-        error: 'Endpoint not found',
-        path: req.path,
-        method: req.method
-    });
-});
-
-// সার্ভার চালু করুন
-app.listen(port, '0.0.0.0', () => { // '0.0.0.0' for Render compatibility
-    console.log(`ব্যাকএন্ড সার্ভার http://localhost:${port} এ শুনছে`);
-    console.log('এই সার্ভার শুধুমাত্র API অনুরোধ হ্যান্ডেল করছে। ফ্রন্টএন্ড আলাদাভাবে পরিবেশিত হচ্ছে।'); // Clarified log
-    console.log('Available endpoints:');
-    console.log(`- GET http://localhost:${port}/health`);
-    console.log(`- GET http://localhost:${port}/`);
-    console.log(`- POST http://localhost:${port}/generate-content`);
+// Start the server
+app.listen(port, () => {
+    console.log(`Backend server running on port ${port}`);
+    console.log(`Access at http://localhost:${port}`);
 });
