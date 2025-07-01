@@ -1,6 +1,6 @@
 // --- START DEBUG BLOCK ---
 // এই লগগুলি শুধুমাত্র ডিবাগিং এর জন্য। লোকাল ডেভেলপমেন্টে এদের আউটপুট দেখা যাবে।
-// রেন্ডারে ডেপ্লয় করার সময় এগুলি স্বয়ংক্রিয়ভাবে ইনজেক্ট হওয়া ভ্যারিয়েবল দেখাবে।
+// রেন্ডারে ডেপ্লয় করার সময় এগুলি স্বয়ংক্রিয়ভাবে ইনজেক্ট হওয়া ভ্যারিয়েবল দেখাবে।
 console.log("App.js loaded.");
 console.log("VITE_APP_BACKEND_URL from import.meta.env:", import.meta.env.VITE_APP_BACKEND_URL);
 // --- END DEBUG BLOCK ---
@@ -20,7 +20,7 @@ const personalityTypesData = {
     'ESTP': { name: "The Entrepreneur", description: "গতিশীল , বাস্তববাদী ও রিস্ক টেকার" },
     'ESFP': { name: "The Entertainer", description: "প্রাণবন্ত , উপভোগপ্রিয় ও বন্ধুত্বপূর্ণ" },
     'ENFP': { name: "The Campaigner", description: "উদ্যমী , কল্পনাবান ও সমাজপ্রিয়" },
-    'ENTP': { name: "The Debater", "description": "যুক্তিপূর্ণ , উদ্ভাবনী ও বিতর্কপ্রিয়" },
+    'ENTP': { name: "The Debater", description: "যুক্তিপূর্ণ , উদ্ভাবনী ও বিতর্কপ্রিয়" },
     'ESTJ': { name: "The Executive", description: "সংগঠক , কর্তৃত্বশীল ও বাস্তববাদী" },
     'ESFJ': { name: "The Consul", description: "যত্নশীল , সহানুভূতিশীল ও সামাজিক" },
     'ENFJ': { name: "The Protagonist", description: "নেতৃস্থানীয় , সহানুভূতিশীল ও উৎসাহদায়ী" },
@@ -111,7 +111,7 @@ const motivationalQuotes = [
     { quote: "In the middle of every difficulty lies opportunity.", author: "Albert Einstein" },
     { quote: "Everything you’ve ever wanted is on the other side of fear.", author: "George Addair" },
     { quote: "The best way to predict the future is to create it.", author: "Peter Drucker" },
-    { quote: "Whether you think you can, or you think you can't – you're right.", author: "Henry Ford" },
+    { quote: "Whether you think you can, or you think you can't – you’re right.", author: "Henry Ford" },
     { quote: "If you're going through hell, keep going.", author: "Winston Churchill" }, 
     { quote: "It always seems impossible until it’s done.", author: "Nelson Mandela" },
     { quote: "Opportunities don't happen, you create them.", author: "Chris Grosser" },
@@ -390,40 +390,7 @@ export default function App() {
 
         // Define prompts and schemas based on promptKey
         if (promptKey === 'initial_description') {
-            promptText = `Given the MBTI personality type ${type}, provide a deeply insightful, emotionally resonant, and culturally relevant personality decoding in Bengali. The response must be a structured JSON object with the following keys:
-
-- \`general_summary\`: (string) A rich, poetic paragraph describing the person’s inner nature, emotional depth, decision-making style, and how they see the world. Use soft, coaching-style language to create a “wow, this is really me” feeling.
-
-- \`strengths\`: (array of objects) List 5 key strengths.
-  Each object must have:
-    - \`name\`: (string) Strength title in Bengali (e.g., “অন্তর্দৃষ্টি”)
-    - \`explanation\`: (string) 1–2 line explanation why this is a strength for their type.
-
-- \`challenges\`: (array of objects) List 3 personality challenges.
-  Each object must include:
-    - \`description\`: (string) Brief emotional challenge
-    - \`advice\`: (string) Warm, coach-style advice to grow beyond this limitation.
-
-- \`career_advice\`: (array of objects) List 3–5 careers that align with the person’s nature, including modern paths like freelancing, data, content creation, entrepreneurship.
-  Each object must have:
-    - \`field\`: (string) Career field in Bengali (e.g., “ফ্রিল্যান্স কনটেন্ট লেখক”)
-    - \`reason\`: (string) Why this personality suits this path
-    - \`action\`: (string, optional) 1-line action they can take to explore this field
-
-- \`relationship_tips\`: (array of objects) List 3–5 insights.
-  Each object must include:
-    - \`general_behavior\`: (string) Typical emotional or social pattern in love/friendship
-    - \`tip\`: (string) Practical or emotional suggestion for more fulfilling relationships
-
-- \`self_improvement_habits\`: (array of objects) List 3 daily or mindset habits.
-  Each object must include:
-    - \`habit\`: (string) One recommended habit or behavior
-    - \`benefit\`: (string) The emotional or personal benefit of adopting it
-
-- \`coach_message\`: (string) A final emotional paragraph that sounds like a wise Bengali life coach closing the session with a heart-touching message. Should inspire reflection and desire to explore more.
-
-All values must be written in natural, emotional, and highly relatable Bengali language — avoid robotic or generic tones. Structure should feel like a personal session with a soft-spoken, intuitive coach who “gets them.”
-Output must be in valid JSON format. Do not include extra text outside of the JSON object.`;
+            promptText = `Given the MBTI personality type ${type}, provide a detailed, structured description in Bengali. The response should be a JSON object with the following keys: \`general_summary\` (string, a paragraph about the type), \`strengths\` (array of objects, each with \`name\` (string) and \`explanation\` (string), list 5 key strengths), \`challenges\` (array of objects, each with \`description\` (string) and \`advice\` (string), list 3 key challenges and advice), \`career_advice\` (array of objects, each with \`field\` (string), \`reason\` (string), and optionally \`action\` (string), list 3-5 career advice entries), \`relationship_tips\` (array of objects, each with \`general_behavior\` (string) and \`tip\` (string), list 3-5 relationship tips), \`self_improvement_habits\` (array of objects, each with \`habit\` (string) and \`benefit\` (string), list 3 self-improvement habits), \`coach_message\` (string, a concluding motivational message). Ensure all strings are in Bengali.`;
             responseSchema = {
                 type: "OBJECT",
                 properties: {
@@ -473,16 +440,7 @@ Output must be in valid JSON format. Do not include extra text outside of the JS
                 required: ["general_summary", "strengths", "challenges", "career_advice", "relationship_tips", "self_improvement_habits", "coach_message"]
             };
         } else if (promptKey === 'career_sub_prompt') {
-            promptText = `For MBTI personality type ${type}, provide expanded and modern career guidance in Bengali.The response must be a JSON object with:
-
-- \`career_guidance_message\`: (string) A warm, intuitive paragraph that explains what kind of career environments are ideal for this personality — e.g., team-based, solo, creative, structured, growth-driven. Mention emotional needs too (freedom, meaning, recognition, impact).
-
-- \`specific_actions\`: (array of strings) List 3–5 specific, actionable suggestions.  
-  Examples:  
-  - “একটি ফ্রিল্যান্সিং প্ল্যাটফর্মে প্রোফাইল খুলে লেখালেখি বা ডিজাইন শুরু করুন।”  
-  - “একটি ডেটা অ্যানালাইসিস কোর্সে নাম লেখান এবং প্রজেক্ট তৈরি করে দেখান।”  
-  - “নিজের একটি ব্র্যান্ড বা সেবার পেছনে কাজ শুরু করুন, ধাপে ধাপে।”
-All output must be in Bengali. Style should be coaching-focused and motivational, with real-world relevance. Output must be a valid JSON object only.`;
+            promptText = `For an MBTI personality type ${type}, provide expanded career guidance in Bengali. The response should be a JSON object with \`career_guidance_message\` (string, an introductory paragraph) and \`specific_actions\` (array of strings, 3-5 specific actionable steps for career development).`;
             responseSchema = {
                 type: "OBJECT",
                 properties: {
@@ -492,16 +450,7 @@ All output must be in Bengali. Style should be coaching-focused and motivational
                 required: ["career_guidance_message", "specific_actions"]
             };
         } else if (promptKey === 'relationship_sub_prompt') {
-            promptText = `For MBTI personality type ${type}, provide deeper relationship and friendship guidance in Bengali.The response must be a JSON object with:
-
-- \`relationship_insight\`: (string) An emotional, intuitive paragraph explaining how this type typically behaves in love and friendships — their strengths, emotional needs, and common challenges. Should be heart-touching and insightful.
-
-- \`actionable_tips\`: (array of strings) 3–5 emotionally intelligent suggestions, examples:
-  - “নিজের চাওয়া-মনের কথা স্পষ্টভাবে প্রকাশ করতে শিখুন।”  
-  - “সবসময় অন্যকে খুশি করতে গিয়ে নিজেকে ভুলে যাবেন না।”  
-  - “ঘনিষ্ঠতা থেকে না পালিয়ে ধীরে ধীরে সম্পর্কের গভীরে প্রবেশ করুন।”
-Must be written in Bengali. Tone must feel like a wise friend or life coach offering heartfelt guidance.
-Output must be a valid JSON object. Do not include explanations outside the JSON format.`;
+            promptText = `For an MBTI personality type ${type}, provide expanded relationship and friendship tips in Bengali. The response should be a JSON object with \`relationship_insight\` (string, an introductory paragraph) and \`actionable_tips\` (array of strings, 3-5 specific actionable tips for relationships and friendships).`;
             responseSchema = {
                 type: "OBJECT",
                 properties: {
@@ -527,8 +476,8 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
 
             // Pointing to your new backend server endpoint
             const apiUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
-                                ? 'http://localhost:3001/generate-content'
-                                : `${import.meta.env.VITE_APP_BACKEND_URL}/generate-content`; 
+                         ? 'http://localhost:3001/generate-content'
+                         : `${import.meta.env.VITE_APP_BACKEND_URL}/generate-content`; 
 
             console.log("Frontend attempting to call backend at:", apiUrl);
 
@@ -597,17 +546,17 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
     };
 
     // Handlers for new "more options" buttons
-    // const handleCareerAdviceClick = () => { // Removed
-    //     setSubScreen('career');
-    //     setSubPromptResult(null); 
-    //     fetchFullDescriptionFromAI(resultType, 'career_sub_prompt');
-    // };
+    const handleCareerAdviceClick = () => {
+        setSubScreen('career');
+        setSubPromptResult(null); 
+        fetchFullDescriptionFromAI(resultType, 'career_sub_prompt');
+    };
 
-    // const handleRelationshipTipsClick = () => { // Removed
-    //     setSubScreen('relationship');
-    //     setSubPromptResult(null); 
-    //     fetchFullDescriptionFromAI(resultType, 'relationship_sub_prompt');
-    // };
+    const handleRelationshipTipsClick = () => {
+        setSubScreen('relationship');
+        setSubPromptResult(null); 
+        fetchFullDescriptionFromAI(resultType, 'relationship_sub_prompt');
+    };
 
     const handleBackToMainResult = () => {
         setSubScreen(null); 
@@ -849,7 +798,7 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
                             {/* NEXT / SUBMIT Button - Now an icon-only button, with text for "ফলাফল দেখুন" */}
                             <button
                                 onClick={handleNextQuestion} // Call handleNextQuestion for manual navigation
-                                // Use nav-arrow-button styling consistently
+                                // Apply common class, and then specific styling for enabled/disabled
                                 className={`nav-arrow-button ${currentQuestionIndex === questions.length - 1 ? 'px-6 py-3 font-semibold text-lg' : ''}`}
                                 disabled={userAnswers[currentQuestionIndex] === undefined} // Disable if no answer
                             >
@@ -882,7 +831,7 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
                             {isGeneratingDescription || isGeneratingSubPrompt ? (
                                 <div className="flex flex-col items-center justify-center py-8 px-4 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg shadow-lg min-h-[180px] sm:min-h-[200px]">
                                     <p className="text-gray-700 text-center text-lg sm:text-xl font-medium mb-4">বিস্তারিত বর্ণনা তৈরি হচ্ছে... অনুগ্রহ করে অপেক্ষা করুন।</p>
-                                    <div className={`text-gray-900 text-xl sm:text-2xl font-semibold italic text-center transition-opacity duration-500 ${quoteVisible ? 'opacity-100 quote-animation' : 'opacity-0'}`}>
+                                    <div className="text-gray-900 text-xl sm:text-2xl font-semibold italic text-center transition-opacity duration-500 ${quoteVisible ? 'opacity-100 quote-animation' : 'opacity-0'}">
                                         “{motivationalQuotes[currentQuoteIndex].quote}”
                                         <p className="text-sm sm:text-base text-gray-600 mt-2 not-italic">— {motivationalQuotes[currentQuoteIndex].author}</p>
                                     </div>
@@ -1008,8 +957,8 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
                                         )
                                     )}
 
-                                    {/* Removed: More options / Email input and Payment Placeholder */}
-                                    {/* {!isGeneratingDescription && !isGeneratingSubPrompt && subScreen === null && (
+                                    {/* More options / Email input and Payment Placeholder */}
+                                    {!isGeneratingDescription && !isGeneratingSubPrompt && subScreen === null && (
                                         <div className="mt-8 pt-4 border-t border-gray-200 w-full">
                                             <h3 className="text-xl sm:text-2xl font-bold mb-4 text-gray-700">আরও জানতে চান?</h3>
                                             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
@@ -1022,17 +971,8 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
                                                     রিপোর্ট পাঠান
                                                 </button>
                                             </div>
-                                            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                                                <button onClick={handleCareerAdviceClick} className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-md hover:bg-indigo-700 transition-all duration-300 text-base sm:text-lg w-full sm:w-auto">
-                                                    ক্যারিয়ার সম্পর্কে আরও জানুন
-                                                </button>
-                                                <button onClick={handleRelationshipTipsClick} className="px-6 py-3 bg-pink-600 text-white font-bold rounded-md hover:bg-pink-700 transition-all duration-300 text-base sm:text-lg w-full sm:w-auto">
-                                                    সম্পর্ক বিষয়ে আরও জানুন
-                                                </button>
-                                            </div>
                                         </div>
                                     )}
-                                    */}
                                 </React.Fragment>
                             )}
                         </div>
