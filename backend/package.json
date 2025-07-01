@@ -1,19 +1,23 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
+    "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "Backend server for personality quiz",
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.6.0",
     "express": "^5.1.0",
+<<<<<<< HEAD
     "node-fetch": "^3.3.2",
+=======
+>>>>>>> 58eb5f3fc7f46efab2410e053e8cc44256ca6e00
     "openai": "^5.8.2"
   }
 }
