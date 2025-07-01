@@ -1,10 +1,3 @@
-// --- START DEBUG BLOCK ---
-// এই লগগুলি শুধুমাত্র ডিবাগিং এর জন্য। লোকাল ডেভেলপমেন্টে এদের আউটপুট দেখা যাবে।
-// রেন্ডারে ডেপ্লয় করার সময় এগুলি স্বয়ংক্রিয়ভাবে ইনজেক্ট হওয়া ভ্যারিয়েবল দেখাবে।
-console.log("App.js loaded.");
-console.log("VITE_APP_BACKEND_URL from import.meta.env:", import.meta.env.VITE_APP_BACKEND_URL);
-// --- END DEBUG BLOCK ---
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 // Personality Type Names and Short Descriptions (from 16 personalities.docx)
@@ -31,50 +24,50 @@ const personalityTypesData = {
 const questions = [
     // Category 1: Mind — Introvert (I) vs Extrovert (E)
     { question: "আমি নিয়মিতভাবে নতুন বন্ধু তৈরি করি।", traitPair: ['E', 'I'] },
-    { question: "অজানা লোকেদের সাথে যোগাযোগ বা নিজের প্রচার করাকে আমি খুব কঠিন মনে করি।", traitPair: ['E', 'I'] }, // Rephrased from original, keeping E/I traitPair
+    { question: "অজানা লোকেদের সাথে যোগাযোগ বা নিজের প্রচার করাকে আমি খুব কঠিন মনে করি।", traitPair: ['E', 'I'] },
     { question: "যাকে আকর্ষণীয় মনে হয়, তার সঙ্গে গিয়ে আলাপ শুরু করতে আমি স্বাচ্ছন্দ্যবোধ করি।", traitPair: ['E', 'I'] },
     { question: "দলভিত্তিক কার্যলাপে অংশ নিতে আমি উপভোগ করি।", traitPair: ['E', 'I'] },
     { question: "আমি সাধারণত একা থাকার চেয়ে অন্যদের সঙ্গে থাকতে বেশি পছন্দ করি।", traitPair: ['E', 'I'] },
-    { question: "আমি সাধারণত ফোন কল করা এড়িয়ে চলি।", traitPair: ['I', 'E'] }, // Agree = I
+    { question: "আমি সাধারণত ফোন কল করা এড়িয়ে চলি।", traitPair: ['I', 'E'] },
     { question: "আমি নতুন পরিচিত মানুষের সঙ্গে সহজেই কানেক্ট হতে পারি।", traitPair: ['E', 'I'] },
-    { question: "আমি এমন একটি কাজ পছন্দ করব যেখানে বেশিরভাগ সময় একা কাজ করা যায়।", traitPair: ['I', 'E'] }, // Agree = I
+    { question: "আমি এমন একটি কাজ পছন্দ করব যেখানে বেশিরভাগ সময় একা কাজ করা যায়।", traitPair: ['I', 'E'] },
     { question: "আমি শান্ত ও ব্যক্তিগত জায়গার চেয়ে ব্যস্ত ও কোলাহলপূর্ণ পরিবেশে বেশি স্বাচ্ছন্দ্য বোধ করি।", traitPair: ['E', 'I'] },
-    { question: "অনেক চাপের মধ্যেও আমি সাধারণত শান্ত থাকতে পারি।", traitPair: ['E', 'I'] }, // Keeping E/I as per original structure, though question meaning is A/X
+    { question: "অনেক চাপের মধ্যেও আমি সাধারণত শান্ত থাকতে পারি।", traitPair: ['E', 'I'] },
 
     // Category 2: Energy — Practical (S) vs Imaginative (N)
-    { question: "জটিল ও নতুন আইডিয়া আমার বেশি উত্তেজিত করে, সহজ ও সরল ধারণার চেয়ে।", traitPair: ['N', 'S'] }, // Agree = N
-    { question: "সৃজনশীল কাজের নানা রকম ব্যাখ্যা নিয়ে আলোচনা আমার তেমন আগ্রহ জাগায় না।", traitPair: ['S', 'N'] }, // Agree = S
-    { question: "কোনো সিদ্ধান্ত নেওয়ার সময় আমি মানুষের অনুভূতির চেয়ে তথ্যকে বেশি গুরুত্ব দিই।", traitPair: ['S', 'N'] }, // Rephrased from original, keeping S/N traitPair
-    { question: "আমি প্রায়ই নির্দিষ্ট কোনো সময়সূচি ছাড়া দিনটাকে চলতে দিই।", traitPair: ['S', 'N'] }, // Rephrased from original, keeping S/N traitPair
-    { question: "আমি সত্য বলার চেয়ে সংবেদনশীল থাকার দিকটিকে বেশি গুরুত্ব দিই।", traitPair: ['F', 'T'] }, // Correction: This should be F/T as per original intent of "Feeling"
+    { question: "জটিল ও নতুন আইডিয়া আমার বেশি উত্তেজিত করে, সহজ ও সরল ধারণার চেয়ে।", traitPair: ['N', 'S'] },
+    { question: "সৃজনশীল কাজের নানা রকম ব্যাখ্যা নিয়ে আলোচনা আমার তেমন আগ্রহ জাগায় না।", traitPair: ['S', 'N'] },
+    { question: "কোনো সিদ্ধান্ত নেওয়ার সময় আমি মানুষের অনুভূতির চেয়ে তথ্যকে বেশি গুরুত্ব দিই।", traitPair: ['S', 'N'] },
+    { question: "আমি প্রায়ই নির্দিষ্ট কোনো সময়সূচি ছাড়া দিনটাকে চলতে দিই।", traitPair: ['S', 'N'] },
+    { question: "আমি সত্য বলার চেয়ে সংবেদনশীল থাকার দিকটিকে বেশি গুরুত্ব দিই।", traitPair: ['F', 'T'] },
     { question: "আমি নতুন অভিজ্ঞতা ও জ্ঞানের ক্ষেত্র খুঁজে বের করতে সক্রিয় থাকি।", traitPair: ['N', 'S'] },
-    { question: "জীবিকার জন্য কল্পকাহিনি লেখা আমার জন্য কল্পনাতীত মনে হয়।", traitPair: ['S', 'N'] }, // Agree = S
-    { question: "নৈতিক দ্বন্দ্ব নিয়ে বিতর্ক করতে আমি উপভোগ করি।", traitPair: ['N', 'S'] }, // Agree = N
-    { question: "আলোচনা খুব তাত্ত্বিক হয়ে গেলে আমি আগ্রহ হারিয়ে ফেলি বা বিরক্ত হই।", traitPair: ['S', 'N'] }, // Agree = S
+    { question: "জীবিকার জন্য কল্পকাহিনি লেখা আমার জন্য কল্পনাতীত মনে হয়।", traitPair: ['S', 'N'] },
+    { question: "নৈতিক দ্বন্দ্ব নিয়ে বিতর্ক করতে আমি উপভোগ করি।", traitPair: ['N', 'S'] },
+    { question: "আলোচনা খুব তাত্ত্বিক হয়ে গেলে আমি আগ্রহ হারিয়ে ফেলি বা বিরক্ত হই।", traitPair: ['S', 'N'] },
     { question: "অপরিচিত ধারণা ও দৃষ্টিভঙ্গি আবিষ্কার করতে আমি উপভোগ করি।", traitPair: ['N', 'S'] },
 
     // Category 3: Nature — Thinking (T) vs Feeling (F)
-    { question: "তথ্যভিত্তিক যুক্তির চেয়ে আবেগে যা নাড়া দেয়, আমি সেটাতে বেশি প্রভাবিত হই।", traitPair: ['F', 'T'] }, // Agree = F
+    { question: "তথ্যভিত্তিক যুক্তির চেয়ে আবেগে যা নাড়া দেয়, আমি সেটাতে বেশি প্রভাবিত হই।", traitPair: ['F', 'T'] },
     { question: "কোনো সিদ্ধান্ত নেওয়ার সময় আমি মানুষের অনুভূতির চেয়ে তথ্যকে বেশি গুরুত্ব দিই।", traitPair: ['T', 'F'] },
     { question: "আমি সত্য বলার চেয়ে সংবেদনশীল থাকার দিকটিকে বেশি গুরুত্ব দিই।", traitPair: ['F', 'T'] },
-    { question: "আমি সিদ্ধান্ত নেওয়ার ক্ষেত্রে দক্ষতাকে প্রাধান্য দিই, যদিও মাঝে মাঝে আবেগের দিকটা উপেক্ষিত হয়।", traitPair: ['T', 'F'] }, // Agree = T
-    { question: "বিরোধের সময়, অন্যের অনুভূতির চেয়ে নিজের যুক্তি প্রমাণ করাকেই আমি বেশি গুরুত্ব দিই।", traitPair: ['T', 'F'] }, // Agree = T
-    { question: "আমি সহজে আবেগপ্রবণ যুক্তিতে প্রভাবিত হই না।", traitPair: ['T', 'F'] }, // Agree = T
-    { question: "তথ্য আর আবেগের মধ্যে দ্বন্দ্ব হলে আমি সাধারণত মনের কথাই অনুসরণ করি।", traitPair: ['F', 'T'] }, // Agree = F
+    { question: "আমি সিদ্ধান্ত নেওয়ার ক্ষেত্রে দক্ষতাকে প্রাধান্য দিই, যদিও মাঝে মাঝে আবেগের দিকটা উপেক্ষিত হয়।", traitPair: ['T', 'F'] },
+    { question: "বিরোধের সময়, অন্যের অনুভূতির চেয়ে নিজের যুক্তি প্রমাণ করাকেই আমি বেশি গুরুত্ব দিই।", traitPair: ['T', 'F'] },
+    { question: "আমি সহজে আবেগপ্রবণ যুক্তিতে প্রভাবিত হই না।", traitPair: ['T', 'F'] },
+    { question: "তথ্য আর আবেগের মধ্যে দ্বন্দ্ব হলে আমি সাধারণত মনের কথাই অনুসরণ করি।", traitPair: ['F', 'T'] },
     { question: "আমি সাধারণত আবেগের চেয়ে বাস্তব তথ্যের ভিত্তিতে সিদ্ধান্ত নিই।", traitPair: ['T', 'F'] },
-    { question: "আমি আবেগকে নিয়ন্ত্রণ করি তার চেয়ে বেশি, আবেগই আমাকে নিয়ন্ত্রণ করে।", traitPair: ['F', 'T'] }, // Agree = F
-    { question: "আমি সিদ্ধান্ত নেওয়ার সময় যা সবচেয়ে যৌক্তিক বা কার্যকর, তার চেয়ে বেশি ভাবি — এতে মানুষ কতটা এফেক্টেড হবে।", traitPair: ['F', 'T'] }, // Agree = F
+    { question: "আমি আবেগকে নিয়ন্ত্রণ করি তার চেয়ে বেশি, আবেগই আমাকে নিয়ন্ত্রণ করে।", traitPair: ['F', 'T'] },
+    { question: "আমি সিদ্ধান্ত নেওয়ার সময় যা সবচেয়ে যৌক্তিক বা কার্যকর, তার চেয়ে বেশি ভাবি — এতে মানুষ কতটা এফেক্টেড হবে।", traitPair: ['F', 'T'] },
 
     // Category 4: Tactics — Judging (J) vs Prospecting (P)
     { question: "আমার থাকার ও কাজ করার জায়গা সাধারণত পরিষ্কার ও গোছানো থাকে।", traitPair: ['J', 'P'] },
     { question: "আমি কাজকে অগ্রাধিকার দিয়ে পরিকল্পনা করি এবং সাধারণত সময়ের আগেই তা শেষ করি।", traitPair: ['J', 'P'] },
-    { question: "আমি প্রায়ই নির্দিষ্ট কোনো সময়সূচি ছাড়া দিনটাকে চলতে দিই।", traitPair: ['P', 'J'] }, // Agree = P
+    { question: "আমি প্রায়ই নির্দিষ্ট কোনো সময়সূচি ছাড়া দিনটাকে চলতে দিই।", traitPair: ['P', 'J'] },
     { question: "আমি বিশ্রাম নেওয়ার আগে দৈনন্দিন কাজগুলো শেষ করতে পছন্দ করি।", traitPair: ['J', 'P'] },
-    { question: "আমি প্রায়ই শেষ মুহূর্তে গিয়ে কাজ শেষ করি।", traitPair: ['P', 'J'] }, // Agree = P
-    { question: "কাজ বা পড়াশোনার নিয়মিত রুটিন বজায় রাখা আমার জন্য কঠিন হয়।", traitPair: ['P', 'J'] }, // Agree = P
+    { question: "আমি প্রায়ই শেষ মুহূর্তে গিয়ে কাজ শেষ করি।", traitPair: ['P', 'J'] },
+    { question: "কাজ বা পড়াশোনার নিয়মিত রুটিন বজায় রাখা আমার জন্য কঠিন হয়।", traitPair: ['P', 'J'] },
     { question: "প্রতিদিনের জন্য আমি কাজের তালিকা (টু-ডু লিস্ট) রাখতে পছন্দ করি।", traitPair: ['J', 'P'] },
     { question: "পরিকল্পনায় ব্যাঘাত ঘটলে আমি যত দ্রুত সম্ভব আগের ধারায় ফিরে যাওয়াকেই সবচেয়ে গুরুত্ব দিই।", traitPair: ['J', 'P'] },
-    { question: "আমার কাজের ধরন পরিকল্পিত ও ধারাবাহিককের চেয়ে হঠাৎ করে এনার্জি আসার উপর বেশি নির্ভরশীল।", traitPair: ['P', 'J'] }, // Agree = P
+    { question: "আমার কাজের ধরন পরিকল্পিত ও ধারাবাহিককের চেয়ে হঠাৎ করে এনার্জি আসার উপর বেশি নির্ভরশীল।", traitPair: ['P', 'J'] },
     { question: "আমি ধাপে ধাপে কাজ করি এবং কোনো ধাপ এড়িয়ে যাই না।", traitPair: ['J', 'P'] },
 
     // Category 5: Identity — Confident (A) vs Anxious (X)
@@ -82,19 +75,20 @@ const questions = [
     { question: "নতুন মানুষের সামনে নিজেকে কেমনভাবে উপস্থাপন করছি, তা নিয়ে আমি খুব কমই চিন্তা করি।", traitPair: ['A', 'X'] },
     { question: "আমি প্রায়ই দুশ্চিন্তা করি যে কিছু খারাপ হতে পারে।", traitPair: ['X', 'A'] },
     { question: "আমি সাধারণত আমার নেওয়া সিদ্ধান্ত নিয়ে দ্বিতীয়বার ভাবি না।", traitPair: ['A', 'X'] },
-    { question: "আমার মুড খুব দ্রুত চেঞ্জ হয়", traitPair: ['X', 'A'] }, // Agree = X
-    { question: "আমি সাধারণত নিজেকে ভীষণ চাপে বা অস্থিরতায় ডুবে থাকা অনুভব করি।", traitPair: ['X', 'A'] }, // Agree = X
-    { question: "আমি খুব কম সময়েই নিজেকে অনিরাপদ বা অস্থির অনুভব করি।", traitPair: ['A', 'X'] }, // Agree = A
-    { question: "কেউ আমাকে নিয়ে ভালো ধারণা পোষণ করলে আমি ভাবি, কবে তারা হতাশ হবে আমার প্রতি।", traitPair: ['X', 'A'] }, // Agree = X
-    { question: "আমার মনে হয় বিমূর্ত দর্শনগত প্রশ্ন নিয়ে চিন্তা করা সময়ের অপচয়।", traitPair: ['A', 'X'] }, // Keeping A/X as per original structure, though meaning could align with S
+    { question: "আমার মুড খুব দ্রুত চেঞ্জ হয়", traitPair: ['X', 'A'] },
+    { question: "আমি সাধারণত নিজেকে ভীষণ চাপে বা অস্থিরতায় ডুবে থাকা অনুভব করি।", traitPair: ['X', 'A'] },
+    { question: "আমি খুব কম সময়েই নিজেকে অনিরাপড বা অস্থির অনুভব করি।", traitPair: ['A', 'X'] },
+    { question: "কেউ আমাকে নিয়ে ভালো ধারণা পোষণ করলে আমি ভাবি, কবে তারা হতাশ হবে আমার প্রতি।", traitPair: ['X', 'A'] },
+    { question: "আমার মনে হয় বিমূর্ত দর্শনগত প্রশ্ন নিয়ে চিন্তা করা সময়ের অপচয়।", traitPair: ['A', 'X'] },
     { question: "আমি আত্মবিশ্বাসী যে, শেষ পর্যন্ত সবকিছুই আমার পক্ষে ভালোভাবে মিলে যাবে।", traitPair: ['A', 'X'] },
 ];
 
+// MODIFIED: Restored 7 choices, with value 4 label changed
 const choices = [
     { value: 1, label: "একদম হ্যাঁ" },
     { value: 2, label: "মোটামুটি হ্যাঁ" },
     { value: 3, label: "কিছুটা হ্যাঁ" },
-    { value: 4, label: "হতেও পারে নাও হতে পারে / ফিফটি ফিফটি" },
+    { value: 4, label: "হতেও পারে নাও হতে পারে" }, // Changed label, removed "ফিফটি ফিফটি"
     { value: 5, label: "কিছুটা না" },
     { value: 6, label: "মোটামুটি না" },
     { value: 7, label: "একদম না" },
@@ -112,75 +106,69 @@ const motivationalQuotes = [
     { quote: "Everything you’ve ever wanted is on the other side of fear.", author: "George Addair" },
     { quote: "The best way to predict the future is to create it.", author: "Peter Drucker" },
     { quote: "Whether you think you can, or you think you can't – you're right.", author: "Henry Ford" },
-    { quote: "If you're going through hell, keep going.", author: "Winston Churchill" }, 
+    { quote: "If you're going through hell, keep going.", author: "Winston Churchill" },
     { quote: "It always seems impossible until it’s done.", author: "Nelson Mandela" },
     { quote: "Opportunities don't happen, you create them.", author: "Chris Grosser" },
     { quote: "Success usually comes to those who are too busy to be looking for it.", author: "Henry David Thoreau" },
     { quote: "Believe you can and you’re halfway there.", author: "Theodore Roosevelt" },
 ];
 
-export default function App() {
-    const [screen, setScreen] = useState('start'); // 'start', 'test', 'result', 'sub_quiz_career', 'sub_quiz_relationship'
-    const [subScreen, setSubScreen] = useState(null); // 'career', 'relationship', 'sub_result'
-    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0); 
-    const [questionVisible, setQuestionVisible] = useState(false); // For fade-in animation of question
-    const [userAnswers, setUserAnswers] = useState({}); 
-    const [resultType, setResultType] = useState(''); 
-    const [structuredDescription, setStructuredDescription] = useState(null); // Changed to null initially
+export default function App() { // Added export default here
+    const [screen, setScreen] = useState('start');
+    const [subScreen, setSubScreen] = useState(null);
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+    const [questionVisible, setQuestionVisible] = useState(false);
+    const [userAnswers, setUserAnswers] = useState({});
+    const [resultType, setResultType] = useState('');
+    const [structuredDescription, setStructuredDescription] = useState(null);
     const [message, setMessage] = useState('');
     const [messageType, setMessageType] = useState('error');
-    const [isGeneratingDescription, setIsGeneratingDescription] = useState(false); 
+    const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
 
-    const [submittingFlag, setSubmittingFlag] = useState(false); 
+    const [submittingFlag, setSubmittingFlag] = useState(false);
 
-    // States for motivational quotes
     const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
     const [quoteVisible, setQuoteVisible] = useState(true);
 
-    // States for sub-prompts AI results
     const [subPromptResult, setSubPromptResult] = useState(null);
     const [isGeneratingSubPrompt, setIsGeneratingSubPrompt] = useState(false);
 
 
-    // Ref to ensure we always have the latest userAnswers when needed (e.g., in async callbacks)
-    const userAnswersRef = useRef({}); 
+    const userAnswersRef = useRef({});
     useEffect(() => {
         userAnswersRef.current = userAnswers;
     }, [userAnswers]);
 
-    // Log the total number of questions when the component mounts
     useEffect(() => {
         console.log("App component initialized. Total questions:", questions.length);
     }, []);
 
-    // Effect for question fade-in animation
     useEffect(() => {
         if (screen === 'test') {
-            setQuestionVisible(false); // Hide to trigger re-animation on question change
+            setQuestionVisible(false);
             const timer = setTimeout(() => {
-                setQuestionVisible(true); // Show with fade-in
-            }, 50); // Small delay to ensure CSS transition resets
+                setQuestionVisible(true);
+            }, 50);
             return () => clearTimeout(timer);
         }
     }, [currentQuestionIndex, screen]);
 
-    // Effect for motivational quotes rotation
     useEffect(() => {
         let quoteDisplayTimer;
         let quoteFadeOutTimer;
 
-        if (isGeneratingDescription || isGeneratingSubPrompt) { // Show quotes for any AI generation
+        if (isGeneratingDescription || isGeneratingSubPrompt) {
             setQuoteVisible(true);
             quoteDisplayTimer = setTimeout(() => {
                 setQuoteVisible(false);
-            }, 3000); 
+            }, 3000);
 
             quoteFadeOutTimer = setTimeout(() => {
                 setCurrentQuoteIndex((prevIndex) => (prevIndex + 1) % motivationalQuotes.length);
-                setQuoteVisible(true); 
-            }, 3500); 
+                setQuoteVisible(true);
+            }, 3500);
         } else {
-            setQuoteVisible(false); 
+            setQuoteVisible(false);
             clearTimeout(quoteDisplayTimer);
             clearTimeout(quoteFadeOutTimer);
         }
@@ -189,13 +177,11 @@ export default function App() {
             clearTimeout(quoteDisplayTimer);
             clearTimeout(quoteFadeOutTimer);
         };
-    }, [isGeneratingDescription, isGeneratingSubPrompt, currentQuoteIndex]); 
+    }, [isGeneratingDescription, isGeneratingSubPrompt, currentQuoteIndex]);
 
     const showMessage = (msg, type = 'error') => {
         setMessage(msg);
         setMessageType(type);
-        // Do not clear the message immediately if it's an error about missing answers.
-        // For other messages, clear after 3 seconds.
         if (msg !== "অনুগ্রহ করে সব প্রশ্নের উত্তর দিন।" && msg !== "অনুগ্রহ করে এই প্রশ্নের উত্তর দিন।") {
              setTimeout(() => {
                  setMessage('');
@@ -204,26 +190,22 @@ export default function App() {
     };
 
     const selectAnswer = (selectedScaleIndex) => {
-        if (submittingFlag) return; 
+        if (submittingFlag) return;
 
-        setMessage(''); // Clear any previous messages when a new answer is selected
-        
-        // Optimistically update the answers state and ref
+        setMessage('');
+
         const newAnswers = { ...userAnswers, [currentQuestionIndex]: selectedScaleIndex };
-        setUserAnswers(newAnswers); 
-        userAnswersRef.current = newAnswers; // Update ref immediately for synchronous access
+        setUserAnswers(newAnswers);
+        userAnswersRef.current = newAnswers;
 
-        // *** IMPORTANT CHANGE: Auto-advance after selecting an answer ***
         const isLastQuestion = (currentQuestionIndex === questions.length - 1);
         if (isLastQuestion) {
             console.log("Last question answered. Attempting to submit test.");
-            // Add a very small timeout to allow UI to update with selected answer before submitting
             setTimeout(() => {
                 submitTest();
-            }, 100); 
+            }, 100);
         } else {
             console.log("Moving to next question automatically.");
-            // Add a very small timeout to allow UI to update with selected answer before moving to next question
             setTimeout(() => {
                 setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
             }, 100);
@@ -231,8 +213,6 @@ export default function App() {
     };
 
     const handleNextQuestion = () => {
-        // Check if an answer has been selected for the current question
-        // This check is primarily for manual clicks on the forward button
         if (userAnswers[currentQuestionIndex] === undefined) {
             showMessage("অনুগ্রহ করে এই প্রশ্নের উত্তর দিন।", 'error');
             return;
@@ -244,7 +224,7 @@ export default function App() {
 
         if (isLastQuestion) {
             console.log("Last question answered. Attempting to submit test via manual next button click.");
-            submitTest(); 
+            submitTest();
         } else {
             console.log("Moving to next question via manual next button click.");
             setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
@@ -258,35 +238,34 @@ export default function App() {
         }
     };
 
-    const calculatePersonalityType = useCallback(() => { 
-        const answersToCalculate = userAnswersRef.current; 
+    const calculatePersonalityType = useCallback(() => {
+        const answersToCalculate = userAnswersRef.current;
         const tempScores = {
             'E': 0, 'I': 0, 'S': 0, 'N': 0,
             'T': 0, 'F': 0, 'J': 0, 'P': 0,
-            'A': 0, 'X': 0 
+            'A': 0, 'X': 0
         };
 
         for (let qIndex = 0; qIndex < questions.length; qIndex++) {
             if (answersToCalculate[qIndex] !== undefined) {
-                const answerValue = answersToCalculate[qIndex]; 
+                const answerValue = answersToCalculate[qIndex];
                 const question = questions[qIndex];
 
                 if (!question || !question.traitPair) {
                     console.error(`Error: Question or traitPair is undefined for index ${qIndex}. Question:`, question);
-                    continue; 
+                    continue;
                 }
 
                 const [trait1, trait2] = question.traitPair;
-                // New scale: 1 = Strongly Agree (হ্যাঁ), 7 = Strongly Disagree (না)
-                // We want 1 (Agree) to contribute positively to trait1, 7 (Disagree) to contribute positively to trait2.
-                // New logic: `(Neutral_Point - Answer_Value)`
-                const scoreValue = 4 - answerValue; 
+                // MODIFIED: Scoring logic adjusted for 7 options, with 4 as neutral point
+                const scoreValue = 4 - answerValue; // Neutral point is 4 (হতেও পারে নাও হতে পারে)
 
                 if (scoreValue > 0) { // If answer is 1,2,3 (Agree/হ্যাঁ side)
                     tempScores[trait1] += scoreValue;
                 } else if (scoreValue < 0) { // If answer is 5,6,7 (Disagree/না side)
-                    tempScores[trait2] += Math.abs(scoreValue); 
+                    tempScores[trait2] += Math.abs(scoreValue);
                 }
+                // If scoreValue is 0 (answerValue is 4), no score is added to either trait, which is correct for neutral.
             }
         }
 
@@ -297,33 +276,31 @@ export default function App() {
         type += (tempScores['J'] >= tempScores['P']) ? 'J' : 'P';
         
         return type;
-    }, []); 
+    }, []);
 
-    const submitTest = useCallback(() => { 
+    const submitTest = useCallback(() => {
         if (submittingFlag) {
             console.log("Submission already in progress, preventing duplicate call.");
-            return; // Prevent multiple submissions
+            return;
         }
-        setSubmittingFlag(true); 
+        setSubmittingFlag(true);
 
-        const answersToSubmit = userAnswersRef.current; // Use ref for latest state
+        const answersToSubmit = userAnswersRef.current;
         console.log("--- SUBMIT TEST INITIATED ---");
         console.log("Answers captured for submission:", answersToSubmit);
         const currentAnswersCount = Object.keys(answersToSubmit).length;
         console.log(`Number of answers captured: ${currentAnswersCount} / ${questions.length}`);
 
-        // Crucial: Check if ALL questions have been answered.
         if (currentAnswersCount !== questions.length) {
             showMessage("অনুগ্রহ করে সব প্রশ্নের উত্তর দিন।", 'error');
             console.error(`Submission failed: Not all questions answered. Expected ${questions.length}, but got ${currentAnswersCount}.`);
-            setSubmittingFlag(false); 
-            return; 
+            setSubmittingFlag(false);
+            return;
         }
         
-        const finalCalculatedType = calculatePersonalityType(); 
+        const finalCalculatedType = calculatePersonalityType();
         console.log("Calculated personality type (4-letter):", finalCalculatedType);
 
-        // Validate the calculated type against the predefined list
         const validTypes = Object.keys(personalityTypesData);
         if (!validTypes.includes(finalCalculatedType)) {
             console.error(`Submission failed: Calculated type "${finalCalculatedType}" is not a standard MBTI type.`);
@@ -334,155 +311,137 @@ export default function App() {
 
         console.log(`Successfully calculated type: ${finalCalculatedType}. Transitioning to result screen.`);
         setResultType(finalCalculatedType);
-        setScreen('result'); 
-        setSubmittingFlag(false); 
+        setScreen('result');
+        console.log(`State update scheduled: screen to 'result', resultType to '${finalCalculatedType}'`);
+        setSubmittingFlag(false);
         console.log("--- SUBMIT TEST COMPLETED ---");
-    }, [submittingFlag, calculatePersonalityType]); 
+    }, [submittingFlag, calculatePersonalityType]);
 
     const restartTest = () => {
         setCurrentQuestionIndex(0);
         setUserAnswers({});
         setResultType('');
-        setStructuredDescription(null); 
+        setStructuredDescription(null);
         setMessage('');
         setMessageType('error');
         setIsGeneratingDescription(false);
         setScreen('start');
-        setSubmittingFlag(false); 
-        setCurrentQuoteIndex(0); 
+        setSubmittingFlag(false);
+        setCurrentQuoteIndex(0);
         setQuoteVisible(true);
-        setSubPromptResult(null); // Clear sub-prompt results
-        setIsGeneratingSubPrompt(false); // Reset sub-prompt generation state
+        setSubPromptResult(null);
+        setIsGeneratingSubPrompt(false);
     };
 
-    // Effect to trigger AI description fetch when screen changes to 'result'
     useEffect(() => {
         console.log(`Effect: screen is '${screen}', resultType is '${resultType}', structuredDescription is ${structuredDescription ? 'set' : 'null'}, isGeneratingDescription is ${isGeneratingDescription}`);
-        // Fetch initial description only if on result screen, resultType is set,
-        // no structured description is already loaded, and not already generating.
+        console.log(`Effect dependencies: screen=${screen}, resultType=${resultType}, structuredDescription=${structuredDescription}, isGeneratingDescription=${isGeneratingDescription}`);
+
         if (screen === 'result' && resultType && !structuredDescription && !isGeneratingDescription) {
-            console.log(`Calling fetchFullDescriptionFromAI for initial description with type: '${resultType}'`);
+            console.log(`Condition met for fetchFullDescriptionFromAI. Calling with type: '${resultType}'`);
             fetchFullDescriptionFromAI(resultType, 'initial_description');
         } else if (screen === 'result' && !resultType && !isGeneratingDescription) {
-            // This case might happen if resultType somehow gets cleared or isn't set
-            // and we're not already generating.
             console.error("Result screen entered without a valid resultType or while generating. This might indicate an earlier calculation error or double trigger.");
             showMessage("ব্যক্তিত্বের ধরণ নির্ণয় করা যায়নি। অনুগ্রহ করে পুনরায় চেষ্টা করুন।", 'error');
+        } else {
+            console.log("Condition NOT met for fetchFullDescriptionFromAI. Current state:", { screen, resultType, structuredDescription, isGeneratingDescription });
         }
-    }, [screen, resultType, structuredDescription, isGeneratingDescription]); 
+    }, [screen, resultType, structuredDescription, isGeneratingDescription]);
 
-    // Function to fetch detailed AI description (main or sub-prompt)
     const fetchFullDescriptionFromAI = async (type, promptKey) => {
         console.log(`fetchFullDescriptionFromAI called for promptKey: '${promptKey}', type: '${type}'`);
         if (promptKey === 'initial_description') {
             setIsGeneratingDescription(true);
-            setStructuredDescription(null); // Clear previous main description
+            setStructuredDescription(null);
+            console.log("setIsGeneratingDescription set to true, structuredDescription cleared.");
         } else {
             setIsGeneratingSubPrompt(true);
-            setSubPromptResult(null); // Clear previous sub-prompt result
+            setSubPromptResult(null);
+            console.log("setIsGeneratingSubPrompt set to true, subPromptResult cleared.");
         }
         
         setMessage('বিস্তারিত বর্ণনা তৈরি হচ্ছে... অনুগ্রহ করে অপেক্ষা করুন।', 'info');
         console.log("Displaying loading message for AI generation.");
 
         let promptText = "";
-        let responseSchema = {};
+        let responseSchema = {}; // This will be empty for initial_description, used for sub-prompts
 
         // Define prompts and schemas based on promptKey
         if (promptKey === 'initial_description') {
-            promptText = `Given the MBTI personality type ${type}, provide a deeply insightful, emotionally resonant, and culturally relevant personality decoding in Bengali. The response must be a structured JSON object with the following keys:
+            // This prompt is for the backend to send to OpenAI.
+            // It uses the few-shot example for strict formatting and 'আপনি' formality.
+            promptText = `
+প্রিয় OpenAI,
+আপনি একজন অভিজ্ঞ, জ্ঞানী এবং অত্যন্ত বিনয়ী বাঙালি জীবন কোচ। আপনার ভাষার ব্যবহার হবে অত্যন্ত মার্জিত এবং শ্রদ্ধাপূর্ণ। আপনার প্রতিটি শব্দ, বাক্য এবং অনুচ্ছেদে কঠোরভাবে 'আপনি' সম্বোধন ব্যবহার করবেন, কোনো অবস্থাতেই 'তুমি' ব্যবহার করা যাবে না। আপনার উত্তর সংক্ষিপ্ত, সরাসরি এবং কার্যকর হবে। অহেতুক নাটকীয়তা, চটকদার শব্দচয়ন বা "জেন-জেড" স্টাইলের অভিব্যক্তি সম্পূর্ণরূপে পরিহার করুন। এমনভাবে লিখুন যেন একজন মধ্যবয়সী, চিন্তাশীল ব্যক্তি আপনার পরামর্শগুলি সহজে বুঝতে পারে এবং সেগুলো তার জীবনে প্রয়োগ করতে আগ্রহী হয়। আপনার লেখার ধরণ হবে আবেগপ্রবণ কিন্তু সহজ-সরল, স্পষ্ট এবং মার্জিত বাংলা ভাষায়।
 
-- \`general_summary\`: (string) A rich, poetic paragraph describing the person’s inner nature, emotional depth, decision-making style, and how they see the world. Use soft, coaching-style language to create a “wow, this is really me” feeling.
+এখানে একটি উদাহরণ দেওয়া হলো। এই উদাহরণটি দেখে আপনি ঠিক একইভাবে নিম্নলিখিত MBTI ব্যক্তিত্বের ধরণের জন্য উত্তর তৈরি করবেন। উত্তর দেওয়ার সময় শুধু MBTI টাইপটি পরিবর্তন করবেন, বাকি ফরম্যাট, শব্দচয়ন, এবং 'আপনি' সম্বোধন হুবহু উদাহরণটির মতো হবে। উদাহরণ ছাড়া আর কোনো অতিরিক্ত ভূমিকা বা কথা লিখবেন না।
 
-- \`strengths\`: (array of objects) List 5 key strengths.
-  Each object must have:
-    - \`name\`: (string) Strength title in Bengali (e.g., “অন্তর্দৃষ্টি”)
-    - \`explanation\`: (string) 1–2 line explanation why this is a strength for their type.
+উদাহরণ: (MBTI Type: ENFP)
+১. আপনার ব্যক্তিত্বের ধরণ:
+ENFP — “প্রেরণাশক্তির অভিযাত্রী”
+আপনি সহজাতভাবে প্রাণবন্ত, কল্পনাপ্রবণ, এবং মানুষের হৃদয় ছুঁয়ে যেতে চান।
+নতুনত্ব, পরিবর্তন আর সংযোগের খোঁজে আপনি কখনোই ক্লান্ত হন না।
+আপনার নির্ভীক হাসি দেখে মানুষ বোঝে না, ভেতরে আপনি কতটা অনুভূতিপ্রবণ আর কোমল।
 
-- \`challenges\`: (array of objects) List 3 personality challenges.
-  Each object must include:
-    - \`description\`: (string) Brief emotional challenge
-    - \`advice\`: (string) Warm, coach-style advice to grow beyond this limitation.
+২. আপনার ব্যক্তিত্বের সারসংক্ষেপ:
+বাহিরে যত প্রাণবন্ত, ভেতরে আপনি অনেক গভীর।
+জীবনকে দেখেন নতুন সম্ভাবনার রঙে, প্রতিটা মানুষের মধ্যে খুঁজে নেন অজানা গল্প।
+আপনার অনুভূতি যেন চলমান নদী—কখনও আনন্দে ভাসে, কখনও অজান্তেই অনুরাগে ডুবে যায়।
+সবার মধ্যে একটু আশার আলো ছড়াতে ভালোবাসেন, যদিও মাঝে মাঝে আপনিই নিজের জন্য সেই আলো পেতে চান।
+মানুষ প্রায়ই বুঝতে পারে না—আপনার চিন্তার কতটা গভীরতা।
 
-- \`career_advice\`: (array of objects) List 3–5 careers that align with the person’s nature, including modern paths like freelancing, data, content creation, entrepreneurship.
-  Each object must have:
-    - \`field\`: (string) Career field in Bengali (e.g., “ফ্রিল্যান্স কনটেন্ট লেখক”)
-    - \`reason\`: (string) Why this personality suits this path
-    - \`action\`: (string, optional) 1-line action they can take to explore this field
+৩. আপনার ৫টি প্রধান শক্তি:
+• সৃষ্টিশীলতা: সাধারণের মধ্যে অসাধারণ খুঁজে পান, প্রতিদিন কোনো না কোনও রঙের নতুন ছায়া খুঁজে বের করেন।
+• মানবিক সংযোগ: খুব সহজে সম্পর্ক তৈরি করতে পারেন এবং মানুষ আপনাকে বিশ্বাস করতে আরামবোধ করে।
+• অনুপ্রেরণা জাগানো: আপনার কথায় ও উপস্থিতিতে অন্যরা নিজেদের ভিতরকার শক্তি খুঁজে পায়।
+• অভিযাত্রিক মন: নতুন কিছু শিখতে, জানতে এবং এক্সপ্লোর করতে আপনি সবসময় প্রস্তুত।
+• গভীর সহানুভূতি: অন্যের কষ্ট, আনন্দ বা স্বপ্ন—সবকিছু আপনি খুব গভীরভাবে অনুভব করেন।
 
-- \`relationship_tips\`: (array of objects) List 3–5 insights.
-  Each object must include:
-    - \`general_behavior\`: (string) Typical emotional or social pattern in love/friendship
-    - \`tip\`: (string) Practical or emotional suggestion for more fulfilling relationships
+৪. আপনার ৩টি চ্যালেঞ্জ:
+• অসমাপ্ততা: নানা কিছু শুরু করেন, কিন্তু শেষটা আটকে যেতে পারে। ছোট ছোট লক্ষ্য নির্ধারণ করে এগিয়ে যান।
+• বাস্তব প্রয়োজন ভুলে স্বপ্নে বুঁদ: সবসময় দূরের সম্ভাবনা দেখেন, মাঝে মাঝে একেবারে প্রয়োজনীয় কাজ ফেলে দেন—প্রতিদিনের জন্য কিছু গ্রাউন্ডিং টাস্ক রাখুন।
+• নিজের চাওয়া গোপন রাখা: অন্যেকে খুশি রাখতে গিয়ে নিজের কষ্ট বলতেই ভুলে যান—বিশ্বাসযোগ্য ‘আপন’ মানুষের সঙ্গে খোলামেলা কথা বলুন।
 
-- \`self_improvement_habits\`: (array of objects) List 3 daily or mindset habits.
-  Each object must include:
-    - \`habit\`: (string) One recommended habit or behavior
-    - \`benefit\`: (string) The emotional or personal benefit of adopting it
+৫. ক্যারিয়ার পরামর্শ:
+• কনটেন্ট ক্রিয়েটর/ইউটিউবার: গল্প ও সৃজনশক্তিকে কাজে লাগিয়ে মানুষের জীবনে রঙ ছড়াতে পারেন | শুরু করার উপায়: ফোনে ছোট ভিডিও বা গল্প লিখে পোস্ট দিন।
+• শিক্ষকতা/কাউন্সেলিং: মানুষের জীবন বদলাতে, তাদের ডানায় আলো ছড়াতে পারেন | শুরু করুন: স্কুল, অনলাইন গ্রুপ, অথবা স্বেচ্ছাসেবী উদ্যোগে যুক্ত হয়ে।
+• স্টার্ট-আপ উদ্যোক্তা: নতুন আইডিয়া ও উদ্যম দিয়ে ছোট দল গড়ে তুলতে পারেন | শুরু করুন: প্রিয় এক সমস্যার জন্য সমাধান নিয়ে একটা প্রাথমিক প্ল্যান করুন।
+• ইভেন্ট অর্গানাইজার: মানুষের সংযোগকে কাজে লাগিয়ে মনের মতো অনুষ্ঠান করতে পারেন | শুরু করুন: বন্ধুমহল/অনলাইন কমিউনিটিতে ছোট ইভেন্টের দায়িত্ব নিয়ে।
+• কমিউনিটি বিল্ডার: মানুষের মধ্যে সংযোজক হয়ে সমাজে পরিবর্তন আনতে পারেন | অনলাইনে ছোট গ্রুপ খুলে আজই শুরু করুন।
 
-- \`coach_message\`: (string) A final emotional paragraph that sounds like a wise Bengali life coach closing the session with a heart-touching message. Should inspire reflection and desire to explore more.
+৬. সম্পর্ক ও বন্ধুত্ব:
+• উচ্ছ্বাসী, আন্তরিক আচরণ: প্রথম পরিচয়েই সহজে কাছের মানুষ হয়ে যান | টিপস: নতুন সম্পর্ক যত সহজে গড়েন, সে সম্পর্ক টিকিয়ে রাখতে ধৈর্য রাখুন।
+• গভীর সংযোগ চাওয়া: সত্যিকারের অনুভূতির খোঁজে থাকেন | টিপস: নিজের কথা, সব অনুভূতিও ভাগ করে নিতে ভুলবেন না।
+• আবেগ ভাগাভাগি: প্রেম বা বন্ধুত্বে মনের ওঠানামা খুব প্রবল | টিপস: ক্লান্তি বা মন খারাপ হলে সরাসরি প্রিয়জনকে জানান, চাপা রাখবেন না।
 
-All values must be written in natural, emotional, and highly relatable Bengali language — avoid robotic or generic tones. Structure should feel like a personal session with a soft-spoken, intuitive coach who “gets them.”
-Output must be in valid JSON format. Do not include extra text outside of the JSON object.`;
-            responseSchema = {
-                type: "OBJECT",
-                properties: {
-                    general_summary: { type: "STRING" },
-                    strengths: {
-                        type: "ARRAY",
-                        items: {
-                            type: "OBJECT",
-                            properties: { name: { type: "STRING" }, explanation: { type: "STRING" } },
-                            required: ["name", "explanation"]
-                        }
-                    },
-                    challenges: {
-                        type: "ARRAY",
-                        items: {
-                            type: "OBJECT",
-                            properties: { description: { type: "STRING" }, advice: { type: "STRING" } },
-                            required: ["description", "advice"]
-                        }
-                    },
-                    career_advice: {
-                        type: "ARRAY",
-                        items: {
-                            type: "OBJECT",
-                            properties: { field: { type: "STRING" }, reason: { type: "STRING" }, action: { type: "STRING" } }, 
-                            required: ["field", "reason"]
-                        }
-                    },
-                    relationship_tips: {
-                        type: "ARRAY",
-                        items: {
-                            type: "OBJECT",
-                            properties: { general_behavior: { type: "STRING" }, tip: { type: "STRING" } },
-                            required: ["general_behavior", "tip"]
-                        }
-                    },
-                    self_improvement_habits: {
-                        type: "ARRAY",
-                        items: {
-                            type: "OBJECT",
-                            properties: { habit: { type: "STRING" }, benefit: { type: "STRING" } },
-                            required: ["habit", "benefit"]
-                        }
-                    },
-                    coach_message: { type: "STRING" }
-                },
-                required: ["general_summary", "strengths", "challenges", "career_advice", "relationship_tips", "self_improvement_habits", "coach_message"]
-            };
+৭. আত্মউন্নয়নের অভ্যাস:
+• ডায়েরি লেখা: নিজের অনুভূতি তুলে ধরুন | উপকারিতা: মন পরিষ্কার থাকবে, চিন্তা গুছিয়ে আসবে।
+• প্রকৃতির মাঝে সময়: হাঁটতে বের হন, আকাশ দেখুন | উপকারিতা: মন শান্ত হয়, নতুন ভাবনা আসে।
+• নতুন কিছু শেখা: শখের কোনো কোর্স বা চ্যালেঞ্জ নিন | উপকারিতা: আত্মবিশ্বাস ও কৌতূহল দুটোই বাড়বে।
+
+৮. কোচের বার্তা:
+আপনি নিজেই নিজের জন্য সবচেয়ে বড় উপহার—আপনার স্বপ্নগুলো, অনুভূতির গভীরতা, ও প্রাণের উচ্ছ্বাস অন্যকে আলো দেয়। কখনও নিজেকে ছোট ভাববেন না; যেভাবে আপনি অন্যকে ভালোবাসেন, সেখানে ফিরেও সেই ভালোবাসার আলোর ছায়া পড়বেই। আপনার পথচলা যেন হয়ে ওঠে সাহস, আনন্দ আর গভীর মানবিকতায় ভরা—ঠিক যেমন আপনি।
+
+---
+
+এখন, নিম্নলিখিত MBTI ব্যক্তিত্বের ধরণের জন্য এই ফরম্যাটে বর্ণনা তৈরি করুন:
+
+ব্যক্তিত্বের ধরণ: ${type}
+`;
+            // For initial_description, responseSchema is NOT set here, as the backend expects plain text.
+            // The backend's server.js will handle sending it as plain text to OpenAI.
         } else if (promptKey === 'career_sub_prompt') {
+            // MODIFIED: Added explicit JSON instruction to the promptText for OpenAI
             promptText = `For MBTI personality type ${type}, provide expanded and modern career guidance in Bengali.The response must be a JSON object with:
 
 - \`career_guidance_message\`: (string) A warm, intuitive paragraph that explains what kind of career environments are ideal for this personality — e.g., team-based, solo, creative, structured, growth-driven. Mention emotional needs too (freedom, meaning, recognition, impact).
 
-- \`specific_actions\`: (array of strings) List 3–5 specific, actionable suggestions.  
-  Examples:  
-  - “একটি ফ্রিল্যান্সিং প্ল্যাটফর্মে প্রোফাইল খুলে লেখালেখি বা ডিজাইন শুরু করুন।”  
-  - “একটি ডেটা অ্যানালাইসিস কোর্সে নাম লেখান এবং প্রজেক্ট তৈরি করে দেখান।”  
-  - “নিজের একটি ব্র্যান্ড বা সেবার পেছনে কাজ শুরু করুন, ধাপে ধাপে।”
-All output must be in Bengali. Style should be coaching-focused and motivational, with real-world relevance. Output must be a valid JSON object only.`;
+- \`specific_actions\`: (array of strings) List 3–5 specific, actionable suggestions.
+  Examples:
+  - “একটি ফ্রিল্যান্সিং প্ল্যাটফর্মে প্রোফাইল খুলে লেখালেখি বা ডিজাইন শুরু করুন।”
+  - “একটি ডেটা অ্যানালাইসিস কোর্সে নাম লেখান এবং প্রজেক্ট তৈরি করে দেখান।”
+  - “নিজের একটি ব্র্যান্ড বা সেবার পেছনে কাজ শুরু করুন, ধাপে ধাপে।”
+All output must be in Bengali. Style should be coaching-focused and motivational, with real-world relevance. Output must be a valid JSON object only. **নিশ্চিত করুন যে আপনার প্রতিক্রিয়া একটি বৈধ JSON অবজেক্ট।**`; // Added explicit Bengali JSON instruction
             responseSchema = {
                 type: "OBJECT",
                 properties: {
@@ -492,16 +451,17 @@ All output must be in Bengali. Style should be coaching-focused and motivational
                 required: ["career_guidance_message", "specific_actions"]
             };
         } else if (promptKey === 'relationship_sub_prompt') {
+            // MODIFIED: Added explicit JSON instruction to the promptText for OpenAI
             promptText = `For MBTI personality type ${type}, provide deeper relationship and friendship guidance in Bengali.The response must be a JSON object with:
 
 - \`relationship_insight\`: (string) An emotional, intuitive paragraph explaining how this type typically behaves in love and friendships — their strengths, emotional needs, and common challenges. Should be heart-touching and insightful.
 
 - \`actionable_tips\`: (array of strings) 3–5 emotionally intelligent suggestions, examples:
-  - “নিজের চাওয়া-মনের কথা স্পষ্টভাবে প্রকাশ করতে শিখুন।”  
-  - “সবসময় অন্যকে খুশি করতে গিয়ে নিজেকে ভুলে যাবেন না।”  
-  - “ঘনিষ্ঠতা থেকে না পালিয়ে ধীরে ধীরে সম্পর্কের গভীরে প্রবেশ করুন।”
+  - “নিজের চাওয়া-মনের কথা স্পষ্টভাবে প্রকাশ করতে শিখুন।”
+  - “সবসময় অন্যকে খুশি করতে গিয়ে নিজেকে ভুলে যাবেন না।”
+  - “ঘনিষ্ঠতা থেকে না পালিয়ে ধীরে ধীরে সম্পর্কের গভীরে প্রবেশ করুন।”
 Must be written in Bengali. Tone must feel like a wise friend or life coach offering heartfelt guidance.
-Output must be a valid JSON object. Do not include explanations outside the JSON format.`;
+Output must be a valid JSON object. Do not include explanations outside the JSON format. **নিশ্চিত করুন যে আপনার প্রতিক্রিয়া একটি বৈধ JSON অবজেক্ট।**`; // Added explicit Bengali JSON instruction
             responseSchema = {
                 type: "OBJECT",
                 properties: {
@@ -513,22 +473,30 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
         }
 
         try {
-            console.log(`Prompt text being sent: ${promptText.substring(0, 100)}...`); 
-            console.log("Response schema being used:", JSON.stringify(responseSchema, null, 2));
+            console.log(`Prompt text being sent: ${promptText.substring(0, 100)}...`);
+            // Only log responseSchema if it's actually being used (i.e., not empty)
+            if (Object.keys(responseSchema).length > 0) {
+                console.log("Response schema being used:", JSON.stringify(responseSchema, null, 2));
+            } else {
+                console.log("No response schema being used (expecting plain text).");
+            }
+
 
             const chatHistory = [{ role: "user", parts: [{ text: promptText }] }];
             const payload = {
                 contents: chatHistory,
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: responseSchema
-                }
+                // Only include generationConfig if a schema is defined (for sub-prompts)
+                ...(Object.keys(responseSchema).length > 0 && {
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: responseSchema
+                    }
+                })
             };
 
-            // Pointing to your new backend server endpoint
-            const apiUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
-                                ? 'http://localhost:3001/generate-content'
-                                : `${import.meta.env.VITE_APP_BACKEND_URL}/generate-content`; 
+            const apiUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+                                    ? 'http://localhost:3001/generate-content'
+                                    : `${import.meta.env.VITE_APP_BACKEND_URL}/generate-content`;
 
             console.log("Frontend attempting to call backend at:", apiUrl);
 
@@ -550,23 +518,29 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
             if (result.candidates && result.candidates.length > 0 &&
                 result.candidates[0].content && result.candidates[0].content.parts &&
                 result.candidates[0].content.parts.length > 0) {
-                const jsonString = result.candidates[0].content.parts[0].text;
-                console.log("AI response JSON string from backend:", jsonString);
-                const parsedData = JSON.parse(jsonString);
-                console.log("Parsed AI data from backend:", parsedData);
+                const textContent = result.candidates[0].content.parts[0].text; // This is now the raw text from backend
 
+                // For initial_description, we expect raw text, not JSON
                 if (promptKey === 'initial_description') {
-                    setStructuredDescription(parsedData);
-                    console.log("Structured description state updated successfully.");
+                    setStructuredDescription({ general_summary: textContent }); // Store as a simple object with the full text
+                    console.log("Structured description state updated successfully with raw text.");
                 } else {
-                    setSubPromptResult(parsedData); 
-                    console.log("Sub-prompt result state updated successfully.");
+                    // For sub-prompts, we still expect JSON
+                    try {
+                        const parsedData = JSON.parse(textContent);
+                        setSubPromptResult(parsedData);
+                        console.log("Sub-prompt result state updated successfully with parsed JSON.");
+                    } catch (jsonParseError) {
+                        console.error("Error parsing sub-prompt JSON:", jsonParseError, "Raw text:", textContent);
+                        showMessage("বিস্তারিত তথ্য লোড করতে সমস্যা হয়েছে। (অবৈধ প্রতিক্রিয়া)", 'error');
+                        throw new Error("Failed to parse sub-prompt JSON from backend.");
+                    }
                 }
-                setMessage(''); // Clear loading message
+                setMessage('');
                 console.log("Loading message cleared after successful fetch.");
             } else {
                 console.error("Invalid or empty response structure from backend. Candidates or content parts missing.");
-                showMessage("বিস্তারিত বর্ণনা লোড করতে সমস্যা হয়েছে। (অবৈধ প্রতিক্রিয়া)", 'error'); 
+                showMessage("বিস্তারিত বর্ণনা লোড করতে সমস্যা হয়েছে। (অবৈধ প্রতিক্রিয়া)", 'error');
                 throw new Error("Invalid or empty response structure from backend.");
             }
 
@@ -579,10 +553,11 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
                 setMessage(`Error: ${error.message || 'Failed to fetch description'}. অনুগ্রহ করে পুনরায় চেষ্টা করুন।`, 'error');
             }
             if (promptKey === 'initial_description') {
+                // Fallback for initial description when it fails
                 setStructuredDescription({general_summary: "বিস্তারিত বর্ণনা লোড করতে সমস্যা হয়েছে। অনুগ্রহ করে পুনরায় চেষ্টা করুন।", strengths: [], challenges: [], career_advice: [], relationship_tips: [], self_improvement_habits: [], coach_message: ""});
                 console.log("Set fallback structured description.");
             } else {
-                setSubPromptResult({message: "বিস্তারিত তথ্য লোad করতে সমস্যা হয়েছে। অনুগ্রহ করে পুনরায় চেষ্টা করুন।", items: []});
+                setSubPromptResult({message: "বিস্তারিত তথ্য লোড করতে সমস্যা হয়েছে। অনুগ্রহ করে পুনরায় চেষ্টা করুন।", items: []});
                 console.log("Set fallback sub-prompt result.");
             }
         } finally {
@@ -596,23 +571,10 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
         }
     };
 
-    // Handlers for new "more options" buttons
-    // const handleCareerAdviceClick = () => { // Removed
-    //     setSubScreen('career');
-    //     setSubPromptResult(null); 
-    //     fetchFullDescriptionFromAI(resultType, 'career_sub_prompt');
-    // };
-
-    // const handleRelationshipTipsClick = () => { // Removed
-    //     setSubScreen('relationship');
-    //     setSubPromptResult(null); 
-    //     fetchFullDescriptionFromAI(resultType, 'relationship_sub_prompt');
-    // };
-
     const handleBackToMainResult = () => {
-        setSubScreen(null); 
-        setSubPromptResult(null); 
-        setMessage(''); 
+        setSubScreen(null);
+        setSubPromptResult(null);
+        setMessage('');
     };
 
     return (
@@ -626,7 +588,7 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
                     100% { opacity: 0; transform: translateY(-10px); }
                 }
                 .quote-animation {
-                    animation: fadeInOut 3.5s forwards; 
+                    animation: fadeInOut 3.5s forwards;
                 }
 
                 /* Fade in for question */
@@ -642,10 +604,10 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
                 .radio-option-container {
                     display: flex;
                     flex-direction: column;
-                    gap: 12px; /* Space between radio buttons */
-                    align-items: flex-start; /* Align radios to the left */
+                    gap: 12px;
+                    align-items: flex-start;
                     width: 100%;
-                    max-width: 400px; /* Limit width to keep it readable */
+                    max-width: 400px;
                     margin-top: 20px;
                 }
 
@@ -653,45 +615,44 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
                     display: flex;
                     align-items: center;
                     cursor: pointer;
-                    font-size: 1.125rem; /* text-lg */
-                    color: #4b5563; /* text-gray-700 */
-                    padding: 8px 12px; /* Added horizontal padding */
+                    font-size: 1.125rem;
+                    color: #4b5563;
+                    padding: 8px 12px;
                     width: 100%;
-                    border-radius: 8px; /* rounded-lg */
+                    border-radius: 8px;
                     transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
-                    border: 1px solid #e5e7eb; /* default light gray border */
+                    border: 1px solid #e5e7eb;
                 }
 
                 .radio-label:hover {
-                    background-color: #f3f4f6; /* light gray hover */
-                    border-color: #a78bfa; /* purple-400 on hover */
+                    background-color: #f3f4f6;
+                    border-color: #a78bfa;
                 }
 
-                /* Styling for the checked state of the label */
                 .radio-label.selected {
-                    background-color: #e0e7ff; /* light indigo/purple */
-                    border-color: #8b5cf6; /* purple-600 */
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* subtle shadow */
-                    color: #4c1d95; /* darker purple text */
-                    font-weight: 600; /* semi-bold */
+                    background-color: #e0e7ff;
+                    border-color: #8b5cf6;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                    color: #4c1d95;
+                    font-weight: 600;
                 }
 
                 .radio-input {
-                    appearance: none; /* Hide default radio button */
+                    appearance: none;
                     -webkit-appearance: none;
                     width: 20px;
                     height: 20px;
-                    border: 2px solid #a78bfa; /* purple-400 */
+                    border: 2px solid #a78bfa;
                     border-radius: 50%;
                     margin-right: 12px;
                     position: relative;
-                    flex-shrink: 0; /* Prevent shrinking */
-                    background-color: white; /* Ensure background is white when not checked */
+                    flex-shrink: 0;
+                    background-color: white;
                 }
 
                 .radio-input:checked {
-                    background-color: #8b5cf6; /* purple-600 */
-                    border-color: #8b5cf6; /* purple-600 */
+                    background-color: #8b5cf6;
+                    border-color: #8b5cf6;
                 }
 
                 .radio-input:checked::before {
@@ -712,27 +673,27 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    width: 40px; /* w-10 */
-                    height: 40px; /* h-10 */
-                    border-radius: 9999px; /* rounded-full */
-                    background-color: #ffffff; /* bg-white */
-                    border: 2px solid #9ca3af; /* border-gray-400 */
-                    color: #4b5563; /* text-gray-600 */
-                    font-size: 1.25rem; /* text-xl */
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 9999px;
+                    background-color: #ffffff;
+                    border: 2px solid #9ca3af;
+                    color: #4b5563;
+                    font-size: 1.25rem;
                     transition: all 0.2s ease-in-out;
-                    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* subtle shadow */
+                    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
                 }
 
                 .nav-arrow-button:hover:not(:disabled) {
-                    background-color: #f3f4f6; /* hover:bg-gray-100 */
-                    border-color: #6b7280; /* hover:border-gray-500 */
-                    transform: scale(1.05); /* hover:scale-105 */
+                    background-color: #f3f4f6;
+                    border-color: #6b7280;
+                    transform: scale(1.05);
                 }
 
                 .nav-arrow-button:disabled {
                     opacity: 0.5;
                     cursor: not-allowed;
-                    transform: scale(1); /* disabled:hover:scale-100 */
+                    transform: scale(1);
                 }
             `}</style>
 
@@ -798,7 +759,7 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
                     <div className="relative bg-white rounded-xl shadow-lg p-6 sm:p-8 lg:p-10 max-w-2xl w-full mx-auto text-center">
                         {/* Question Progress */}
                         <div className="absolute top-6 left-6 text-gray-500 text-sm sm:text-base">
-                            প্রশ্ন {Math.min(currentQuestionIndex + 1, questions.length)} এর {questions.length}: {/* Safely display question number */}
+                            প্রশ্ন {Math.min(currentQuestionIndex + 1, questions.length)} এর {questions.length}:
                         </div>
 
                         {/* Message Box */}
@@ -817,13 +778,13 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
                         {/* Choice Column - Changed to vertical radio buttons */}
                         <div className="radio-option-container">
                             {choices.map((choice) => (
-                                <label 
-                                    key={choice.value} 
+                                <label
+                                    key={choice.value}
                                     className={`radio-label ${userAnswers[currentQuestionIndex] === choice.value ? 'selected' : ''}`}
                                 >
                                     <input
                                         type="radio"
-                                        name={`question-${currentQuestionIndex}`} // Ensures only one radio can be selected per question
+                                        name={`question-${currentQuestionIndex}`}
                                         value={choice.value}
                                         checked={userAnswers[currentQuestionIndex] === choice.value}
                                         onChange={() => selectAnswer(choice.value)}
@@ -838,7 +799,7 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
                         <div className="mt-8 w-full flex justify-between items-center px-4">
                             <button
                                 onClick={previousQuestion}
-                                className="nav-arrow-button" // Common class for styling
+                                className="nav-arrow-button"
                                 disabled={currentQuestionIndex === 0}
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-5 h-5">
@@ -846,15 +807,13 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
                                 </svg>
                             </button>
 
-                            {/* NEXT / SUBMIT Button - Now an icon-only button, with text for "ফলাফল দেখুন" */}
                             <button
-                                onClick={handleNextQuestion} // Call handleNextQuestion for manual navigation
-                                // Use nav-arrow-button styling consistently
+                                onClick={handleNextQuestion}
                                 className={`nav-arrow-button ${currentQuestionIndex === questions.length - 1 ? 'px-6 py-3 font-semibold text-lg' : ''}`}
-                                disabled={userAnswers[currentQuestionIndex] === undefined} // Disable if no answer
+                                disabled={userAnswers[currentQuestionIndex] === undefined}
                             >
                                 {currentQuestionIndex === questions.length - 1 ? (
-                                    'ফলাফল দেখুন' // Last question, show text
+                                    'ফলাফল দেখুন'
                                 ) : (
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-5 h-5">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
@@ -888,7 +847,7 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
                                     </div>
                                 </div>
                             ) : (
-                                <React.Fragment> {/* Explicit React.Fragment to ensure correct parsing */}
+                                <React.Fragment>
                                     {subScreen === 'career' && subPromptResult ? (
                                         <div className="mt-4 text-center">
                                             <button onClick={handleBackToMainResult} className="mb-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-all duration-300 transform hover:scale-105 text-sm sm:text-base">
@@ -924,82 +883,15 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
                                         structuredDescription ? (
                                             <React.Fragment>
                                                 {console.log("Rendering structuredDescription content. Data present:", structuredDescription)}
+                                                {/* The main description is now a single string from the backend */}
                                                 {structuredDescription.general_summary && (
-                                                    <div className="mb-4 text-base sm:text-lg">
-                                                        <h3 className="text-xl sm:text-2xl font-bold mb-2">আপনার ব্যক্তিত্বের সারসংক্ষেপ:</h3>
-                                                        <p>{structuredDescription.general_summary}</p>
-                                                    </div>
-                                                )}
-                                                {structuredDescription.strengths && structuredDescription.strengths.length > 0 && (
-                                                    <div className="mt-6 text-base sm:text-lg">
-                                                        <h3 className="text-xl sm:text-2xl font-bold mb-2">আপনার ৫টি প্রধান শক্তি:</h3>
-                                                        <ul className="list-disc list-inside space-y-1">
-                                                            {structuredDescription.strengths.map((item, itemIdx) => (
-                                                                <li key={`strength-${itemIdx}`}>
-                                                                    <strong>{item.name}:</strong> {item.explanation}
-                                                                </li>
-                                                            ))}
-                                                        </ul>
-                                                    </div>
-                                                )}
-                                                {structuredDescription.challenges && structuredDescription.challenges.length > 0 && (
-                                                    <div className="mt-6 text-base sm:text-lg">
-                                                        <h3 className="text-xl sm:text-2xl font-bold mb-2">আপনার ৩টি চ্যালেঞ্জ:</h3>
-                                                        <ul className="list-disc list-inside space-y-1">
-                                                            {structuredDescription.challenges.map((item, itemIdx) => (
-                                                                <li key={`challenge-${itemIdx}`}>
-                                                                    <strong>{item.description}:</strong> {item.advice}
-                                                                </li>
-                                                            ))}
-                                                        </ul>
-                                                    </div>
-                                                )}
-                                                {structuredDescription.career_advice && structuredDescription.career_advice.length > 0 && (
-                                                    <div className="mt-6 text-base sm:text-lg">
-                                                        <h3 className="text-xl sm:text-2xl font-bold mb-2">ক্যারিয়ার পরামর্শ:</h3>
-                                                        <ul className="list-disc list-inside space-y-1">
-                                                            {structuredDescription.career_advice.map((item, itemIdx) => (
-                                                                <li key={`career-${itemIdx}`}>
-                                                                    <strong>{item.field}:</strong> {item.reason}
-                                                                    {item.action && ` - ${item.action}`}
-                                                                </li>
-                                                            ))}
-                                                        </ul>
-                                                    </div>
-                                                )}
-                                                {structuredDescription.relationship_tips && structuredDescription.relationship_tips.length > 0 && (
-                                                    <div className="mt-6 text-base sm:text-lg">
-                                                        <h3 className="text-xl sm:text-2xl font-bold mb-2">সম্পর্ক ও বন্ধুত্ব:</h3>
-                                                        <ul className="list-disc list-inside space-y-1">
-                                                            {structuredDescription.relationship_tips.map((item, itemIdx) => (
-                                                                <li key={`relationship-${itemIdx}`}>
-                                                                    <strong>{item.general_behavior}:</strong> {item.tip}
-                                                                </li>
-                                                            ))}
-                                                        </ul>
-                                                    </div>
-                                                )}
-                                                {structuredDescription.self_improvement_habits && structuredDescription.self_improvement_habits.length > 0 && (
-                                                    <div className="mt-6 text-base sm:text-lg">
-                                                        <h3 className="text-xl sm:text-2xl font-bold mb-2">আত্মউন্নয়নের অভ্যাস:</h3>
-                                                        <ul className="list-disc list-inside space-y-1">
-                                                            {structuredDescription.self_improvement_habits.map((item, itemIdx) => (
-                                                                <li key={`steps-${itemIdx}`}>
-                                                                    <strong>{item.habit}:</strong> {item.benefit}
-                                                                </li>
-                                                            ))}
-                                                        </ul>
-                                                    </div>
-                                                )}
-                                                {structuredDescription.coach_message && (
-                                                    <div className="mt-6 text-base sm:text-lg">
-                                                        <h3 className="text-xl sm:text-2xl font-bold mb-2">কোচের বার্তা:</h3>
-                                                        <p>{structuredDescription.coach_message}</p>
+                                                    <div className="mb-4 text-base sm:text-lg whitespace-pre-wrap text-left">
+                                                        {/* Render the raw text directly */}
+                                                        {structuredDescription.general_summary}
                                                     </div>
                                                 )}
                                             </React.Fragment>
                                         ) : (
-                                            // Fallback for main description if expected but not rendered
                                             !isGeneratingDescription && resultType && (
                                                 <p className="text-center text-red-500 text-base sm:text-lg">
                                                     বিস্তারিত বর্ণনা লোড করতে সমস্যা হয়েছে। অনুগ্রহ করে পুনরায় চেষ্টা করুন বা কুইজটি আবার দিন।
@@ -1007,32 +899,6 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
                                             )
                                         )
                                     )}
-
-                                    {/* Removed: More options / Email input and Payment Placeholder */}
-                                    {/* {!isGeneratingDescription && !isGeneratingSubPrompt && subScreen === null && (
-                                        <div className="mt-8 pt-4 border-t border-gray-200 w-full">
-                                            <h3 className="text-xl sm:text-2xl font-bold mb-4 text-gray-700">আরও জানতে চান?</h3>
-                                            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
-                                                <input
-                                                    type="email"
-                                                    placeholder="আপনার ইমেইল দিন"
-                                                    className="flex-grow p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"
-                                                />
-                                                <button className="px-6 py-3 bg-green-600 text-white font-bold rounded-md hover:bg-green-700 transition-all duration-300 text-base sm:text-lg w-full sm:w-auto">
-                                                    রিপোর্ট পাঠান
-                                                </button>
-                                            </div>
-                                            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                                                <button onClick={handleCareerAdviceClick} className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-md hover:bg-indigo-700 transition-all duration-300 text-base sm:text-lg w-full sm:w-auto">
-                                                    ক্যারিয়ার সম্পর্কে আরও জানুন
-                                                </button>
-                                                <button onClick={handleRelationshipTipsClick} className="px-6 py-3 bg-pink-600 text-white font-bold rounded-md hover:bg-pink-700 transition-all duration-300 text-base sm:text-lg w-full sm:w-auto">
-                                                    সম্পর্ক বিষয়ে আরও জানুন
-                                                </button>
-                                            </div>
-                                        </div>
-                                    )}
-                                    */}
                                 </React.Fragment>
                             )}
                         </div>
