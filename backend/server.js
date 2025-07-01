@@ -1,93 +1,128 @@
 // Load environment variables from .env file
-require('dotenv').config(); 
+require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
+const OpenAI = require('openai'); // Import the OpenAI library
 
 const app = express();
-const port = process.env.PORT || 3001; // Use port 3001 or whatever is available
+const port = process.env.PORT || 3001; // Use Render's assigned PORT or fallback to 3001
 
 // Middleware
-app.use(cors()); // Enable CORS for all routes, allowing your frontend to connect
-app.use(express.json()); // Enable parsing JSON request bodies
+app.use(cors({
+    origin: process.env.FRONTEND_URL || 'http://localhost:5173' // Allow requests from your frontend origin
+}));
+app.use(express.json()); // To parse JSON request bodies
 
-// Define the API key from environment variables
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+// Initialize OpenAI client
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY, // Ensure you have OPENAI_API_KEY in your .env
+});
 
-// Check if the API key is provided
-if (!GEMINI_API_KEY) {
-    console.error('Error: GEMINI_API_KEY is not set in the .env file. Please set it to run the backend server.');
-    process.exit(1); // Exit the process if the API key is missing
-}
+console.log("Backend server starting...");
+console.log("CORS enabled for origin:", process.env.FRONTEND_URL || 'http://localhost:5173');
 
-// Since Node.js v18+, 'fetch' is globally available.
-// We no longer need to 'require("node-fetch")'.
-// Added a direct check for fetch availability for robust logging.
-if (typeof fetch === 'undefined') {
-    console.error("Critical Error: Native 'fetch' is not globally available in this Node.js environment.");
-    console.error("This usually means you're running Node.js version older than 18 or there's an environment issue.");
-    process.exit(1);
-} else {
-    console.log(`Native 'fetch' is globally available and its type is: ${typeof fetch}`);
-}
-
-
-// API endpoint to proxy requests to Gemini
+// API endpoint to generate content
 app.post('/generate-content', async (req, res) => {
-    // Log the incoming request body from the frontend
-    console.log('Received request from frontend:', JSON.stringify(req.body, null, 2));
+    console.log("Request received at /generate-content");
+    console.log("Request body:", JSON.stringify(req.body, null, 2));
+
+    const { contents, generationConfig } = req.body;
+
+    if (!contents || !Array.isArray(contents) || contents.length === 0) {
+        return res.status(400).json({ error: "Invalid request: 'contents' array is missing or empty." });
+    }
+    if (!contents[0].parts || !Array.isArray(contents[0].parts) || contents[0].parts.length === 0 || !contents[0].parts[0].text) {
+        return res.status(400).json({ error: "Invalid request: 'promptText' is missing from contents." });
+    }
+
+    const promptText = contents[0].parts[0].text;
+    const responseSchema = generationConfig?.responseSchema; // Get the schema if provided
+
+    // Validate OpenAI API Key
+    if (!process.env.OPENAI_API_KEY) {
+        console.error("OPENAI_API_KEY is not set in environment variables.");
+        return res.status(500).json({ error: "Server configuration error: OpenAI API Key is missing." });
+    }
 
     try {
-        const { contents, generationConfig } = req.body; // Extract contents and generationConfig from frontend request
+        console.log("Sending prompt to OpenAI...");
 
-        // Validate the incoming request payload
-        if (!contents || !Array.isArray(contents) || contents.length === 0) {
-            return res.status(400).json({ error: 'Invalid request: "contents" array is required.' });
+        // Construct the message for OpenAI's chat completion API.
+        // Important: For structured JSON output with OpenAI, it's best practice
+        // to put the schema instructions directly into the prompt message.
+        let fullPrompt;
+        if (responseSchema) {
+            fullPrompt = `${promptText}\n\nStrictly adhere to the following JSON schema for your response:\n${JSON.stringify(responseSchema, null, 2)}\n\nYour entire response MUST be a valid JSON object matching this schema.`;
+        } else {
+            fullPrompt = promptText;
         }
 
-        // Construct the payload for the Gemini API
-        const geminiPayload = {
-            contents: contents,
-            generationConfig: generationConfig // Pass the schema and other config from the frontend
-        };
-
-        const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+        console.log("Full prompt sent to OpenAI (first 500 chars):", fullPrompt.substring(0, 500));
         
-        console.log('Forwarding request to Gemini API:', geminiApiUrl);
-        console.log('Gemini Payload:', JSON.stringify(geminiPayload, null, 2));
-
-        // Make the request to the Gemini API using the native global fetch
-        const geminiResponse = await fetch(geminiApiUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(geminiPayload),
+        const completion = await openai.chat.completions.create({
+            model: "gpt-4o", // Using gpt-4o for best results with JSON and instruction following
+            messages: [{ role: "user", content: fullPrompt }],
+            response_format: { type: "json_object" }, // Crucial for getting JSON output
+            temperature: 0.7, // Adjust creativity as needed
+            max_tokens: 1500, // Adjust based on expected response length
         });
 
-        // Handle non-OK responses from Gemini API
-        if (!geminiResponse.ok) {
-            const errorData = await geminiResponse.json();
-            console.error('Error from Gemini API:', errorData);
-            return res.status(geminiResponse.status).json({
-                error: errorData.error?.message || `Gemini API error! Status: ${geminiResponse.status}`
+        const aiResponseContent = completion.choices[0].message.content;
+        console.log("Raw OpenAI response content received (first 500 chars):", aiResponseContent ? aiResponseContent.substring(0, 500) : 'No content');
+
+        // Parse the JSON string received from OpenAI
+        let parsedData;
+        try {
+            parsedData = JSON.parse(aiResponseContent);
+            console.log("Successfully parsed AI response as JSON.");
+        } catch (parseError) {
+            console.error("Failed to parse AI response as JSON:", parseError);
+            console.error("Problematic AI Response:", aiResponseContent);
+            // If parsing fails, try to return a generic error or the raw content if possible
+            return res.status(500).json({ 
+                error: "AI did not return valid JSON. Please try again.",
+                rawAiResponse: aiResponseContent // Optionally send raw response for debugging
             });
         }
+        
+        // Format the OpenAI response to match the structure expected by your frontend (App.js)
+        const formattedResponse = {
+            candidates: [
+                {
+                    content: {
+                        parts: [
+                            {
+                                text: JSON.stringify(parsedData) // Frontend expects a JSON string here
+                            }
+                        ]
+                    }
+                }
+            ]
+        };
 
-        const geminiResult = await geminiResponse.json();
-        console.log('Response from Gemini API:', JSON.stringify(geminiResult, null, 2));
-
-        // Send the Gemini API's result back to the frontend
-        res.status(200).json(geminiResult);
+        res.json(formattedResponse);
 
     } catch (error) {
-        console.error('Server error during Gemini API call:', error);
-        res.status(500).json({ error: 'Internal server error: ' + error.message });
+        console.error("Error generating content from OpenAI:", error);
+        // More detailed error logging for OpenAI API specific errors
+        if (error instanceof OpenAI.APIError) {
+            console.error(error.status); // e.g. 401
+            console.error(error.message); // e.g. The authentication token you passed was invalid...
+            console.error(error.code); // e.g. 'invalid_api_key'
+            console.error(error.type); // e.g. 'authentication_error'
+            return res.status(error.status || 500).json({ 
+                error: `OpenAI API Error: ${error.message}`, 
+                code: error.code 
+            });
+        } else {
+            return res.status(500).json({ error: "Failed to generate content: " + error.message });
+        }
     }
 });
 
 // Start the server
 app.listen(port, () => {
-    console.log(`Backend server listening at http://localhost:${port}`);
-    console.log('Remember to start your React frontend and point its API calls to this backend URL.');
+    console.log(`Backend server running on port ${port}`);
+    console.log(`Access at http://localhost:${port}`);
 });

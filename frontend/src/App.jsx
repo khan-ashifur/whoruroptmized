@@ -1,3 +1,10 @@
+// --- START DEBUG BLOCK ---
+// এই লগগুলি শুধুমাত্র ডিবাগিং এর জন্য। লোকাল ডেভেলপমেন্টে এদের আউটপুট দেখা যাবে।
+// রেন্ডারে ডেপ্লয় করার সময় এগুলি স্বয়ংক্রিয়ভাবে ইনজেক্ট হওয়া ভ্যারিয়েবল দেখাবে।
+console.log("App.js loaded.");
+console.log("VITE_APP_BACKEND_URL from import.meta.env:", import.meta.env.VITE_APP_BACKEND_URL);
+// --- END DEBUG BLOCK ---
+
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 // Personality Type Names and Short Descriptions (from 16 personalities.docx)
@@ -13,7 +20,7 @@ const personalityTypesData = {
     'ESTP': { name: "The Entrepreneur", description: "গতিশীল , বাস্তববাদী ও রিস্ক টেকার" },
     'ESFP': { name: "The Entertainer", description: "প্রাণবন্ত , উপভোগপ্রিয় ও বন্ধুত্বপূর্ণ" },
     'ENFP': { name: "The Campaigner", description: "উদ্যমী , কল্পনাবান ও সমাজপ্রিয়" },
-    'ENTP': { name: "The Debater", description: "যুক্তিপূর্ণ , উদ্ভাবনী ও বিতর্কপ্রিয়" },
+    'ENTP': { name: "The Debater", "description": "যুক্তিপূর্ণ , উদ্ভাবনী ও বিতর্কপ্রিয়" },
     'ESTJ': { name: "The Executive", description: "সংগঠক , কর্তৃত্বশীল ও বাস্তববাদী" },
     'ESFJ': { name: "The Consul", description: "যত্নশীল , সহানুভূতিশীল ও সামাজিক" },
     'ENFJ': { name: "The Protagonist", description: "নেতৃস্থানীয় , সহানুভূতিশীল ও উৎসাহদায়ী" },
@@ -23,74 +30,74 @@ const personalityTypesData = {
 // Questions data in Bengali, with impact on personality scores
 const questions = [
     // Category 1: Mind — Introvert (I) vs Extrovert (E)
-    { question: "আপনি কি নতুন মানুষের সাথে আলাপ করতে স্বাচ্ছন্দ্যবোধ করেন?", traitPair: ['E', 'I'] },
-    { question: "বড় দলে সময় কাটাতে আপনার ভালো লাগে?", traitPair: ['E', 'I'] },
-    { question: "নতুন জায়গায় গিয়ে আপনি কি সহজে মিশে যান?", traitPair: ['E', 'I'] },
-    { question: "অনেকক্ষণ একা থাকলে আপনি কি বিরক্ত হন?", traitPair: ['E', 'I'] }, // Agreement means prefers company (E)
-    { question: "পার্টি বা অনুষ্ঠান শেষে আপনি কি ক্লান্ত অনুভব করেন?", traitPair: ['I', 'E'] }, // Agreement means drains energy (I)
-    { question: "একা সময় কাটানো কি আপনাকে শক্তি দেয়?", traitPair: ['I', 'E'] }, // Agreement means recharges alone (I)
-    { question: "নতুন বন্ধুত্ব তৈরি করা কি আপনার জন্য সহজ?", traitPair: ['E', 'I'] },
-    { question: "অনেক মানুষ থাকলে কি আপনি চুপচাপ থাকেন?", traitPair: ['I', 'E'] },
-    { question: "অপরিচিত পরিবেশে কথা বলার আগে কি ভাবেন?", traitPair: ['I', 'E'] },
-    { question: "বন্ধুদের সাথে সময় কাটানো কি আপনার প্রিয় সময় কাটানোর উপায়?", traitPair: ['E', 'I'] }, // Rephrased for scale
+    { question: "আমি নিয়মিতভাবে নতুন বন্ধু তৈরি করি।", traitPair: ['E', 'I'] },
+    { question: "অজানা লোকেদের সাথে যোগাযোগ বা নিজের প্রচার করাকে আমি খুব কঠিন মনে করি।", traitPair: ['E', 'I'] }, // Rephrased from original, keeping E/I traitPair
+    { question: "যাকে আকর্ষণীয় মনে হয়, তার সঙ্গে গিয়ে আলাপ শুরু করতে আমি স্বাচ্ছন্দ্যবোধ করি।", traitPair: ['E', 'I'] },
+    { question: "দলভিত্তিক কার্যলাপে অংশ নিতে আমি উপভোগ করি।", traitPair: ['E', 'I'] },
+    { question: "আমি সাধারণত একা থাকার চেয়ে অন্যদের সঙ্গে থাকতে বেশি পছন্দ করি।", traitPair: ['E', 'I'] },
+    { question: "আমি সাধারণত ফোন কল করা এড়িয়ে চলি।", traitPair: ['I', 'E'] }, // Agree = I
+    { question: "আমি নতুন পরিচিত মানুষের সঙ্গে সহজেই কানেক্ট হতে পারি।", traitPair: ['E', 'I'] },
+    { question: "আমি এমন একটি কাজ পছন্দ করব যেখানে বেশিরভাগ সময় একা কাজ করা যায়।", traitPair: ['I', 'E'] }, // Agree = I
+    { question: "আমি শান্ত ও ব্যক্তিগত জায়গার চেয়ে ব্যস্ত ও কোলাহলপূর্ণ পরিবেশে বেশি স্বাচ্ছন্দ্য বোধ করি।", traitPair: ['E', 'I'] },
+    { question: "অনেক চাপের মধ্যেও আমি সাধারণত শান্ত থাকতে পারি।", traitPair: ['E', 'I'] }, // Keeping E/I as per original structure, though question meaning is A/X
 
     // Category 2: Energy — Practical (S) vs Imaginative (N)
-    { question: "আপনি কি বাস্তব সমস্যার সমাধানে বেশি মনোযোগ দেন?", traitPair: ['S', 'N'] },
-    { question: "নতুন আইডিয়া নিয়ে ভাবতে কি ভালোবাসেন?", traitPair: ['N', 'S'] },
-    { question: "ভবিষ্যতের স্বপ্ন দেখা কি আপনাকে অনুপ্রাণিত করে?", traitPair: ['N', 'S'] },
-    { question: "আপনি কি তত্ত্বের চেয়ে বাস্তব উদাহরণ বেশি পছন্দ করেন?", traitPair: ['S', 'N'] },
-    { question: "নতুন কোনো পরিকল্পনা করলে আগে সব খুঁটিনাটি ভাবেন?", traitPair: ['S', 'N'] },
-    { question: "আপনি বর্তমান সময় উপভোগ করে বেশি মজা পান?", traitPair: ['S', 'N'] }, // Rephrased for scale
-    { question: "আপনি নতুন কিছু সৃষ্টি করা বেশি উপভোগ করেন?", traitPair: ['N', 'S'] }, // Rephrased for scale
-    { question: "আপনি কি কল্পনাপ্রবণ?", traitPair: ['N', 'S'] },
-    { question: "আপনি কি প্রতিদিনের কাজের মাঝে নতুন আইডিয়া খোঁজেন?", traitPair: ['N', 'S'] },
-    { question: "আপনি কি ছোট ছোট পরিবর্তনকে উপভোগ করেন?", traitPair: ['S', 'N'] },
+    { question: "জটিল ও নতুন আইডিয়া আমার বেশি উত্তেজিত করে, সহজ ও সরল ধারণার চেয়ে।", traitPair: ['N', 'S'] }, // Agree = N
+    { question: "সৃজনশীল কাজের নানা রকম ব্যাখ্যা নিয়ে আলোচনা আমার তেমন আগ্রহ জাগায় না।", traitPair: ['S', 'N'] }, // Agree = S
+    { question: "কোনো সিদ্ধান্ত নেওয়ার সময় আমি মানুষের অনুভূতির চেয়ে তথ্যকে বেশি গুরুত্ব দিই।", traitPair: ['S', 'N'] }, // Rephrased from original, keeping S/N traitPair
+    { question: "আমি প্রায়ই নির্দিষ্ট কোনো সময়সূচি ছাড়া দিনটাকে চলতে দিই।", traitPair: ['S', 'N'] }, // Rephrased from original, keeping S/N traitPair
+    { question: "আমি সত্য বলার চেয়ে সংবেদনশীল থাকার দিকটিকে বেশি গুরুত্ব দিই।", traitPair: ['F', 'T'] }, // Correction: This should be F/T as per original intent of "Feeling"
+    { question: "আমি নতুন অভিজ্ঞতা ও জ্ঞানের ক্ষেত্র খুঁজে বের করতে সক্রিয় থাকি।", traitPair: ['N', 'S'] },
+    { question: "জীবিকার জন্য কল্পকাহিনি লেখা আমার জন্য কল্পনাতীত মনে হয়।", traitPair: ['S', 'N'] }, // Agree = S
+    { question: "নৈতিক দ্বন্দ্ব নিয়ে বিতর্ক করতে আমি উপভোগ করি।", traitPair: ['N', 'S'] }, // Agree = N
+    { question: "আলোচনা খুব তাত্ত্বিক হয়ে গেলে আমি আগ্রহ হারিয়ে ফেলি বা বিরক্ত হই।", traitPair: ['S', 'N'] }, // Agree = S
+    { question: "অপরিচিত ধারণা ও দৃষ্টিভঙ্গি আবিষ্কার করতে আমি উপভোগ করি।", traitPair: ['N', 'S'] },
 
     // Category 3: Nature — Thinking (T) vs Feeling (F)
-    { question: "সিদ্ধান্ত নেয়ার সময় আপনি কি বেশি যুক্তি ব্যবহার করেন?", traitPair: ['T', 'F'] },
-    { question: "অন্যের অনুভূতির ওপর আপনি কি মনোযোগ দেন?", traitPair: ['F', 'T'] },
-    { question: "ক কঠিন সিদ্ধান্তে আপনি আগে যুক্তি ভাবেন?", traitPair: ['T', 'F'] }, // Rephrased for scale
-    { question: "সমালোচনা পেলে কি আপনি ব্যক্তিগতভাবে নেন?", traitPair: ['F', 'T'] },
-    { question: "আপনি কি সহজে অন্যের দৃষ্টিভঙ্গি বুঝতে পারেন?", traitPair: ['F', 'T'] },
-    { question: "আপনার বন্ধুরা আপনাকে বাস্তববাদী ভাবে চেনে?", traitPair: ['T', 'F'] }, // Rephrased for scale
-    { question: "সমস্যার সময় আপনি কি বেশি শান্ত থাকেন?", traitPair: ['T', 'F'] },
-    { question: "অন্যের মন খারাপ থাকলে কি আপনি খেয়াল করেন?", traitPair: ['F', 'T'] },
-    { question: "আপনি কি নিজের ইচ্ছার কথা সহজে প্রকাশ করতে পারেন?", traitPair: ['T', 'F'] },
-    { question: "সত্য অনুভূতি থেকে বেশি গুরুত্বপূর্ণ মনে হয়?", traitPair: ['T', 'F'] }, // Rephrased for scale
+    { question: "তথ্যভিত্তিক যুক্তির চেয়ে আবেগে যা নাড়া দেয়, আমি সেটাতে বেশি প্রভাবিত হই।", traitPair: ['F', 'T'] }, // Agree = F
+    { question: "কোনো সিদ্ধান্ত নেওয়ার সময় আমি মানুষের অনুভূতির চেয়ে তথ্যকে বেশি গুরুত্ব দিই।", traitPair: ['T', 'F'] },
+    { question: "আমি সত্য বলার চেয়ে সংবেদনশীল থাকার দিকটিকে বেশি গুরুত্ব দিই।", traitPair: ['F', 'T'] },
+    { question: "আমি সিদ্ধান্ত নেওয়ার ক্ষেত্রে দক্ষতাকে প্রাধান্য দিই, যদিও মাঝে মাঝে আবেগের দিকটা উপেক্ষিত হয়।", traitPair: ['T', 'F'] }, // Agree = T
+    { question: "বিরোধের সময়, অন্যের অনুভূতির চেয়ে নিজের যুক্তি প্রমাণ করাকেই আমি বেশি গুরুত্ব দিই।", traitPair: ['T', 'F'] }, // Agree = T
+    { question: "আমি সহজে আবেগপ্রবণ যুক্তিতে প্রভাবিত হই না।", traitPair: ['T', 'F'] }, // Agree = T
+    { question: "তথ্য আর আবেগের মধ্যে দ্বন্দ্ব হলে আমি সাধারণত মনের কথাই অনুসরণ করি।", traitPair: ['F', 'T'] }, // Agree = F
+    { question: "আমি সাধারণত আবেগের চেয়ে বাস্তব তথ্যের ভিত্তিতে সিদ্ধান্ত নিই।", traitPair: ['T', 'F'] },
+    { question: "আমি আবেগকে নিয়ন্ত্রণ করি তার চেয়ে বেশি, আবেগই আমাকে নিয়ন্ত্রণ করে।", traitPair: ['F', 'T'] }, // Agree = F
+    { question: "আমি সিদ্ধান্ত নেওয়ার সময় যা সবচেয়ে যৌক্তিক বা কার্যকর, তার চেয়ে বেশি ভাবি — এতে মানুষ কতটা এফেক্টেড হবে।", traitPair: ['F', 'T'] }, // Agree = F
 
     // Category 4: Tactics — Judging (J) vs Prospecting (P)
-    { question: "আপনি কি সব কিছু প্ল্যান করে আগেভাগে করতে ভালোবাসেন?", traitPair: ['J', 'P'] },
-    { question: "শেষ মুহূর্তের সিদ্ধান্ত কি আপনাকে অস্থির করে?", traitPair: ['J', 'P'] },
-    { question: "পরিকল্পনার বাইরে কিছু হলে কি খারাপ লাগে?", traitPair: ['J', 'P'] },
-    { question: "রুটিন মেনে চলতে কি পছন্দ করেন?", traitPair: ['J', 'P'] },
-    { question: "একাধিক কাজ একসাথে করলে কি স্বস্তি পান?", traitPair: ['P', 'J'] }, // Agreement means enjoys flexibility (P)
-    { question: "আপনার নিয়মিত শিডিউল বেশি ভালো লাগে?", traitPair: ['J', 'P'] }, // Rephrased for scale
-    { question: "নতুন আইডিয়া এলেই আপনি কাজ শুরু করেন?", traitPair: ['P', 'J'] }, // Rephrased for scale
-    { question: "পরিকল্পনা ছাড়া ভ্রমণে যেতে স্বস্তি পান?", traitPair: ['P', 'J'] },
-    { question: "নতুন অভিজ্ঞতার জন্য কি আপনি খোলা মন রাখেন?", traitPair: ['P', 'J'] },
-    { question: "আপনি কি অপ্রত্যাশিত পরিবর্তনে সহজে মানিয়ে নিতে পারেন?", traitPair: ['P', 'J'] },
+    { question: "আমার থাকার ও কাজ করার জায়গা সাধারণত পরিষ্কার ও গোছানো থাকে।", traitPair: ['J', 'P'] },
+    { question: "আমি কাজকে অগ্রাধিকার দিয়ে পরিকল্পনা করি এবং সাধারণত সময়ের আগেই তা শেষ করি।", traitPair: ['J', 'P'] },
+    { question: "আমি প্রায়ই নির্দিষ্ট কোনো সময়সূচি ছাড়া দিনটাকে চলতে দিই।", traitPair: ['P', 'J'] }, // Agree = P
+    { question: "আমি বিশ্রাম নেওয়ার আগে দৈনন্দিন কাজগুলো শেষ করতে পছন্দ করি।", traitPair: ['J', 'P'] },
+    { question: "আমি প্রায়ই শেষ মুহূর্তে গিয়ে কাজ শেষ করি।", traitPair: ['P', 'J'] }, // Agree = P
+    { question: "কাজ বা পড়াশোনার নিয়মিত রুটিন বজায় রাখা আমার জন্য কঠিন হয়।", traitPair: ['P', 'J'] }, // Agree = P
+    { question: "প্রতিদিনের জন্য আমি কাজের তালিকা (টু-ডু লিস্ট) রাখতে পছন্দ করি।", traitPair: ['J', 'P'] },
+    { question: "পরিকল্পনায় ব্যাঘাত ঘটলে আমি যত দ্রুত সম্ভব আগের ধারায় ফিরে যাওয়াকেই সবচেয়ে গুরুত্ব দিই।", traitPair: ['J', 'P'] },
+    { question: "আমার কাজের ধরন পরিকল্পিত ও ধারাবাহিককের চেয়ে হঠাৎ করে এনার্জি আসার উপর বেশি নির্ভরশীল।", traitPair: ['P', 'J'] }, // Agree = P
+    { question: "আমি ধাপে ধাপে কাজ করি এবং কোনো ধাপ এড়িয়ে যাই না।", traitPair: ['J', 'P'] },
 
-    // Category 5: Identity — Confident (A) vs Anxious (X) - 'X' for Turbulent/Anxious to avoid conflict with Thinking (T)
-    { question: "আপনি কি নিজের সিদ্ধান্তে আত্মবিশ্বাসী?", traitPair: ['A', 'X'] },
-    { question: "অনিশ্চিত অবস্থায় কি আপনি দুশ্চিন্তা করেন?", traitPair: ['X', 'A'] },
-    { question: "অপরিচিত পরিবেশে কি অস্বস্তি লাগে?", traitPair: ['X', 'A'] },
-    { question: "ভুল করলে কি বারবার মনে পড়ে?", traitPair: ['X', 'A'] },
-    { question: "নতুন কিছু শুরু করার আগে কি বেশি ভাবেন?", traitPair: ['X', 'A'] },
-    { question: "চাপের মধ্যে আপনি কি শান্ত থাকতে পারেন?", traitPair: ['A', 'X'] },
-    { question: "নিজেকে কি আপনি আত্মবিশ্বাসী মনে করেন?", traitPair: ['A', 'X'] },
-    { question: "ঝুঁকি নেয়ার সময় কি দ্বিধা থাকে?", traitPair: ['X', 'A'] },
-    { question: "নিজের কাজ নিয়ে কি আপনি খুশি থাকেন?", traitPair: ['A', 'X'] },
-    { question: "নতুন সুযোগ এলে কি আপনি এগিয়ে যান?", traitPair: ['A', 'X'] },
+    // Category 5: Identity — Confident (A) vs Anxious (X)
+    { question: "অনেক চাপের মধ্যেও আমি সাধারণত শান্ত থাকতে পারি।", traitPair: ['A', 'X'] },
+    { question: "নতুন মানুষের সামনে নিজেকে কেমনভাবে উপস্থাপন করছি, তা নিয়ে আমি খুব কমই চিন্তা করি।", traitPair: ['A', 'X'] },
+    { question: "আমি প্রায়ই দুশ্চিন্তা করি যে কিছু খারাপ হতে পারে।", traitPair: ['X', 'A'] },
+    { question: "আমি সাধারণত আমার নেওয়া সিদ্ধান্ত নিয়ে দ্বিতীয়বার ভাবি না।", traitPair: ['A', 'X'] },
+    { question: "আমার মুড খুব দ্রুত চেঞ্জ হয়", traitPair: ['X', 'A'] }, // Agree = X
+    { question: "আমি সাধারণত নিজেকে ভীষণ চাপে বা অস্থিরতায় ডুবে থাকা অনুভব করি।", traitPair: ['X', 'A'] }, // Agree = X
+    { question: "আমি খুব কম সময়েই নিজেকে অনিরাপদ বা অস্থির অনুভব করি।", traitPair: ['A', 'X'] }, // Agree = A
+    { question: "কেউ আমাকে নিয়ে ভালো ধারণা পোষণ করলে আমি ভাবি, কবে তারা হতাশ হবে আমার প্রতি।", traitPair: ['X', 'A'] }, // Agree = X
+    { question: "আমার মনে হয় বিমূর্ত দর্শনগত প্রশ্ন নিয়ে চিন্তা করা সময়ের অপচয়।", traitPair: ['A', 'X'] }, // Keeping A/X as per original structure, though meaning could align with S
+    { question: "আমি আত্মবিশ্বাসী যে, শেষ পর্যন্ত সবকিছুই আমার পক্ষে ভালোভাবে মিলে যাবে।", traitPair: ['A', 'X'] },
 ];
 
 const choices = [
-    { value: 1, unselectedBorderColor: 'border-purple-500' }, // Deeper Purple
-    { value: 2, unselectedBorderColor: 'border-purple-300' }, // Lighter Purple
-    { value: 3, unselectedBorderColor: 'border-gray-300' },   // Towards Gray
-    { value: 4, unselectedBorderColor: 'border-gray-400' },   // Middle Gray
-    { value: 5, unselectedBorderColor: 'border-green-300' },  // Towards Green
-    { value: 6, unselectedBorderColor: 'border-green-500' },  // Lighter Green
-    { value: 7, unselectedBorderColor: 'border-green-700' },  // Deeper Green
+    { value: 1, label: "একদম হ্যাঁ" },
+    { value: 2, label: "মোটামুটি হ্যাঁ" },
+    { value: 3, label: "কিছুটা হ্যাঁ" },
+    { value: 4, label: "হতেও পারে নাও হতে পারে / ফিফটি ফিফটি" },
+    { value: 5, label: "কিছুটা না" },
+    { value: 6, label: "মোটামুটি না" },
+    { value: 7, label: "একদম না" },
 ];
 
 // Motivational quotes to display during loading
@@ -105,7 +112,7 @@ const motivationalQuotes = [
     { quote: "Everything you’ve ever wanted is on the other side of fear.", author: "George Addair" },
     { quote: "The best way to predict the future is to create it.", author: "Peter Drucker" },
     { quote: "Whether you think you can, or you think you can't – you're right.", author: "Henry Ford" },
-    { quote: "If you're going through hell, keep going.", author: "Winston Churchill" },
+    { quote: "If you're going through hell, keep going.", author: "Winston Churchill" }, 
     { quote: "It always seems impossible until it’s done.", author: "Nelson Mandela" },
     { quote: "Opportunities don't happen, you create them.", author: "Chris Grosser" },
     { quote: "Success usually comes to those who are too busy to be looking for it.", author: "Henry David Thoreau" },
@@ -206,22 +213,40 @@ export default function App() {
         setUserAnswers(newAnswers); 
         userAnswersRef.current = newAnswers; // Update ref immediately for synchronous access
 
+        // *** IMPORTANT CHANGE: Auto-advance after selecting an answer ***
         const isLastQuestion = (currentQuestionIndex === questions.length - 1);
-        
-        console.log(`Question ${currentQuestionIndex} answered with value: ${selectedScaleIndex}. Is this the last question? ${isLastQuestion}`);
-        console.log(`UserAnswersRef state AFTER setting new answer (length: ${Object.keys(userAnswersRef.current).length}):`, userAnswersRef.current);
+        if (isLastQuestion) {
+            console.log("Last question answered. Attempting to submit test.");
+            // Add a very small timeout to allow UI to update with selected answer before submitting
+            setTimeout(() => {
+                submitTest();
+            }, 100); 
+        } else {
+            console.log("Moving to next question automatically.");
+            // Add a very small timeout to allow UI to update with selected answer before moving to next question
+            setTimeout(() => {
+                setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
+            }, 100);
+        }
+    };
 
+    const handleNextQuestion = () => {
+        // Check if an answer has been selected for the current question
+        // This check is primarily for manual clicks on the forward button
+        if (userAnswers[currentQuestionIndex] === undefined) {
+            showMessage("অনুগ্রহ করে এই প্রশ্নের উত্তর দিন।", 'error');
+            return;
+        }
+
+        const isLastQuestion = (currentQuestionIndex === questions.length - 1);
+
+        console.log(`Manual Next Click: Current Q: ${currentQuestionIndex}, Is Last: ${isLastQuestion}, Answered: ${userAnswers[currentQuestionIndex] !== undefined}`);
 
         if (isLastQuestion) {
-            console.log("It's the last question. Scheduling submission with a small delay.");
-            // Add a very small timeout to ensure React's state update is fully committed
-            // before submitTest reads userAnswersRef.current.
-            setTimeout(() => { 
-                console.log(`Inside last question's setTimeout. Invoking submitTest(). UserAnswersRef length at this point: ${Object.keys(userAnswersRef.current).length}`);
-                submitTest(); 
-            }, 50); // Minimal delay
+            console.log("Last question answered. Attempting to submit test via manual next button click.");
+            submitTest(); 
         } else {
-            console.log("Moving to next question.");
+            console.log("Moving to next question via manual next button click.");
             setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
         }
     };
@@ -252,11 +277,14 @@ export default function App() {
                 }
 
                 const [trait1, trait2] = question.traitPair;
-                const scoreValue = answerValue - 4; 
+                // New scale: 1 = Strongly Agree (হ্যাঁ), 7 = Strongly Disagree (না)
+                // We want 1 (Agree) to contribute positively to trait1, 7 (Disagree) to contribute positively to trait2.
+                // New logic: `(Neutral_Point - Answer_Value)`
+                const scoreValue = 4 - answerValue; 
 
-                if (scoreValue > 0) { 
+                if (scoreValue > 0) { // If answer is 1,2,3 (Agree/হ্যাঁ side)
                     tempScores[trait1] += scoreValue;
-                } else if (scoreValue < 0) { 
+                } else if (scoreValue < 0) { // If answer is 5,6,7 (Disagree/না side)
                     tempScores[trait2] += Math.abs(scoreValue); 
                 }
             }
@@ -362,7 +390,40 @@ export default function App() {
 
         // Define prompts and schemas based on promptKey
         if (promptKey === 'initial_description') {
-            promptText = `Given the MBTI personality type ${type}, provide a detailed, structured description in Bengali. The response should be a JSON object with the following keys: \`general_summary\` (string, a paragraph about the type), \`strengths\` (array of objects, each with \`name\` (string) and \`explanation\` (string), list 5 key strengths), \`challenges\` (array of objects, each with \`description\` (string) and \`advice\` (string), list 3 key challenges and advice), \`career_advice\` (array of objects, each with \`field\` (string), \`reason\` (string), and optionally \`action\` (string), list 3-5 career advice entries), \`relationship_tips\` (array of objects, each with \`general_behavior\` (string) and \`tip\` (string), list 3-5 relationship tips), \`self_improvement_habits\` (array of objects, each with \`habit\` (string) and \`benefit\` (string), list 3 self-improvement habits), \`coach_message\` (string, a concluding motivational message). Ensure all strings are in Bengali.`;
+            promptText = `Given the MBTI personality type ${type}, provide a deeply insightful, emotionally resonant, and culturally relevant personality decoding in Bengali. The response must be a structured JSON object with the following keys:
+
+- \`general_summary\`: (string) A rich, poetic paragraph describing the person’s inner nature, emotional depth, decision-making style, and how they see the world. Use soft, coaching-style language to create a “wow, this is really me” feeling.
+
+- \`strengths\`: (array of objects) List 5 key strengths.
+  Each object must have:
+    - \`name\`: (string) Strength title in Bengali (e.g., “অন্তর্দৃষ্টি”)
+    - \`explanation\`: (string) 1–2 line explanation why this is a strength for their type.
+
+- \`challenges\`: (array of objects) List 3 personality challenges.
+  Each object must include:
+    - \`description\`: (string) Brief emotional challenge
+    - \`advice\`: (string) Warm, coach-style advice to grow beyond this limitation.
+
+- \`career_advice\`: (array of objects) List 3–5 careers that align with the person’s nature, including modern paths like freelancing, data, content creation, entrepreneurship.
+  Each object must have:
+    - \`field\`: (string) Career field in Bengali (e.g., “ফ্রিল্যান্স কনটেন্ট লেখক”)
+    - \`reason\`: (string) Why this personality suits this path
+    - \`action\`: (string, optional) 1-line action they can take to explore this field
+
+- \`relationship_tips\`: (array of objects) List 3–5 insights.
+  Each object must include:
+    - \`general_behavior\`: (string) Typical emotional or social pattern in love/friendship
+    - \`tip\`: (string) Practical or emotional suggestion for more fulfilling relationships
+
+- \`self_improvement_habits\`: (array of objects) List 3 daily or mindset habits.
+  Each object must include:
+    - \`habit\`: (string) One recommended habit or behavior
+    - \`benefit\`: (string) The emotional or personal benefit of adopting it
+
+- \`coach_message\`: (string) A final emotional paragraph that sounds like a wise Bengali life coach closing the session with a heart-touching message. Should inspire reflection and desire to explore more.
+
+All values must be written in natural, emotional, and highly relatable Bengali language — avoid robotic or generic tones. Structure should feel like a personal session with a soft-spoken, intuitive coach who “gets them.”
+Output must be in valid JSON format. Do not include extra text outside of the JSON object.`;
             responseSchema = {
                 type: "OBJECT",
                 properties: {
@@ -383,12 +444,11 @@ export default function App() {
                             required: ["description", "advice"]
                         }
                     },
-                    // Removed 'optional: true' as it's not supported by Gemini's schema for direct property definition
                     career_advice: {
                         type: "ARRAY",
                         items: {
                             type: "OBJECT",
-                            properties: { field: { type: "STRING" }, reason: { type: "STRING" }, action: { type: "STRING" } }, // 'optional: true' removed
+                            properties: { field: { type: "STRING" }, reason: { type: "STRING" }, action: { type: "STRING" } }, 
                             required: ["field", "reason"]
                         }
                     },
@@ -413,7 +473,16 @@ export default function App() {
                 required: ["general_summary", "strengths", "challenges", "career_advice", "relationship_tips", "self_improvement_habits", "coach_message"]
             };
         } else if (promptKey === 'career_sub_prompt') {
-            promptText = `For an MBTI personality type ${type}, provide expanded career guidance in Bengali. The response should be a JSON object with \`career_guidance_message\` (string, an introductory paragraph) and \`specific_actions\` (array of strings, 3-5 specific actionable steps for career development).`;
+            promptText = `For MBTI personality type ${type}, provide expanded and modern career guidance in Bengali.The response must be a JSON object with:
+
+- \`career_guidance_message\`: (string) A warm, intuitive paragraph that explains what kind of career environments are ideal for this personality — e.g., team-based, solo, creative, structured, growth-driven. Mention emotional needs too (freedom, meaning, recognition, impact).
+
+- \`specific_actions\`: (array of strings) List 3–5 specific, actionable suggestions.  
+  Examples:  
+  - “একটি ফ্রিল্যান্সিং প্ল্যাটফর্মে প্রোফাইল খুলে লেখালেখি বা ডিজাইন শুরু করুন।”  
+  - “একটি ডেটা অ্যানালাইসিস কোর্সে নাম লেখান এবং প্রজেক্ট তৈরি করে দেখান।”  
+  - “নিজের একটি ব্র্যান্ড বা সেবার পেছনে কাজ শুরু করুন, ধাপে ধাপে।”
+All output must be in Bengali. Style should be coaching-focused and motivational, with real-world relevance. Output must be a valid JSON object only.`;
             responseSchema = {
                 type: "OBJECT",
                 properties: {
@@ -423,7 +492,16 @@ export default function App() {
                 required: ["career_guidance_message", "specific_actions"]
             };
         } else if (promptKey === 'relationship_sub_prompt') {
-            promptText = `For an MBTI personality type ${type}, provide expanded relationship and friendship tips in Bengali. The response should be a JSON object with \`relationship_insight\` (string, an introductory paragraph) and \`actionable_tips\` (array of strings, 3-5 specific actionable tips for relationships and friendships).`;
+            promptText = `For MBTI personality type ${type}, provide deeper relationship and friendship guidance in Bengali.The response must be a JSON object with:
+
+- \`relationship_insight\`: (string) An emotional, intuitive paragraph explaining how this type typically behaves in love and friendships — their strengths, emotional needs, and common challenges. Should be heart-touching and insightful.
+
+- \`actionable_tips\`: (array of strings) 3–5 emotionally intelligent suggestions, examples:
+  - “নিজের চাওয়া-মনের কথা স্পষ্টভাবে প্রকাশ করতে শিখুন।”  
+  - “সবসময় অন্যকে খুশি করতে গিয়ে নিজেকে ভুলে যাবেন না।”  
+  - “ঘনিষ্ঠতা থেকে না পালিয়ে ধীরে ধীরে সম্পর্কের গভীরে প্রবেশ করুন।”
+Must be written in Bengali. Tone must feel like a wise friend or life coach offering heartfelt guidance.
+Output must be a valid JSON object. Do not include explanations outside the JSON format.`;
             responseSchema = {
                 type: "OBJECT",
                 properties: {
@@ -435,7 +513,7 @@ export default function App() {
         }
 
         try {
-            console.log(`Prompt text being sent: ${promptText.substring(0, 100)}...`); // Log first 100 chars
+            console.log(`Prompt text being sent: ${promptText.substring(0, 100)}...`); 
             console.log("Response schema being used:", JSON.stringify(responseSchema, null, 2));
 
             const chatHistory = [{ role: "user", parts: [{ text: promptText }] }];
@@ -448,9 +526,12 @@ export default function App() {
             };
 
             // Pointing to your new backend server endpoint
-            const apiUrl = `http://localhost:3001/generate-content`; 
+            const apiUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+                                ? 'http://localhost:3001/generate-content'
+                                : `${import.meta.env.VITE_APP_BACKEND_URL}/generate-content`; 
 
-            console.log("Fetching AI content from backend API:", apiUrl);
+            console.log("Frontend attempting to call backend at:", apiUrl);
+
             const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -466,7 +547,6 @@ export default function App() {
             const result = await response.json();
             console.log("Raw response from backend:", result);
             
-            // The backend is already set up to return the direct Gemini result, so we just use it.
             if (result.candidates && result.candidates.length > 0 &&
                 result.candidates[0].content && result.candidates[0].content.parts &&
                 result.candidates[0].content.parts.length > 0) {
@@ -486,25 +566,23 @@ export default function App() {
                 console.log("Loading message cleared after successful fetch.");
             } else {
                 console.error("Invalid or empty response structure from backend. Candidates or content parts missing.");
-                showMessage("বিস্তারিত বর্ণনা লোড করতে সমস্যা হয়েছে। (অবৈধ প্রতিক্রিয়া)", 'error'); // More specific error
+                showMessage("বিস্তারিত বর্ণনা লোড করতে সমস্যা হয়েছে। (অবৈধ প্রতিক্রিয়া)", 'error'); 
                 throw new Error("Invalid or empty response structure from backend.");
             }
 
         } catch (error) {
             console.error(`Error in fetchFullDescriptionFromAI: ${error.message}`, error);
-            // Check if it's a network error (e.g., backend not running)
             if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
                 setMessage('ব্যাকএন্ড সার্ভার উপলব্ধ নেই। অনুগ্রহ করে নিশ্চিত করুন যে আপনার Node.js সার্ভার চলছে।', 'error');
                 console.error("Network error: Backend server might not be running.");
             } else {
                 setMessage(`Error: ${error.message || 'Failed to fetch description'}. অনুগ্রহ করে পুনরায় চেষ্টা করুন।`, 'error');
             }
-            // Set a fallback description or message if AI call fails
             if (promptKey === 'initial_description') {
                 setStructuredDescription({general_summary: "বিস্তারিত বর্ণনা লোড করতে সমস্যা হয়েছে। অনুগ্রহ করে পুনরায় চেষ্টা করুন।", strengths: [], challenges: [], career_advice: [], relationship_tips: [], self_improvement_habits: [], coach_message: ""});
                 console.log("Set fallback structured description.");
             } else {
-                setSubPromptResult({message: "বিস্তারিত তথ্য লোড করতে সমস্যা হয়েছে। অনুগ্রহ করে পুনরায় চেষ্টা করুন।", items: []});
+                setSubPromptResult({message: "বিস্তারিত তথ্য লোad করতে সমস্যা হয়েছে। অনুগ্রহ করে পুনরায় চেষ্টা করুন।", items: []});
                 console.log("Set fallback sub-prompt result.");
             }
         } finally {
@@ -519,17 +597,17 @@ export default function App() {
     };
 
     // Handlers for new "more options" buttons
-    const handleCareerAdviceClick = () => {
-        setSubScreen('career');
-        setSubPromptResult(null); // Clear previous sub-prompt result
-        fetchFullDescriptionFromAI(resultType, 'career_sub_prompt');
-    };
+    // const handleCareerAdviceClick = () => { // Removed
+    //     setSubScreen('career');
+    //     setSubPromptResult(null); 
+    //     fetchFullDescriptionFromAI(resultType, 'career_sub_prompt');
+    // };
 
-    const handleRelationshipTipsClick = () => {
-        setSubScreen('relationship');
-        setSubPromptResult(null); // Clear previous sub-prompt result
-        fetchFullDescriptionFromAI(resultType, 'relationship_sub_prompt');
-    };
+    // const handleRelationshipTipsClick = () => { // Removed
+    //     setSubScreen('relationship');
+    //     setSubPromptResult(null); 
+    //     fetchFullDescriptionFromAI(resultType, 'relationship_sub_prompt');
+    // };
 
     const handleBackToMainResult = () => {
         setSubScreen(null); 
@@ -558,6 +636,103 @@ export default function App() {
                 }
                 .question-fade-in {
                     animation: fadeIn 0.5s ease-out forwards;
+                }
+
+                /* Custom styling for vertical radio buttons */
+                .radio-option-container {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 12px; /* Space between radio buttons */
+                    align-items: flex-start; /* Align radios to the left */
+                    width: 100%;
+                    max-width: 400px; /* Limit width to keep it readable */
+                    margin-top: 20px;
+                }
+
+                .radio-label {
+                    display: flex;
+                    align-items: center;
+                    cursor: pointer;
+                    font-size: 1.125rem; /* text-lg */
+                    color: #4b5563; /* text-gray-700 */
+                    padding: 8px 12px; /* Added horizontal padding */
+                    width: 100%;
+                    border-radius: 8px; /* rounded-lg */
+                    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+                    border: 1px solid #e5e7eb; /* default light gray border */
+                }
+
+                .radio-label:hover {
+                    background-color: #f3f4f6; /* light gray hover */
+                    border-color: #a78bfa; /* purple-400 on hover */
+                }
+
+                /* Styling for the checked state of the label */
+                .radio-label.selected {
+                    background-color: #e0e7ff; /* light indigo/purple */
+                    border-color: #8b5cf6; /* purple-600 */
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* subtle shadow */
+                    color: #4c1d95; /* darker purple text */
+                    font-weight: 600; /* semi-bold */
+                }
+
+                .radio-input {
+                    appearance: none; /* Hide default radio button */
+                    -webkit-appearance: none;
+                    width: 20px;
+                    height: 20px;
+                    border: 2px solid #a78bfa; /* purple-400 */
+                    border-radius: 50%;
+                    margin-right: 12px;
+                    position: relative;
+                    flex-shrink: 0; /* Prevent shrinking */
+                    background-color: white; /* Ensure background is white when not checked */
+                }
+
+                .radio-input:checked {
+                    background-color: #8b5cf6; /* purple-600 */
+                    border-color: #8b5cf6; /* purple-600 */
+                }
+
+                .radio-input:checked::before {
+                    content: '';
+                    display: block;
+                    width: 10px;
+                    height: 10px;
+                    background-color: white;
+                    border-radius: 50%;
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                }
+
+                /* Consistent button styling for navigation arrows */
+                .nav-arrow-button {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 40px; /* w-10 */
+                    height: 40px; /* h-10 */
+                    border-radius: 9999px; /* rounded-full */
+                    background-color: #ffffff; /* bg-white */
+                    border: 2px solid #9ca3af; /* border-gray-400 */
+                    color: #4b5563; /* text-gray-600 */
+                    font-size: 1.25rem; /* text-xl */
+                    transition: all 0.2s ease-in-out;
+                    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* subtle shadow */
+                }
+
+                .nav-arrow-button:hover:not(:disabled) {
+                    background-color: #f3f4f6; /* hover:bg-gray-100 */
+                    border-color: #6b7280; /* hover:border-gray-500 */
+                    transform: scale(1.05); /* hover:scale-105 */
+                }
+
+                .nav-arrow-button:disabled {
+                    opacity: 0.5;
+                    cursor: not-allowed;
+                    transform: scale(1); /* disabled:hover:scale-100 */
                 }
             `}</style>
 
@@ -620,7 +795,7 @@ export default function App() {
                 )}
 
                 {screen === 'test' && (
-                    <div className="relative bg-white rounded-xl shadow-lg p-6 sm:p-8 lg:p-10 max-w-2xl w-full mx-auto my-auto flex flex-col items-center text-center">
+                    <div className="relative bg-white rounded-xl shadow-lg p-6 sm:p-8 lg:p-10 max-w-2xl w-full mx-auto text-center">
                         {/* Question Progress */}
                         <div className="absolute top-6 left-6 text-gray-500 text-sm sm:text-base">
                             প্রশ্ন {Math.min(currentQuestionIndex + 1, questions.length)} এর {questions.length}: {/* Safely display question number */}
@@ -639,48 +814,52 @@ export default function App() {
                             {questions[currentQuestionIndex]?.question || ''}
                         </div>
 
-                        {/* Choice Row - Adjusted for horizontal labels and tight spacing */}
-                        <div className={`flex items-center justify-center w-full px-2 sm:px-4 mb-8 transition-opacity duration-300 ${questionVisible ? 'opacity-100' : 'opacity-0'}`}>
-                            {/* Left Label - Changed to purple */}
-                            <span className="text-xs sm:text-sm md:text-base font-semibold text-purple-600 mr-1 sm:mr-2 whitespace-nowrap">
-                                একদমই একমত না
-                            </span>
-
-                            {/* Circles Container */}
-                            <div className="flex space-x-1 sm:space-x-2"> {/* Tighter spacing between circles */}
-                                {choices.map((choice) => (
-                                    <button
-                                        key={choice.value}
-                                        className={`w-7 h-7 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full border-2 transition-all duration-300 ease-out
-                                            ${
-                                                userAnswers[currentQuestionIndex] === choice.value 
-                                                  ? 'bg-purple-600 border-purple-600 shadow-md' 
-                                                  : `bg-transparent ${choice.unselectedBorderColor} hover:border-gray-500 hover:scale-105` 
-                                            }`}
-                                        onClick={() => selectAnswer(choice.value)}
-                                        aria-label={`Choice ${choice.value}`}
+                        {/* Choice Column - Changed to vertical radio buttons */}
+                        <div className="radio-option-container">
+                            {choices.map((choice) => (
+                                <label 
+                                    key={choice.value} 
+                                    className={`radio-label ${userAnswers[currentQuestionIndex] === choice.value ? 'selected' : ''}`}
+                                >
+                                    <input
+                                        type="radio"
+                                        name={`question-${currentQuestionIndex}`} // Ensures only one radio can be selected per question
+                                        value={choice.value}
+                                        checked={userAnswers[currentQuestionIndex] === choice.value}
+                                        onChange={() => selectAnswer(choice.value)}
+                                        className="radio-input"
                                     />
-                                ))}
-                            </div>
-
-                            {/* Right Label - Remains green */}
-                            <span className="text-xs sm:text-sm md:text-base font-semibold text-green-600 ml-1 sm:ml-2 whitespace-nowrap">
-                                পুরোপুরি একমত
-                            </span>
+                                    {choice.label}
+                                </label>
+                            ))}
                         </div>
 
-                        {/* Back Button */}
-                        <div className="absolute bottom-6 left-6">
+                        {/* Navigation Buttons */}
+                        <div className="mt-8 w-full flex justify-between items-center px-4">
                             <button
                                 onClick={previousQuestion}
-                                className="flex items-center justify-center w-10 h-10 rounded-full bg-white border border-gray-400 text-gray-600
-                                        text-xl hover:bg-gray-100 hover:border-gray-500 hover:scale-105 transition-all duration-200 ease-in-out
-                                        disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                                className="nav-arrow-button" // Common class for styling
                                 disabled={currentQuestionIndex === 0}
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-5 h-5">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                                 </svg>
+                            </button>
+
+                            {/* NEXT / SUBMIT Button - Now an icon-only button, with text for "ফলাফল দেখুন" */}
+                            <button
+                                onClick={handleNextQuestion} // Call handleNextQuestion for manual navigation
+                                // Use nav-arrow-button styling consistently
+                                className={`nav-arrow-button ${currentQuestionIndex === questions.length - 1 ? 'px-6 py-3 font-semibold text-lg' : ''}`}
+                                disabled={userAnswers[currentQuestionIndex] === undefined} // Disable if no answer
+                            >
+                                {currentQuestionIndex === questions.length - 1 ? (
+                                    'ফলাফল দেখুন' // Last question, show text
+                                ) : (
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-5 h-5">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                                    </svg>
+                                )}
                             </button>
                         </div>
                     </div>
@@ -730,7 +909,7 @@ export default function App() {
                                             <button onClick={handleBackToMainResult} className="mb-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-all duration-300 transform hover:scale-105 text-sm sm:text-base">
                                                 ← ফলাফলে ফিরে যান
                                             </button>
-                                            <h3 className="text-2xl sm:text-3xl font-bold mb-4 text-pink-700">সম্প সম্পর্ক ও বন্ধুত্ব:</h3>
+                                            <h3 className="text-2xl sm:text-3xl font-bold mb-4 text-pink-700">সম্পর্ক ও বন্ধুত্ব:</h3>
                                             <p className="mb-4 text-base sm:text-lg">{subPromptResult.relationship_insight || subPromptResult.message}</p>
                                             {subPromptResult.actionable_tips && subPromptResult.actionable_tips.length > 0 && (
                                                 <ul className="list-disc list-inside mx-auto text-left space-y-2 text-base sm:text-lg max-w-full">
@@ -788,7 +967,6 @@ export default function App() {
                                                         </ul>
                                                     </div>
                                                 )}
-                                                {/* Corrected access to structuredDescription.relationship_tips */}
                                                 {structuredDescription.relationship_tips && structuredDescription.relationship_tips.length > 0 && (
                                                     <div className="mt-6 text-base sm:text-lg">
                                                         <h3 className="text-xl sm:text-2xl font-bold mb-2">সম্পর্ক ও বন্ধুত্ব:</h3>
@@ -830,8 +1008,8 @@ export default function App() {
                                         )
                                     )}
 
-                                    {/* More options / Email input and Payment Placeholder */}
-                                    {!isGeneratingDescription && !isGeneratingSubPrompt && subScreen === null && (
+                                    {/* Removed: More options / Email input and Payment Placeholder */}
+                                    {/* {!isGeneratingDescription && !isGeneratingSubPrompt && subScreen === null && (
                                         <div className="mt-8 pt-4 border-t border-gray-200 w-full">
                                             <h3 className="text-xl sm:text-2xl font-bold mb-4 text-gray-700">আরও জানতে চান?</h3>
                                             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
@@ -844,8 +1022,17 @@ export default function App() {
                                                     রিপোর্ট পাঠান
                                                 </button>
                                             </div>
+                                            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                                                <button onClick={handleCareerAdviceClick} className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-md hover:bg-indigo-700 transition-all duration-300 text-base sm:text-lg w-full sm:w-auto">
+                                                    ক্যারিয়ার সম্পর্কে আরও জানুন
+                                                </button>
+                                                <button onClick={handleRelationshipTipsClick} className="px-6 py-3 bg-pink-600 text-white font-bold rounded-md hover:bg-pink-700 transition-all duration-300 text-base sm:text-lg w-full sm:w-auto">
+                                                    সম্পর্ক বিষয়ে আরও জানুন
+                                                </button>
+                                            </div>
                                         </div>
                                     )}
+                                    */}
                                 </React.Fragment>
                             )}
                         </div>
