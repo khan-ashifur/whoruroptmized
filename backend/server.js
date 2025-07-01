@@ -131,7 +131,8 @@ app.post('/generate-content', async (req, res) => {
           content: {
             parts: [
               {
-                text: parsedData // This should be the parsed JSON object
+                // FIX: Stringify parsedData back into a JSON string for the frontend
+                text: JSON.stringify(parsedData)
               }
             ]
           }
@@ -155,6 +156,7 @@ app.post('/generate-content', async (req, res) => {
         console.error("  Full OpenAI Response Data (if available):", JSON.stringify(error.response.data, null, 2));
     } else {
         // Fallback for general errors, ensuring it's stringifiable
+        // Use Object.getOwnPropertyNames to get all properties of the error object for logging
         console.error("  Full error object (raw):", JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
     }
 
