@@ -31,10 +31,11 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' })); // Increased limit for potentially large requests
 
 // Define the API key from environment variables (This is your OpenAI API Key)
-const OPENAI_API_KEY = process.env.GEMINI_API_KEY; // Assuming .env uses GEMINI_API_KEY name for OpenAI Key
+// *** IMPORTANT CHANGE: Now directly looking for process.env.OPENAI_API_KEY ***
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY; 
 
 if (!OPENAI_API_KEY) {
-    console.error('Error: OPENAI_API_KEY (set as GEMINI_API_KEY in .env) is not configured. Please set it to run the backend server.');
+    console.error('Error: OPENAI_API_KEY is not configured. Please set it in Render environment variables or your local .env file.');
     process.exit(1); 
 }
 
