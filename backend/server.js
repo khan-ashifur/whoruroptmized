@@ -55,7 +55,6 @@ app.get('/', (req, res) => {
 });
 
 // Define default empty structured object for reliable frontend rendering
-// IMPORTANT: Updated to include type, name, description_line1/2/3 to match expected output from AI and frontend
 const defaultStructuredDescription = {
     type: "", 
     name: "", 
@@ -100,7 +99,7 @@ app.post('/generate-content', async (req, res) => {
 
     // Extract dynamic type info from Frontend Request's text content
     const frontendPayload = JSON.parse(contents[0].parts[0].text); // Frontend sends a JSON string inside text
-    const mbtiTypeFromFrontend = frontendPayload.type || "UNKNOWN_TYPE"; // Renamed from mbtiTypeFromFrontend
+    const mbtiTypeFromFrontend = frontendPayload.type || "UNKNOWN_TYPE"; 
     const mbtiTypeName = frontendPayload.name || 'Unknown Type Name';
     const mbtiTypeDescription = frontendPayload.description || 'Unknown Type Description';
     const promptKey = frontendPayload.promptKey || 'initial_description';
@@ -111,10 +110,9 @@ app.post('/generate-content', async (req, res) => {
     console.log("Extracted Prompt Key:", promptKey);
 
     let promptText = "";
-    let responseSchema = {}; // This will be used for both main and sub-prompts now
+    let responseSchema = {}; 
 
     if (promptKey === 'initial_description') {
-        // MODIFIED: Prompt updated to remove "MBTI" and include Jungian/archetype context.
         promptText = `
 প্রিয় OpenAI,
 আপনি একজন অত্যন্ত দক্ষ এবং অভিজ্ঞ বাংলা ভাষাভাষী জীবন কোচ। আপনার ভাষার ব্যবহার হবে অত্যন্ত মার্জিত এবং শ্রদ্ধাপূর্ণ। আপনার প্রতিটি শব্দ, বাক্য এবং অনুচ্ছেদে কঠোরভাবে 'আপনি' সম্বোধন ব্যবহার করবেন, কোনো অবস্থাতেই 'তুমি' ব্যবহার করা যাবে না। আপনার উত্তর সংক্ষিপ্ত, সরাসরি এবং কার্যকর হবে। অহেতুক নাটকীয়তা, চটকদার শব্দচয়ন বা "জেন-জেড" স্টাইলের অভিব্যক্তি সম্পূর্ণরূপে পরিহার করুন। এমনভাবে লিখুন যেন একজন মধ্যবয়সী, চিন্তাশীল ব্যক্তি আপনার পরামর্শগুলি সহজে বুঝতে পারে এবং সেগুলো তার জীবনে প্রয়োগ করতে আগ্রহী হয়। আপনার লেখার ধরণ হবে আবেগপ্রবণ কিন্তু সহজ-সরল, স্পষ্ট এবং মার্জিত বাংলা ভাষায়।
@@ -295,81 +293,90 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
     }
     
     // Clean and validate the final response data before sending to frontend
-    let cleanedResultData = { ...defaultStructuredDescription };
+    // *** MODIFIED: Simplified and corrected data cleaning logic ***
+    let cleanedResultData = {}; // Start with an empty object
 
-    for (const key in finalResponseData) {
-        if (defaultStructuredDescriptionKeys.includes(key)) {
-            if (typeof finalResponseData[key] === 'string') {
-                cleanedResultData[key] = cleanAndTrimText(finalResponseData[key]);
-            } else if (Array.isArray(finalResponseData[key])) {
-                cleanedResultData[key] = finalResponseData[key].map(item => {
-                    if (typeof item === 'string') return cleanAndTrimText(item);
-                    if (typeof item === 'object' && item !== null) {
-                        const cleanedItem = {};
-                        for (const subKey in item) {
-                            cleanedItem[subKey] = cleanAndTrimText(item[subKey]);
-                        }
-                        return cleanedItem;
-                    }
-                    return item;
-                }).filter(item => {
-                    if (typeof item === 'string') return item.length > 0;
-                    if (typeof item === 'object' && item !== null) return Object.values(item).some(val => typeof val === 'string' ? val.length > 0 : true);
-                    return false;
-                });
-            } else if (typeof finalResponseData[key] === 'object' && finalResponseData[key] !== null) {
-                if (['general_summary', 'coach_message', 'type', 'name', 'description_line1', 'description_line2', 'description_line3'].includes(key) && typeof finalResponseData[key] !== 'string') {
-                    cleanedResultData[key] = defaultStructuredDescription[key]; // Should be string, but AI gave object
-                    console.warn(`Key ${key} was an unexpected object for a string value. Set to default.`);
-                } else if (Array.isArray(defaultStructuredDescription[key]) && typeof finalResponseData[key] !== 'array') { // If AI gave object for an expected array
-                    cleanedResultData[key] = defaultStructuredDescription[key]; // Default to empty array
-                    console.warn(`Key ${key} was an unexpected object (expected array). Set to default.`);
-                } else {
-                    cleanedResultData[key] = finalResponseData[key];
-                }
-            }
-        } else {
-            console.warn(`Unexpected key '${key}' found in AI response and ignored.`);
-        }
-    }
+    // Populate cleanedResultData by iterating over the default structure keys
+    for (const key of defaultStructuredDescriptionKeys) {
+        if (finalResponseData.hasOwnProperty(key)) {
+            const expectedDefaultValue = defaultStructuredDescription[key];
+
+            if (typeof expectedDefaultValue === 'string') {
+                cleanedResultData[key] = cleanAndTrimText(finalResponseData[key]);
+            } else if (Array.isArray(expectedDefaultValue)) {
+                if (Array.isArray(finalResponseData[key])) { // Ensure the AI's response is also an array
+                    cleanedResultData[key] = finalResponseData[key].map(item => {
+                        if (typeof item === 'string') return cleanAndTrimText(item);
+                        if (typeof item === 'object' && item !== null) {
+                            const cleanedItem = {};
+                            for (const subKey in item) {
+                                cleanedItem[subKey] = cleanAndTrimText(item[subKey]);
+                            }
+                            return cleanedItem;
+                        }
+                        return item;
+                    }).filter(item => {
+                        // Filter out empty strings or objects where all values are empty after cleaning
+                        if (typeof item === 'string') return item.length > 0;
+                        if (typeof item === 'object' && item !== null) return Object.values(item).some(val => typeof val === 'string' ? val.length > 0 : true);
+                        return false;
+                    });
+                } else {
+                    // AI sent something not an array for an expected array field
+                    cleanedResultData[key] = expectedDefaultValue; // Default to empty array
+                    console.warn(`Key '${key}' from AI was not an array (expected array). Set to default.`);
+                }
+            } else if (typeof expectedDefaultValue === 'object' && expectedDefaultValue !== null) {
+                // This branch should only be for specific object types at top level if ever added.
+                // For now, if AI provides an object where a string/array is expected, it falls into above branches.
+                // If it's an object, and we just need to copy it directly
+                cleanedResultData[key] = finalResponseData[key];
+            }
+        } else {
+            // Key expected in output but not present in AI response, so use its default empty value
+            cleanedResultData[key] = defaultStructuredDescription[key];
+            console.warn(`Key '${key}' expected but not found in AI response. Using default empty value.`);
+        }
+    }
+    // --- END MODIFIED: Data Cleaning Logic ---
 
 
-    const finalResponse = {
-      candidates: [
-        {
-          content: {
-            parts: [
-              {
-                text: JSON.stringify(cleanedResultData) // Stringify the cleaned data before sending to frontend
-              }
-            ]
-          }
-        }
-      ]
-    };
+    const finalResponse = {
+      candidates: [
+        {
+          content: {
+            parts: [
+              {
+                text: JSON.stringify(cleanedResultData) // Stringify the cleaned data before sending to frontend
+              }
+            ]
+          }
+        }
+      ]
+    };
 
-    console.log("Sending final response to frontend:", JSON.stringify(finalResponse, null, 2));
-    res.json(finalResponse);
+    console.log("Sending final response to frontend:", JSON.stringify(finalResponse, null, 2));
+    res.json(finalResponse);
 
-  } catch (error) {
-    console.error("--- OpenAI API Call Failed or Unhandled Error ---");
-    console.error("  Error message:", error.message);
-    console.error("  Error name:", error.name);
-    if (error.status) console.error("  HTTP Status:", error.status);
-    if (error.code) console.error("  OpenAI Error Code:", error.code);
-    if (error.type) console.error("  OpenAI Error Type:", error.type);
-    if (error.param) console.error("  OpenAI Error Param:", error.param);
-    if (error.response && error.response.data) {
-        console.error("  Full error object (raw):", JSON.stringify(error.response.data, null, 2));
-    } else {
-        console.error("  Full error object (raw):", JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
-    }
+  } catch (error) {
+    console.error("--- OpenAI API Call Failed or Unhandled Error ---");
+    console.error("  Error message:", error.message);
+    console.error("  Error name:", error.name);
+    if (error.status) console.error("  HTTP Status:", error.status);
+    if (error.code) console.error("  OpenAI Error Code:", error.code);
+    if (error.type) console.error("  OpenAI Error Type:", error.type);
+    if (error.param) console.error("  OpenAI Error Param:", error.param);
+    if (error.response && error.response.data) {
+        console.error("  Full error object (raw):", JSON.stringify(error.response.data, null, 2));
+    } else {
+        console.error("  Full error object (raw):", JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
+    }
 
-    const errorMessage = error.message || 'An unknown error occurred with the OpenAI API.';
-    const statusCode = error.status || 500;
+    const errorMessage = error.message || 'An unknown error occurred with the OpenAI API.';
+    const statusCode = error.status || 500;
 
-    res.status(statusCode).json({ error: errorMessage });
-  }
+    res.status(statusCode).json({ error: errorMessage });
+  }
 });
 
 app.use((err, req, res, next) => {
