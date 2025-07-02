@@ -1,23 +1,24 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 // Personality Type Names and Short Descriptions (from 16 personalities.docx)
+// *** MODIFIED: Renamed types to generic, non-trademarked names for copyright safety ***
 const personalityTypesData = {
-    'ISTJ': { name: "The Inspector", description: "দায়িত্বশীল , সুনির্দিষ্ট ও কার্যনিষ্ঠ" },
-    'ISFJ': { name: "The Protector", description: "সহানুভূতিশীল , বিশ্বস্ত ও যত্নবান" },
-    'INFJ': { name: "The Advocate", description: "অন্তর্দৃষ্টি , আদর্শবাদী ও সহানুভূতিশীল" },
-    'INTJ': { name: "The Architect", description: "কৌশলী , স্বনির্ভর ও ভবিষ্যতমুখী" },
-    'ISTP': { name: "The Virtuoso", description: "বাস্তবধর্মী , বিশ্লেষণী ও হাতেকলমে দক্ষ" },
-    'ISFP': { name: "The Adventurer", description: "শান্তিপ্রিয় , শিল্পমনস্ক ও নমনীয়" },
-    'INFP': { name: "The Mediator", description: "কল্পনাপ্রবণ , আদর্শবাদী ও অনুভবশীল" },
-    'INTP': { name: "The Thinker", description: "বিশ্লেষণী , কৌতূহলী ও চিন্তাশীল" },
-    'ESTP': { name: "The Entrepreneur", description: "গতিশীল , বাস্তববাদী ও রিস্ক টেকার" },
-    'ESFP': { name: "The Entertainer", description: "প্রাণবন্ত , উপভোগপ্রিয় ও বন্ধুত্বপূর্ণ" },
-    'ENFP': { name: "The Campaigner", description: "উদ্যমী , কল্পনাবান ও সমাজপ্রিয়" },
-    'ENTP': { name: "The Debater", "description": "যুক্তিপূর্ণ , উদ্ভাবনী ও বিতর্কপ্রিয়" },
-    'ESTJ': { name: "The Executive", description: "সংগঠক , কর্তৃত্বশীল ও বাস্তববাদী" },
-    'ESFJ': { name: "The Consul", description: "যত্নশীল , সহানুভূতিশীল ও সামাজিক" },
-    'ENFJ': { name: "The Protagonist", description: "নেতৃস্থানীয় , সহানুভূতিশীল ও উৎসাহদায়ী" },
-    'ENTJ': { name: "The Commander", description: "কৌশলী , আত্মবিশ্বাসী ও নেতৃত্বদক্ষ" },
+    'ISTJ': { name: "The Practical Logician", description: "দায়িত্বশীল , সুনির্দিষ্ট ও কার্যনিষ্ঠ" },
+    'ISFJ': { name: "The Compassionate Guardian", description: "সহানুভূতিশীল , বিশ্বস্ত ও যত্নবান" },
+    'INFJ': { name: "The Insightful Visionary", description: "অন্তর্দৃষ্টি , আদর্শবাদী ও সহানুভূতিশীল" },
+    'INTJ': { name: "The Strategic Mastermind", description: "কৌশলী , স্বনির্ভর ও ভবিষ্যতমুখী" },
+    'ISTP': { name: "The Adaptable Craftsman", description: "বাস্তবধর্মী , বিশ্লেষণী ও হাতেকলমে দক্ষ" },
+    'ISFP': { name: "The Creative Explorer", description: "শান্তিপ্রিয় , শিল্পমনস্ক ও নমনীয়" },
+    'INFP': { name: "The Idealistic Dreamer", description: "কল্পনাপ্রবণ , আদর্শবাদী ও অনুভবশীল" },
+    'INTP': { name: "The Analytical Innovator", description: "বিশ্লেষণী , কৌতূহলী ও চিন্তাশীল" },
+    'ESTP': { name: "The Energetic Doer", description: "গতিশীল , বাস্তববাদী ও রিস্ক টেকার" },
+    'ESFP': { name: "The Spontaneous Performer", description: "প্রাণবন্ত , উপভোগপ্রিয় ও বন্ধুত্বপূর্ণ" },
+    'ENFP': { name: "The Enthusiastic Originator", description: "উদ্যমী , কল্পনাবান ও সমাজপ্রিয়" },
+    'ENTP': { name: "The Inventive Debater", "description": "যুক্তিপূর্ণ , উদ্ভাবনী ও বিতর্কপ্রিয়" },
+    'ESTJ': { name: "The Efficient Organizer", description: "সংগঠক , কর্তৃত্বশীল ও বাস্তববাদী" },
+    'ESFJ': { name: "The Harmonious Supporter", description: "যত্নশীল , সহানুভূতিশীল ও সামাজিক" },
+    'ENFJ': { name: "The Charismatic Inspirer", description: "নেতৃস্থানীয় , সহানুভূতিশীল ও উৎসাহদায়ী" },
+    'ENTJ': { name: "The Decisive Leader", description: "কৌশলী , আত্মবিশ্বাসী ও নেতৃত্বদক্ষ" },
 };
 
 // Questions data in Bengali, with impact on personality scores
@@ -77,7 +78,7 @@ const questions = [
     { question: "আমি সাধারণত আমার নেওয়া সিদ্ধান্ত নিয়ে দ্বিতীয়বার ভাবি না।", traitPair: ['A', 'X'] },
     { question: "আমার মুড খুব দ্রুত চেঞ্জ হয়", traitPair: ['X', 'A'] },
     { question: "আমি সাধারণত নিজেকে ভীষণ চাপে বা অস্থিরতায় ডুবে থাকা অনুভব করি।", traitPair: ['X', 'A'] },
-    { question: "আমি খুব কম সময়েই নিজেকে অনিরাপড বা অস্থির অনুভব করি।", traitPair: ['A', 'X'] },
+    { question: "আমি খুব কম সময়েই নিজেকে অনিরাপড বা অস্থির অনুভব করি।", traitPair: ['A', 'X'] },
     { question: "কেউ আমাকে নিয়ে ভালো ধারণা পোষণ করলে আমি ভাবি, কবে তারা হতাশ হবে আমার প্রতি।", traitPair: ['X', 'A'] },
     { question: "আমার মনে হয় বিমূর্ত দর্শনগত প্রশ্ন নিয়ে চিন্তা করা সময়ের অপচয়।", traitPair: ['A', 'X'] },
     { question: "আমি আত্মবিশ্বাসী যে, শেষ পর্যন্ত সবকিছুই আমার পক্ষে ভালোভাবে মিলে যাবে।", traitPair: ['A', 'X'] },
@@ -365,17 +366,9 @@ export default function App() { // Added export default here
         console.log("Displaying loading message for AI generation.");
 
         let promptText = "";
-        // responseSchema is defined here for the frontend's understanding, but the backend handles response_format for OpenAI
-        let responseSchema = {}; 
-
+        
         // Define prompts and schemas based on promptKey
-        // This is the prompt that will be sent TO THE BACKEND.
         if (promptKey === 'initial_description') {
-            // Frontend sends the raw personality type data to backend, 
-            // the backend constructs the detailed system prompt for OpenAI.
-            // No explicit schema needed for frontend's prompt here.
-            
-            // Collect the personality data to send to backend
             const personalityInfo = personalityTypesData[type] || {name: "Unknown Type Name", description: "Unknown Type Description"};
             promptText = JSON.stringify({ // Send a JSON string for the backend to parse
                 type: type,
@@ -389,13 +382,11 @@ export default function App() { // Added export default here
                 type: type, // Pass the MBTI type for sub-prompts too
                 promptKey: promptKey
             });
-            // responseSchema is for the backend to pass to OpenAI, not directly used here for frontend fetch.
         } else if (promptKey === 'relationship_sub_prompt') {
             promptText = JSON.stringify({
                 type: type, // Pass the MBTI type for sub-prompts too
                 promptKey: promptKey
             });
-            // responseSchema is for the backend to pass to OpenAI, not directly used here for frontend fetch.
         }
         
         try {
@@ -409,7 +400,6 @@ export default function App() { // Added export default here
                 // generationConfig should not be sent from frontend; backend controls OpenAI model parameters.
             };
 
-            // *** FIX: Use VITE_APP_BACKEND_URL for local development as well ***
             const apiUrl = `${import.meta.env.VITE_APP_BACKEND_URL}/generate-content`; 
 
             console.log("Frontend attempting to call backend at:", apiUrl);
@@ -433,7 +423,6 @@ export default function App() { // Added export default here
                 result.candidates[0].content && result.candidates[0].content.parts &&
                 result.candidates[0].content.parts.length > 0) {
                 
-                // *** FIX: ALWAYS parse the textContent received from backend as JSON ***
                 const textContent = result.candidates[0].content.parts[0].text; 
                 let parsedDescriptionData;
                 try {
@@ -446,7 +435,6 @@ export default function App() { // Added export default here
                 }
 
                 if (promptKey === 'initial_description') {
-                    // structuredDescription now directly holds the fully parsed object
                     setStructuredDescription(parsedDescriptionData); 
                     console.log("Structured description state updated successfully with parsed JSON.");
                 } else {
@@ -457,7 +445,7 @@ export default function App() { // Added export default here
                 console.log("Loading message cleared after successful fetch.");
             } else {
                 console.error("Invalid or empty response structure from backend. Candidates or content parts missing.");
-                showMessage("বিস্তারিত বর্ণনা লোড করতে সমস্যা হয়েছে। (অবৈধ প্রতিক্রিয়া)", 'error');
+                showMessage("বিস্তারিত বর্ণনা লোad করতে সমস্যা হয়েছে। (অবৈধ প্রতিক্রিয়া)", 'error');
                 throw new Error("Invalid or empty response structure from backend.");
             }
 
@@ -472,7 +460,7 @@ export default function App() { // Added export default here
             if (promptKey === 'initial_description') {
                 // Fallback for initial description when it fails
                 setStructuredDescription({
-                    type: resultType, // Use the calculated type
+                    type: resultType, 
                     name: personalityTypesData[resultType]?.name || 'Unknown Type Name',
                     description_line1: personalityTypesData[resultType]?.description || 'Unknown Type Description',
                     description_line2: '',
@@ -510,7 +498,7 @@ export default function App() { // Added export default here
                 {items.map((item, index) => (
                     <li key={index}>
                         <strong>{item[typeKey]}:</strong> {item[subKey]}{adviceKey && item[adviceKey] ? ` — ${item[adviceKey]}` : ''}
-                        {item.action && ` | পদক্ষেপ: ${item.action}`} {/* For career advice action */}
+                        {item.action && ` | পদক্ষেপ: ${item.action}`} 
                     </li>
                 ))}
             </ul>
