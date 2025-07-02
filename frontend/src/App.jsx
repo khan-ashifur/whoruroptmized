@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 // Personality Type Names and Short Descriptions (from 16 personalities.docx)
-// *** MODIFIED: Renamed types to generic, non-trademarked names for copyright safety ***
+// *** MODIFIED: Renamed types to generic, non-trademarked names ***
 const personalityTypesData = {
     'ISTJ': { name: "The Practical Logician", description: "দায়িত্বশীল , সুনির্দিষ্ট ও কার্যনিষ্ঠ" },
     'ISFJ': { name: "The Compassionate Guardian", description: "সহানুভূতিশীল , বিশ্বস্ত ও যত্নবান" },
@@ -305,14 +305,15 @@ export default function App() { // Added export default here
 
         const validTypes = Object.keys(personalityTypesData);
         if (!validTypes.includes(finalCalculatedType)) {
-            console.error(`Submission failed: Calculated type "${finalCalculatedType}" is not a standard MBTI type.`);
+            console.error(`Submission failed: Calculated type "${finalCalculatedType}" is not a standard type. Using UNKNOWN.`); // *** MBTI reference was here ***
             showMessage("ব্যক্তিত্বের ধরণ নির্ণয় করা যায়নি। অনুগ্রহ করে পুনরায় চেষ্টা করুন।", 'error');
-            setSubmittingFlag(false);
-            return;
+            // Fallback to a generic "Unknown" type if calculation somehow fails or produces non-standard
+            setResultType('UNKNOWN'); 
+        } else {
+            setResultType(finalCalculatedType);
         }
 
         console.log(`Successfully calculated type: ${finalCalculatedType}. Transitioning to result screen.`);
-        setResultType(finalCalculatedType);
         setScreen('result');
         console.log(`State update scheduled: screen to 'result', resultType to '${finalCalculatedType}'`);
         setSubmittingFlag(false);
@@ -759,7 +760,7 @@ export default function App() { // Added export default here
                             {structuredDescription?.type || resultType} {/* Use parsed type or fallback to calculated */}
                         </p>
                         <p className="text-xl sm:text-2xl font-semibold mb-2">
-                            {structuredDescription?.name || personalityTypesData[resultType]?.name || 'Unknown Type'} {/* Use parsed name or fallback */}
+                            {structuredDescription?.name || personalityTypesData[resultType]?.name || 'Unknown Type Name'} {/* Use parsed name or fallback to new generic names */}
                         </p>
                         <p className="text-lg sm:text-xl mb-4">
                             {structuredDescription?.description_line1 || personalityTypesData[resultType]?.description || ''} {/* Use parsed description line 1 or fallback */}
