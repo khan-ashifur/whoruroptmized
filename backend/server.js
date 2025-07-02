@@ -297,8 +297,10 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
     let cleanedResultData = {}; // Start with an empty object
 
     // Populate cleanedResultData by iterating over the default structure keys
+    // This ensures all expected keys are present, even if AI misses them.
     for (const key of defaultStructuredDescriptionKeys) {
-        if (finalResponseData.hasOwnProperty(key)) {
+        // Check if the key exists in AI's response and is not null/undefined
+        if (finalResponseData.hasOwnProperty(key) && finalResponseData[key] !== null && finalResponseData[key] !== undefined) {
             const expectedDefaultValue = defaultStructuredDescription[key];
 
             if (typeof expectedDefaultValue === 'string') {
@@ -327,56 +329,55 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
                     console.warn(`Key '${key}' from AI was not an array (expected array). Set to default.`);
                 }
             } else if (typeof expectedDefaultValue === 'object' && expectedDefaultValue !== null) {
-                // This branch should only be for specific object types at top level if ever added.
-                // For now, if AI provides an object where a string/array is expected, it falls into above branches.
-                // If it's an object, and we just need to copy it directly
+                // For direct object copies if there were any, but our top-level are strings/arrays.
+                // This will catch if AI provides a non-array object for an array key, and we just assign it directly IF it's not a primitive.
                 cleanedResultData[key] = finalResponseData[key];
             }
         } else {
-            // Key expected in output but not present in AI response, so use its default empty value
+            // Key expected in output but not present in AI response, or was null/undefined, so use its default empty value
             cleanedResultData[key] = defaultStructuredDescription[key];
-            console.warn(`Key '${key}' expected but not found in AI response. Using default empty value.`);
+            console.warn(`Key '${key}' expected but not found/valid in AI response. Using default empty value.`);
         }
     }
     // --- END MODIFIED: Data Cleaning Logic ---
 
 
-    const finalResponse = {
-      candidates: [
-        {
-          content: {
-            parts: [
-              {
-                text: JSON.stringify(cleanedResultData) // Stringify the cleaned data before sending to frontend
-              }
-            ]
-          }
-        }
-      ]
-    };
+    const finalResponse = {
+      candidates: [
+        {
+          content: {
+            parts: [
+              {
+                text: JSON.stringify(cleanedResultData) // Stringify the cleaned data before sending to frontend
+              }
+            ]
+          }
+        }
+      ]
+    };
 
-    console.log("Sending final response to frontend:", JSON.stringify(finalResponse, null, 2));
-    res.json(finalResponse);
+    console.log("Sending final response to frontend:", JSON.stringify(finalResponse, null, 2));
+    res.json(finalResponse);
 
-  } catch (error) {
-    console.error("--- OpenAI API Call Failed or Unhandled Error ---");
-    console.error("  Error message:", error.message);
-    console.error("  Error name:", error.name);
-    if (error.status) console.error("  HTTP Status:", error.status);
-    if (error.code) console.error("  OpenAI Error Code:", error.code);
-    if (error.type) console.error("  OpenAI Error Type:", error.type);
-    if (error.param) console.error("  OpenAI Error Param:", error.param);
-    if (error.response && error.response.data) {
-        console.error("  Full error object (raw):", JSON.stringify(error.response.data, null, 2));
-    } else {
-        console.error("  Full error object (raw):", JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
-    }
+  } catch (error) {
+    console.error("--- OpenAI API Call Failed or Unhandled Error ---");
+    console.error("  Error message:", error.message);
+    console.error("  Error name:", error.name);
+    if (error.status) console.error("  HTTP Status:", error.status);
+    if (error.code) console.error("  OpenAI Error Code:", error.code);
+    if (error.type) console.error("  OpenAI Error Type:", error.type);
+    if (error.param) console.error("  OpenAI Error Param:", error.param);
+    if (error.response && error.response.data) {
+        console.error("  Full error object (raw):", JSON.stringify(error.response.data, null, 2));
+    } else {
+        console.error("  Full error object (raw):", JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
+    }
 
-    const errorMessage = error.message || 'An unknown error occurred with the OpenAI API.';
-    const statusCode = error.status || 500;
+    const errorMessage = error.message || 'An unknown error occurred with the OpenAI API.';
+    const statusCode = error.status || 500;
 
-    res.status(statusCode).json({ error: errorMessage });
-  }
+    res.status(statusCode).json({ error: errorMessage });
+  }
 });
 
 app.use((err, req, res, next) => {
