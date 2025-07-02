@@ -273,17 +273,12 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
 
     let finalResponseData;
     // For initial_description, parse the JSON. For sub-prompts, they are already JSON.
-    if (promptKey === 'initial_description') {
-        try {
-            // Extract content from personality_type_info wrapper if present, then parse
-            let parsedTemp = JSON.parse(generatedTextContent);
-            if (parsedTemp.personality_type_info && typeof parsedTemp.personality_type_info === 'object') {
-                finalResponseData = parsedTemp.personality_type_info;
-            } else {
-                finalResponseData = parsedTemp;
-            }
-            console.log("Parsed AI data for initial description:", finalResponseData);
-        } catch (jsonParseError) {
+  if (promptKey === 'initial_description') {
+    try {
+        finalResponseData = JSON.parse(generatedTextContent);
+        console.log("Parsed AI data for initial description:", finalResponseData);
+    } catch (jsonParseError) {
+
             console.error("Error parsing initial description JSON:", jsonParseError, "Raw text:", generatedTextContent);
             return res.status(500).json({ error: 'OpenAI returned invalid JSON for initial description', raw: generatedTextContent });
         }
