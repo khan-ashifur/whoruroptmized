@@ -131,10 +131,10 @@ JSON অবজেক্টের নিম্নলিখিত কীগুল�
 - \`general_summary\`: (string) একটি সমৃদ্ধ, কাব্যিক অনুচ্ছেদ যা ব্যক্তির ভেতরের প্রকৃতি, আবেগিক গভীরতা, সিদ্ধান্ত গ্রহণের ধরণ এবং তারা পৃথিবীকে কীভাবে দেখে তা বর্ণনা করবে। নরম, কোচিং-স্টাইলের ভাষা ব্যবহার করুন যাতে "আহ্, এটা সত্যিই আমি" এমন অনুভূতি তৈরি হয়। এতে নিম্নলিখিত দুটি লাইন অবশ্যই অন্তর্ভুক্ত করবেন: "সবার মধ্যে একটু আশার আলো ছড়াতে ভালোবাসেন, যদিও মাঝে মাঝে আপনিই নিজের জন্য সেই আলো পেতে চান।" এবং "মানুষ প্রায়ই বুঝতে পারে না—আপনার চিন্তার কতটা গভীরতা।" এই লাইনগুলো প্রাকৃতিক ভাবে অনুচ্ছেদে মিশে যাবে।
 - \`strengths\`: (array of objects) ৫টি প্রধান শক্তির তালিকা। প্রতিটি অবজেক্টে \`name\` (string, বাংলায়) এবং \`explanation\` (string, ১-২ লাইনের ব্যাখ্যা) থাকতে হবে।
 - \`challenges\`: (array of objects) ৩টি ব্যক্তিত্বের চ্যালেঞ্জের তালিকা। প্রতিটি অবজেক্টে \`description\` (string, সংক্ষিপ্ত আবেগিক চ্যালেঞ্জ) এবং \`advice\` (string, উষ্ণ, কোচ-স্টাইলের পরামর্শ) থাকতে হবে।
-- \`career_advice\`: (array of objects) ৩-৫টি পেশার তালিকা যা ব্যক্তির প্রকৃতির সাথে সামঞ্জস্যপূর্ণ, আধুনিক পেশা যেমন - কন্টেন্ট ক্রিয়েটর, ডেটা অ্যানালিস্ট, স্টার্টআপ উদ্যোক্তা, ডিজিটাল মার্কেটিং স্পেশালিস্ট, কমিউনিটি ম্যানেজার, ফ্রিল্যান্স লেখক, সফটওয়্যার ডেভেলপার, প্রজেক্ট ম্যানেজার, সামাজিক কর্মী, শিক্ষক, কাউন্সেলর, ইভেন্ট অর্গানাইজার ইত্যাদি অন্তর্ভুক্ত করুন। প্রতিটি অবজেক্টে \`field\` (string, বাংলায়), \`reason\` (string, কেন এই পেশা উপযুক্ত), এবং \`action\` (string, ঐচ্ছিক, ১-লাইনের পদক্ষেপ) থাকতে হবে।
+- \`career_advice\`: (array of objects) ৩-৫টি পেশার তালিকা যা ব্যক্তির প্রকৃতির সাথে সামঞ্জস্যপূর্ণ, আধুনিক পেশা যেমন - কন্টেন্ট ক্রিয়েটর, ডেটা অ্যানালিস্ট, স্টার্টআপ উদ্যোক্তা, ডিজিটাল মার্কেটিং স্পেশালিস্ট, কমিউনিটি ম্যানেজার, ফ্রিল্যান্স লেখক, সফটওয়্যার ডেভেলভার, প্রজেক্ট ম্যানেজার, সামাজিক কর্মী, শিক্ষক, কাউন্সেলর, ইভেন্ট অর্গানাইজার ইত্যাদি অন্তর্ভুক্ত করুন। প্রতিটি অবজেক্টে \`field\` (string, বাংলায়), \`reason\` (string, কেন এই পেশা উপযুক্ত), এবং \`action\` (string, ঐচ্ছিক, ১-লাইনের পদক্ষেপ) থাকতে হবে।
 - \`relationship_tips\`: (array of objects) ৩-৫টি অন্তর্দৃষ্টির তালিকা। প্রতিটি অবজেক্টে \`general_behavior\` (string, প্রেম/বন্ধুত্বে সাধারণ আচরণ) এবং \`tip\` (string, সম্পর্ক উন্নত করার জন্য ব্যবহারিক/আবেগিক পরামর্শ) থাকতে হবে।
 - \`self_improvement_habits\`: (array of objects) ৩টি দৈনিক বা মানসিকতার অভ্যাসের তালিকা। প্রতিটি অবজেক্টে \`habit\` (string, প্রস্তাবিত অভ্যাস) এবং \`benefit\` (string, এর মানসিক/ব্যক্তিগত সুবিধা) থাকতে হবে।
-- \`coach_message\`: (string) একটি চূড়ান্ত আবেগপ্রবণ অনুচ্ছেদ যা একজন জ্ঞানী বাঙালি জীবন কোচের মতো শোনাবে, যা গভীর প্রতিফলন এবং আরও অন্বেষণের আকাঙ্ক্ষা জাগাবে, সর্বদা 'আপনি' সম্বোধন ব্যবহার করে। এটি অবশ্যই সহজ-সরল এবং মার্জিত বাংলা ভাষায় হবে, কোনো অহেতুক নাটকীয়তা বা চটকদার শব্দ ব্যবহার করবেন না।
+- \`coach_message\`: (string) একটি চূড়ান্ত আবেগপ্রম্পট যা একজন জ্ঞানী বাঙালি জীবন কোচের মতো শোনাবে, যা গভীর প্রতিফলন এবং আরও অন্বেষণের আকাঙ্ক্ষা জাগাবে, সর্বদা 'আপনি' সম্বোধন ব্যবহার করে। এটি অবশ্যই সহজ-সরল এবং মার্জিত বাংলা ভাষায় হবে, কোনো অহেতুক নাটকীয়তা বা চটকদার শব্দ ব্যবহার করবেন না।
 
 আপনার প্রতিক্রিয়া অবশ্যই একটি বৈধ JSON অবজেক্ট হতে হবে এবং JSON অবজেক্ট ছাড়া আর কোনো অতিরিক্ত টেক্সট থাকবে না।
 `;
@@ -250,7 +250,7 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
       model: "gpt-4o",
       messages: [{ role: 'user', content: promptText }],
       temperature: generationConfig?.temperature || 0.7,
-      max_tokens: 4000, // *** MODIFIED: Increased max_tokens ***
+      max_tokens: 4000, 
       ...(Object.keys(responseSchema).length > 0 && {
         response_format: { type: "json_object" }
       })
@@ -293,72 +293,49 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
     }
     
     // Clean and validate the final response data before sending to frontend
-    // *** MODIFIED: Simplified and corrected data cleaning logic to prevent data stripping ***
-    let cleanedResultData = { ...defaultStructuredDescription }; // Start with defaults
+    // *** CRITICAL MODIFIED SECTION: Directly populating cleanedResultData ***
+    let cleanedResultData = { ...defaultStructuredDescription }; // Start with all expected keys from default
 
-    // Iterate over the keys we EXPECT in the final output (from defaultStructuredDescription)
-    for (const key of defaultStructuredDescriptionKeys) {
-        // If the key exists in the AI's parsed response and is not explicitly null/undefined
-        if (finalResponseData.hasOwnProperty(key) && finalResponseData[key] !== null && finalResponseData[key] !== undefined) {
-            const expectedTypeInDefault = typeof defaultStructuredDescription[key];
-            const isExpectedArray = Array.isArray(defaultStructuredDescription[key]);
-            const actualValue = finalResponseData[key];
+    // Directly assign from finalResponseData and clean individual fields
+    cleanedResultData.type = cleanAndTrimText(finalResponseData.type || "");
+    cleanedResultData.name = cleanAndTrimText(finalResponseData.name || "");
+    cleanedResultData.description_line1 = cleanAndTrimText(finalResponseData.description_line1 || "");
+    cleanedResultData.description_line2 = cleanAndTrimText(finalResponseData.description_line2 || "");
+    cleanedResultData.description_line3 = cleanAndTrimText(finalResponseData.description_line3 || "");
+    cleanedResultData.general_summary = cleanAndTrimText(finalResponseData.general_summary || "");
+    cleanedResultData.coach_message = cleanAndTrimText(finalResponseData.coach_message || "");
 
-            // Handle strings
-            if (expectedTypeInDefault === 'string') {
-                if (typeof actualValue === 'string') {
-                    cleanedResultData[key] = cleanAndTrimText(actualValue);
-                } else {
-                    // AI sent non-string for an expected string field
-                    cleanedResultData[key] = defaultStructuredDescription[key]; // Default to empty string
-                    console.warn(`Key '${key}' from AI was not a string (expected string). Set to default.`);
-                }
-            } 
-            // Handle arrays
-            else if (isExpectedArray) {
-                if (Array.isArray(actualValue)) { // Ensure the AI's response is also an array
-                    cleanedResultData[key] = actualValue.map(item => {
-                        // Clean individual items within the array (strings and objects within arrays)
-                        if (typeof item === 'string') return cleanAndTrimText(item);
-                        if (typeof item === 'object' && item !== null) {
-                            const cleanedItem = {};
-                            for (const subKey in item) {
-                                cleanedItem[subKey] = cleanAndTrimText(item[subKey]);
-                            }
-                            return cleanedItem;
-                        }
-                        return item; // Return non-string/non-object as is
-                    }).filter(item => {
-                        // Filter out empty strings or objects where all values are empty after cleaning
-                        if (typeof item === 'string') return item.length > 0;
-                        if (typeof item === 'object' && item !== null) return Object.values(item).some(val => typeof val === 'string' ? val.length > 0 : true);
-                        return false;
-                    });
-                } else {
-                    // AI sent something not an array for an expected array field
-                    cleanedResultData[key] = defaultStructuredDescription[key]; // Default to empty array
-                    console.warn(`Key '${key}' from AI was not an array (expected array). Set to default.`);
-                }
-            }
-            // If it's an object (which our top-level expected fields are not, other than personality_type_info which is handled earlier)
-            // or if it's a new unexpected top-level object, just copy it as is.
-            else if (typeof expectedDefaultValue === 'object' && expectedDefaultValue !== null) {
-                // This case handles general objects. Given our default schema, this is unlikely for direct top-level keys
-                // but included for robustness if schema changes or AI deviates.
-                 cleanedResultData[key] = actualValue;
-            } else {
-                // Catch-all for unexpected types that are present, but don't match expected string/array/object types
-                cleanedResultData[key] = defaultStructuredDescription[key];
-                console.warn(`Key '${key}' from AI was an unexpected primitive type. Set to default.`);
-            }
-        } else {
-            // Key expected in output but not present in AI response (or was null/undefined), so use its default empty value
-            cleanedResultData[key] = defaultStructuredDescription[key];
-            console.warn(`Key '${key}' expected but not found/valid in AI response. Using default empty value.`);
+    // Handle array fields specifically
+    const processArrayField = (sourceArray, itemSchemaKeys) => {
+        if (!Array.isArray(sourceArray)) {
+            return []; // Return empty array if source is not an array
         }
-    }
-    // --- END MODIFIED: Data Cleaning Logic ---
+        return sourceArray.map(item => {
+            const cleanedItem = {};
+            if (typeof item === 'object' && item !== null) {
+                for (const key of itemSchemaKeys) {
+                    if (item[key]) { // Check if property exists before cleaning
+                        cleanedItem[key] = cleanAndTrimText(item[key]);
+                    }
+                }
+            } else if (typeof item === 'string') {
+                // Fallback for simple string in array if AI gives it
+                if (itemSchemaKeys.length > 0) {
+                    cleanedItem[itemSchemaKeys[0]] = cleanAndTrimText(item); // Assign to first key in schema
+                } else {
+                    return cleanAndTrimText(item); // If schema is just strings
+                }
+            }
+            return cleanedItem;
+        }).filter(item => Object.keys(item).length > 0 && Object.values(item).some(val => typeof val === 'string' ? val.length > 0 : true));
+    };
 
+    cleanedResultData.strengths = processArrayField(finalResponseData.strengths, ['name', 'explanation']);
+    cleanedResultData.challenges = processArrayField(finalResponseData.challenges, ['description', 'advice']);
+    cleanedResultData.career_advice = processArrayField(finalResponseData.career_advice, ['field', 'reason', 'action']);
+    cleanedResultData.relationship_tips = processArrayField(finalResponseData.relationship_tips, ['general_behavior', 'tip']);
+    cleanedResultData.self_improvement_habits = processArrayField(finalResponseData.self_improvement_habits, ['habit', 'benefit']);
+    // *** END CRITICAL MODIFIED SECTION ***
 
     const finalResponse = {
       candidates: [
