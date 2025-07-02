@@ -120,7 +120,8 @@ export default function App() { // Added export default here
     const [questionVisible, setQuestionVisible] = useState(false);
     const [userAnswers, setUserAnswers] = useState({});
     const [resultType, setResultType] = useState('');
-    const [structuredDescription, setStructuredDescription] = useState(null);
+    // structuredDescription will now hold the full parsed JSON object from the backend
+    const [structuredDescription, setStructuredDescription] = useState(null); 
     const [message, setMessage] = useState('');
     const [messageType, setMessageType] = useState('error');
     const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
@@ -364,139 +365,52 @@ export default function App() { // Added export default here
         console.log("Displaying loading message for AI generation.");
 
         let promptText = "";
-        let responseSchema = {}; // This will be empty for initial_description, used for sub-prompts
+        // responseSchema is defined here for the frontend's understanding, but the backend handles response_format for OpenAI
+        let responseSchema = {}; 
 
         // Define prompts and schemas based on promptKey
+        // This is the prompt that will be sent TO THE BACKEND.
         if (promptKey === 'initial_description') {
-            // This prompt is for the backend to send to OpenAI.
-            // It uses the few-shot example for strict formatting and 'আপনি' formality.
-            promptText = `
-প্রিয় OpenAI,
-আপনি একজন অভিজ্ঞ, জ্ঞানী এবং অত্যন্ত বিনয়ী বাঙালি জীবন কোচ। আপনার ভাষার ব্যবহার হবে অত্যন্ত মার্জিত এবং শ্রদ্ধাপূর্ণ। আপনার প্রতিটি শব্দ, বাক্য এবং অনুচ্ছেদে কঠোরভাবে 'আপনি' সম্বোধন ব্যবহার করবেন, কোনো অবস্থাতেই 'তুমি' ব্যবহার করা যাবে না। আপনার উত্তর সংক্ষিপ্ত, সরাসরি এবং কার্যকর হবে। অহেতুক নাটকীয়তা, চটকদার শব্দচয়ন বা "জেন-জেড" স্টাইলের অভিব্যক্তি সম্পূর্ণরূপে পরিহার করুন। এমনভাবে লিখুন যেন একজন মধ্যবয়সী, চিন্তাশীল ব্যক্তি আপনার পরামর্শগুলি সহজে বুঝতে পারে এবং সেগুলো তার জীবনে প্রয়োগ করতে আগ্রহী হয়। আপনার লেখার ধরণ হবে আবেগপ্রবণ কিন্তু সহজ-সরল, স্পষ্ট এবং মার্জিত বাংলা ভাষায়।
+            // Frontend sends the raw personality type data to backend, 
+            // the backend constructs the detailed system prompt for OpenAI.
+            // No explicit schema needed for frontend's prompt here.
+            
+            // Collect the personality data to send to backend
+            const personalityInfo = personalityTypesData[type] || {name: "Unknown Type Name", description: "Unknown Type Description"};
+            promptText = JSON.stringify({ // Send a JSON string for the backend to parse
+                type: type,
+                name: personalityInfo.name,
+                description: personalityInfo.description,
+                promptKey: promptKey // Ensure promptKey is passed to backend
+            });
 
-এখানে একটি উদাহরণ দেওয়া হলো। এই উদাহরণটি দেখে আপনি ঠিক একইভাবে নিম্নলিখিত MBTI ব্যক্তিত্বের ধরণের জন্য উত্তর তৈরি করবেন। উত্তর দেওয়ার সময় শুধু MBTI টাইপটি পরিবর্তন করবেন, বাকি ফরম্যাট, শব্দচয়ন, এবং 'আপনি' সম্বোধন হুবহু উদাহরণটির মতো হবে। উদাহরণ ছাড়া আর কোনো অতিরিক্ত ভূমিকা বা কথা লিখবেন না।
-
-উদাহরণ: (MBTI Type: ENFP)
-১. আপনার ব্যক্তিত্বের ধরণ:
-ENFP — “প্রেরণাশক্তির অভিযাত্রী”
-আপনি সহজাতভাবে প্রাণবন্ত, কল্পনাপ্রবণ, এবং মানুষের হৃদয় ছুঁয়ে যেতে চান।
-নতুনত্ব, পরিবর্তন আর সংযোগের খোঁজে আপনি কখনোই ক্লান্ত হন না।
-আপনার নির্ভীক হাসি দেখে মানুষ বোঝে না, ভেতরে আপনি কতটা অনুভূতিপ্রবণ আর কোমল।
-
-২. আপনার ব্যক্তিত্বের সারসংক্ষেপ:
-বাহিরে যত প্রাণবন্ত, ভেতরে আপনি অনেক গভীর।
-জীবনকে দেখেন নতুন সম্ভাবনার রঙে, প্রতিটা মানুষের মধ্যে খুঁজে নেন অজানা গল্প।
-আপনার অনুভূতি যেন চলমান নদী—কখনও আনন্দে ভাসে, কখনও অজান্তেই অনুরাগে ডুবে যায়।
-সবার মধ্যে একটু আশার আলো ছড়াতে ভালোবাসেন, যদিও মাঝে মাঝে আপনিই নিজের জন্য সেই আলো পেতে চান।
-মানুষ প্রায়ই বুঝতে পারে না—আপনার চিন্তার কতটা গভীরতা।
-
-৩. আপনার ৫টি প্রধান শক্তি:
-• সৃষ্টিশীলতা: সাধারণের মধ্যে অসাধারণ খুঁজে পান, প্রতিদিন কোনো না কোনও রঙের নতুন ছায়া খুঁজে বের করেন।
-• মানবিক সংযোগ: খুব সহজে সম্পর্ক তৈরি করতে পারেন এবং মানুষ আপনাকে বিশ্বাস করতে আরামবোধ করে।
-• অনুপ্রেরণা জাগানো: আপনার কথায় ও উপস্থিতিতে অন্যরা নিজেদের ভিতরকার শক্তি খুঁজে পায়।
-• অভিযাত্রিক মন: নতুন কিছু শিখতে, জানতে এবং এক্সপ্লোর করতে আপনি সবসময় প্রস্তুত।
-• গভীর সহানুভূতি: অন্যের কষ্ট, আনন্দ বা স্বপ্ন—সবকিছু আপনি খুব গভীরভাবে অনুভব করেন।
-
-৪. আপনার ৩টি চ্যালেঞ্জ:
-• অসমাপ্ততা: নানা কিছু শুরু করেন, কিন্তু শেষটা আটকে যেতে পারে। ছোট ছোট লক্ষ্য নির্ধারণ করে এগিয়ে যান।
-• বাস্তব প্রয়োজন ভুলে স্বপ্নে বুঁদ: সবসময় দূরের সম্ভাবনা দেখেন, মাঝে মাঝে একেবারে প্রয়োজনীয় কাজ ফেলে দেন—প্রতিদিনের জন্য কিছু গ্রাউন্ডিং টাস্ক রাখুন।
-• নিজের চাওয়া গোপন রাখা: অন্যেকে খুশি রাখতে গিয়ে নিজের কষ্ট বলতেই ভুলে যান—বিশ্বাসযোগ্য ‘আপন’ মানুষের সঙ্গে খোলামেলা কথা বলুন।
-
-৫. ক্যারিয়ার পরামর্শ:
-• কনটেন্ট ক্রিয়েটর/ইউটিউবার: গল্প ও সৃজনশক্তিকে কাজে লাগিয়ে মানুষের জীবনে রঙ ছড়াতে পারেন | শুরু করার উপায়: ফোনে ছোট ভিডিও বা গল্প লিখে পোস্ট দিন।
-• শিক্ষকতা/কাউন্সেলিং: মানুষের জীবন বদলাতে, তাদের ডানায় আলো ছড়াতে পারেন | শুরু করুন: স্কুল, অনলাইন গ্রুপ, অথবা স্বেচ্ছাসেবী উদ্যোগে যুক্ত হয়ে।
-• স্টার্ট-আপ উদ্যোক্তা: নতুন আইডিয়া ও উদ্যম দিয়ে ছোট দল গড়ে তুলতে পারেন | শুরু করুন: প্রিয় এক সমস্যার জন্য সমাধান নিয়ে একটা প্রাথমিক প্ল্যান করুন।
-• ইভেন্ট অর্গানাইজার: মানুষের সংযোগকে কাজে লাগিয়ে মনের মতো অনুষ্ঠান করতে পারেন | শুরু করুন: বন্ধুমহল/অনলাইন কমিউনিটিতে ছোট ইভেন্টের দায়িত্ব নিয়ে।
-• কমিউনিটি বিল্ডার: মানুষের মধ্যে সংযোজক হয়ে সমাজে পরিবর্তন আনতে পারেন | অনলাইনে ছোট গ্রুপ খুলে আজই শুরু করুন।
-
-৬. সম্পর্ক ও বন্ধুত্ব:
-• উচ্ছ্বাসী, আন্তরিক আচরণ: প্রথম পরিচয়েই সহজে কাছের মানুষ হয়ে যান | টিপস: নতুন সম্পর্ক যত সহজে গড়েন, সে সম্পর্ক টিকিয়ে রাখতে ধৈর্য রাখুন।
-• গভীর সংযোগ চাওয়া: সত্যিকারের অনুভূতির খোঁজে থাকেন | টিপস: নিজের কথা, সব অনুভূতিও ভাগ করে নিতে ভুলবেন না।
-• আবেগ ভাগাভাগি: প্রেম বা বন্ধুত্বে মনের ওঠানামা খুব প্রবল | টিপস: ক্লান্তি বা মন খারাপ হলে সরাসরি প্রিয়জনকে জানান, চাপা রাখবেন না।
-
-৭. আত্মউন্নয়নের অভ্যাস:
-• ডায়েরি লেখা: নিজের অনুভূতি তুলে ধরুন | উপকারিতা: মন পরিষ্কার থাকবে, চিন্তা গুছিয়ে আসবে।
-• প্রকৃতির মাঝে সময়: হাঁটতে বের হন, আকাশ দেখুন | উপকারিতা: মন শান্ত হয়, নতুন ভাবনা আসে।
-• নতুন কিছু শেখা: শখের কোনো কোর্স বা চ্যালেঞ্জ নিন | উপকারিতা: আত্মবিশ্বাস ও কৌতূহল দুটোই বাড়বে।
-
-৮. কোচের বার্তা:
-আপনি নিজেই নিজের জন্য সবচেয়ে বড় উপহার—আপনার স্বপ্নগুলো, অনুভূতির গভীরতা, ও প্রাণের উচ্ছ্বাস অন্যকে আলো দেয়। কখনও নিজেকে ছোট ভাববেন না; যেভাবে আপনি অন্যকে ভালোবাসেন, সেখানে ফিরেও সেই ভালোবাসার আলোর ছায়া পড়বেই। আপনার পথচলা যেন হয়ে ওঠে সাহস, আনন্দ আর গভীর মানবিকতায় ভরা—ঠিক যেমন আপনি।
-
----
-
-এখন, নিম্নলিখিত MBTI ব্যক্তিত্বের ধরণের জন্য এই ফরম্যাটে বর্ণনা তৈরি করুন:
-
-ব্যক্তিত্বের ধরণ: ${type}
-`;
-            // For initial_description, responseSchema is NOT set here, as the backend expects plain text.
-            // The backend's server.js will handle sending it as plain text to OpenAI.
         } else if (promptKey === 'career_sub_prompt') {
-            // MODIFIED: Added explicit JSON instruction to the promptText for OpenAI
-            promptText = `For MBTI personality type ${type}, provide expanded and modern career guidance in Bengali.The response must be a JSON object with:
-
-- \`career_guidance_message\`: (string) A warm, intuitive paragraph that explains what kind of career environments are ideal for this personality — e.g., team-based, solo, creative, structured, growth-driven. Mention emotional needs too (freedom, meaning, recognition, impact).
-
-- \`specific_actions\`: (array of strings) List 3–5 specific, actionable suggestions.
-  Examples:
-  - “একটি ফ্রিল্যান্সিং প্ল্যাটফর্মে প্রোফাইল খুলে লেখালেখি বা ডিজাইন শুরু করুন।”
-  - “একটি ডেটা অ্যানালাইসিস কোর্সে নাম লেখান এবং প্রজেক্ট তৈরি করে দেখান।”
-  - “নিজের একটি ব্র্যান্ড বা সেবার পেছনে কাজ শুরু করুন, ধাপে ধাপে।”
-All output must be in Bengali. Style should be coaching-focused and motivational, with real-world relevance. Output must be a valid JSON object only. **নিশ্চিত করুন যে আপনার প্রতিক্রিয়া একটি বৈধ JSON অবজেক্ট।**`; // Added explicit Bengali JSON instruction
-            responseSchema = {
-                type: "OBJECT",
-                properties: {
-                    career_guidance_message: { type: "STRING" },
-                    specific_actions: { type: "ARRAY", items: { type: "STRING" } }
-                },
-                required: ["career_guidance_message", "specific_actions"]
-            };
+            promptText = JSON.stringify({
+                type: type, // Pass the MBTI type for sub-prompts too
+                promptKey: promptKey
+            });
+            // responseSchema is for the backend to pass to OpenAI, not directly used here for frontend fetch.
         } else if (promptKey === 'relationship_sub_prompt') {
-            // MODIFIED: Added explicit JSON instruction to the promptText for OpenAI
-            promptText = `For MBTI personality type ${type}, provide deeper relationship and friendship guidance in Bengali.The response must be a JSON object with:
-
-- \`relationship_insight\`: (string) An emotional, intuitive paragraph explaining how this type typically behaves in love and friendships — their strengths, emotional needs, and common challenges. Should be heart-touching and insightful.
-
-- \`actionable_tips\`: (array of strings) 3–5 emotionally intelligent suggestions, examples:
-  - “নিজের চাওয়া-মনের কথা স্পষ্টভাবে প্রকাশ করতে শিখুন।”
-  - “সবসময় অন্যকে খুশি করতে গিয়ে নিজেকে ভুলে যাবেন না।”
-  - “ঘনিষ্ঠতা থেকে না পালিয়ে ধীরে ধীরে সম্পর্কের গভীরে প্রবেশ করুন।”
-Must be written in Bengali. Tone must feel like a wise friend or life coach offering heartfelt guidance.
-Output must be a valid JSON object. Do not include explanations outside the JSON format. **নিশ্চিত করুন যে আপনার প্রতিক্রিয়া একটি বৈধ JSON অবজেক্ট।**`; // Added explicit Bengali JSON instruction
-            responseSchema = {
-                type: "OBJECT",
-                properties: {
-                    relationship_insight: { type: "STRING" },
-                    actionable_tips: { type: "ARRAY", items: { type: "STRING" } }
-                },
-                required: ["relationship_insight", "actionable_tips"]
-            };
+            promptText = JSON.stringify({
+                type: type, // Pass the MBTI type for sub-prompts too
+                promptKey: promptKey
+            });
+            // responseSchema is for the backend to pass to OpenAI, not directly used here for frontend fetch.
         }
-
+        
         try {
-            console.log(`Prompt text being sent: ${promptText.substring(0, 100)}...`);
-            // Only log responseSchema if it's actually being used (i.e., not empty)
-            if (Object.keys(responseSchema).length > 0) {
-                console.log("Response schema being used:", JSON.stringify(responseSchema, null, 2));
-            } else {
-                console.log("No response schema being used (expecting plain text).");
-            }
-
-
-            const chatHistory = [{ role: "user", parts: [{ text: promptText }] }];
+            console.log(`Prompt text being sent to backend: ${promptText.substring(0, 100)}...`);
+            // Frontend passes structured data to backend, not plain text prompt
             const payload = {
-                contents: chatHistory,
-                // Only include generationConfig if a schema is defined (for sub-prompts)
-                ...(Object.keys(responseSchema).length > 0 && {
-                    generationConfig: {
-                        responseMimeType: "application/json",
-                        responseSchema: responseSchema
-                    }
-                })
+                contents: [{
+                    role: "user",
+                    parts: [{ text: promptText }] // This will be JSON.stringified promptText
+                }],
+                // generationConfig should not be sent from frontend; backend controls OpenAI model parameters.
             };
 
-            const apiUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-                                    ? 'http://localhost:3001/generate-content'
-                                    : `${import.meta.env.VITE_APP_BACKEND_URL}/generate-content`;
+            // *** FIX: Use VITE_APP_BACKEND_URL for local development as well ***
+            const apiUrl = `${import.meta.env.VITE_APP_BACKEND_URL}/generate-content`; 
 
             console.log("Frontend attempting to call backend at:", apiUrl);
 
@@ -518,23 +432,26 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
             if (result.candidates && result.candidates.length > 0 &&
                 result.candidates[0].content && result.candidates[0].content.parts &&
                 result.candidates[0].content.parts.length > 0) {
-                const textContent = result.candidates[0].content.parts[0].text; // This is now the raw text from backend
+                
+                // *** FIX: ALWAYS parse the textContent received from backend as JSON ***
+                const textContent = result.candidates[0].content.parts[0].text; 
+                let parsedDescriptionData;
+                try {
+                    parsedDescriptionData = JSON.parse(textContent);
+                    console.log("Successfully parsed backend response as JSON.");
+                } catch (jsonParseError) {
+                    console.error("Error parsing backend JSON response:", jsonParseError, "Raw text:", textContent);
+                    showMessage("বিস্তারিত তথ্য লোড করতে সমস্যা হয়েছে। (অবৈধ প্রতিক্রিয়া)", 'error');
+                    throw new Error("Failed to parse JSON response from backend.");
+                }
 
-                // For initial_description, we expect raw text, not JSON
                 if (promptKey === 'initial_description') {
-                    setStructuredDescription({ general_summary: textContent }); // Store as a simple object with the full text
-                    console.log("Structured description state updated successfully with raw text.");
+                    // structuredDescription now directly holds the fully parsed object
+                    setStructuredDescription(parsedDescriptionData); 
+                    console.log("Structured description state updated successfully with parsed JSON.");
                 } else {
-                    // For sub-prompts, we still expect JSON
-                    try {
-                        const parsedData = JSON.parse(textContent);
-                        setSubPromptResult(parsedData);
-                        console.log("Sub-prompt result state updated successfully with parsed JSON.");
-                    } catch (jsonParseError) {
-                        console.error("Error parsing sub-prompt JSON:", jsonParseError, "Raw text:", textContent);
-                        showMessage("বিস্তারিত তথ্য লোড করতে সমস্যা হয়েছে। (অবৈধ প্রতিক্রিয়া)", 'error');
-                        throw new Error("Failed to parse sub-prompt JSON from backend.");
-                    }
+                    setSubPromptResult(parsedDescriptionData);
+                    console.log("Sub-prompt result state updated successfully with parsed JSON.");
                 }
                 setMessage('');
                 console.log("Loading message cleared after successful fetch.");
@@ -554,7 +471,15 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
             }
             if (promptKey === 'initial_description') {
                 // Fallback for initial description when it fails
-                setStructuredDescription({general_summary: "বিস্তারিত বর্ণনা লোড করতে সমস্যা হয়েছে। অনুগ্রহ করে পুনরায় চেষ্টা করুন।", strengths: [], challenges: [], career_advice: [], relationship_tips: [], self_improvement_habits: [], coach_message: ""});
+                setStructuredDescription({
+                    type: resultType, // Use the calculated type
+                    name: personalityTypesData[resultType]?.name || 'Unknown Type Name',
+                    description_line1: personalityTypesData[resultType]?.description || 'Unknown Type Description',
+                    description_line2: '',
+                    description_line3: '',
+                    general_summary: "বিস্তারিত বর্ণনা লোড করতে সমস্যা হয়েছে। অনুগ্রহ করে পুনরায় চেষ্টা করুন।",
+                    strengths: [], challenges: [], career_advice: [], relationship_tips: [], self_improvement_habits: [], coach_message: ""
+                });
                 console.log("Set fallback structured description.");
             } else {
                 setSubPromptResult({message: "বিস্তারিত তথ্য লোড করতে সমস্যা হয়েছে। অনুগ্রহ করে পুনরায় চেষ্টা করুন।", items: []});
@@ -575,6 +500,21 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
         setSubScreen(null);
         setSubPromptResult(null);
         setMessage('');
+    };
+
+    // Helper for rendering lists (strengths, challenges etc.)
+    const renderListItems = (items, typeKey, subKey, adviceKey) => {
+        if (!Array.isArray(items) || items.length === 0) return null;
+        return (
+            <ul className="list-disc list-inside space-y-2 text-base sm:text-lg mx-auto text-left max-w-full">
+                {items.map((item, index) => (
+                    <li key={index}>
+                        <strong>{item[typeKey]}:</strong> {item[subKey]}{adviceKey && item[adviceKey] ? ` — ${item[adviceKey]}` : ''}
+                        {item.action && ` | পদক্ষেপ: ${item.action}`} {/* For career advice action */}
+                    </li>
+                ))}
+            </ul>
+        );
     };
 
     return (
@@ -828,14 +768,20 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
                     <div className="bg-white rounded-2xl shadow p-6 w-full max-w-2xl mx-auto text-center">
                         <h2 className="text-3xl sm:text-4xl mb-4 text-green-700">আপনার ব্যক্তিত্বের ধরণ:</h2>
                         <p className="text-5xl sm:text-6xl font-bold mb-6 text-blue-700">
-                            {resultType}
+                            {structuredDescription?.type || resultType} {/* Use parsed type or fallback to calculated */}
                         </p>
                         <p className="text-xl sm:text-2xl font-semibold mb-2">
-                            {personalityTypesData[resultType]?.name || 'Unknown Type'}
+                            {structuredDescription?.name || personalityTypesData[resultType]?.name || 'Unknown Type'} {/* Use parsed name or fallback */}
                         </p>
                         <p className="text-lg sm:text-xl mb-4">
-                            {personalityTypesData[resultType]?.description || ''}
+                            {structuredDescription?.description_line1 || personalityTypesData[resultType]?.description || ''} {/* Use parsed description line 1 or fallback */}
                         </p>
+                        {structuredDescription?.description_line2 && (
+                            <p className="text-lg sm:text-xl mb-4">{structuredDescription.description_line2}</p>
+                        )}
+                        {structuredDescription?.description_line3 && (
+                            <p className="text-lg sm:text-xl mb-4">{structuredDescription.description_line3}</p>
+                        )}
 
                         <div className="mt-8 p-4 bg-gray-50 rounded-lg shadow-inner text-left">
                             {isGeneratingDescription || isGeneratingSubPrompt ? (
@@ -879,15 +825,54 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
                                             )}
                                         </div>
                                     ) : (
-                                        // Main result description sections (no individual section animation)
+                                        // Main result description sections (displaying all structuredDescription fields)
                                         structuredDescription ? (
                                             <React.Fragment>
-                                                {console.log("Rendering structuredDescription content. Data present:", structuredDescription)}
-                                                {/* The main description is now a single string from the backend */}
                                                 {structuredDescription.general_summary && (
-                                                    <div className="mb-4 text-base sm:text-lg whitespace-pre-wrap text-left">
-                                                        {/* Render the raw text directly */}
+                                                    <div className="mb-6 text-base sm:text-lg whitespace-pre-wrap text-left">
                                                         {structuredDescription.general_summary}
+                                                    </div>
+                                                )}
+
+                                                {structuredDescription.strengths && structuredDescription.strengths.length > 0 && (
+                                                    <div className="mb-6">
+                                                        <h3 className="text-xl sm:text-2xl font-semibold mb-3 text-purple-700 text-left">আপনার প্রধান শক্তি:</h3>
+                                                        {renderListItems(structuredDescription.strengths, 'name', 'explanation')}
+                                                    </div>
+                                                )}
+
+                                                {structuredDescription.challenges && structuredDescription.challenges.length > 0 && (
+                                                    <div className="mb-6">
+                                                        <h3 className="text-xl sm:text-2xl font-semibold mb-3 text-red-700 text-left">আপনার চ্যালেঞ্জ:</h3>
+                                                        {renderListItems(structuredDescription.challenges, 'description', 'advice')}
+                                                    </div>
+                                                )}
+
+                                                {structuredDescription.career_advice && structuredDescription.career_advice.length > 0 && (
+                                                    <div className="mb-6">
+                                                        <h3 className="text-xl sm:text-2xl font-semibold mb-3 text-blue-700 text-left">ক্যারিয়ার পরামর্শ:</h3>
+                                                        {renderListItems(structuredDescription.career_advice, 'field', 'reason', 'action')}
+                                                    </div>
+                                                )}
+
+                                                {structuredDescription.relationship_tips && structuredDescription.relationship_tips.length > 0 && (
+                                                    <div className="mb-6">
+                                                        <h3 className="text-xl sm:text-2xl font-semibold mb-3 text-pink-700 text-left">সম্পর্ক ও বন্ধুত্ব:</h3>
+                                                        {renderListItems(structuredDescription.relationship_tips, 'general_behavior', 'tip')}
+                                                    </div>
+                                                )}
+
+                                                {structuredDescription.self_improvement_habits && structuredDescription.self_improvement_habits.length > 0 && (
+                                                    <div className="mb-6">
+                                                        <h3 className="text-xl sm:text-2xl font-semibold mb-3 text-green-700 text-left">আত্মউন্নয়নের অভ্যাস:</h3>
+                                                        {renderListItems(structuredDescription.self_improvement_habits, 'habit', 'benefit')}
+                                                    </div>
+                                                )}
+
+                                                {structuredDescription.coach_message && (
+                                                    <div className="mb-4 text-base sm:text-lg italic text-gray-700 text-left border-l-4 border-gray-400 pl-4 py-2">
+                                                        <p className="font-semibold text-gray-800">কোচের বার্তা:</p>
+                                                        {structuredDescription.coach_message}
                                                     </div>
                                                 )}
                                             </React.Fragment>
