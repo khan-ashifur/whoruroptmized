@@ -250,7 +250,7 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
       model: "gpt-4o",
       messages: [{ role: 'user', content: promptText }],
       temperature: generationConfig?.temperature || 0.7,
-      max_tokens: generationConfig?.maxOutputTokens || 1500,
+      max_tokens: 4000, // *** MODIFIED: Increased max_tokens ***
       ...(Object.keys(responseSchema).length > 0 && {
         response_format: { type: "json_object" }
       })
@@ -293,21 +293,32 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
     }
     
     // Clean and validate the final response data before sending to frontend
-    // *** MODIFIED: Simplified and corrected data cleaning logic ***
-    let cleanedResultData = {}; // Start with an empty object
+    // *** MODIFIED: Simplified and corrected data cleaning logic to prevent data stripping ***
+    let cleanedResultData = { ...defaultStructuredDescription }; // Start with defaults
 
-    // Populate cleanedResultData by iterating over the default structure keys
-    // This ensures all expected keys are present, even if AI misses them.
+    // Iterate over the keys we EXPECT in the final output (from defaultStructuredDescription)
     for (const key of defaultStructuredDescriptionKeys) {
-        // Check if the key exists in AI's response and is not null/undefined
+        // If the key exists in the AI's parsed response and is not explicitly null/undefined
         if (finalResponseData.hasOwnProperty(key) && finalResponseData[key] !== null && finalResponseData[key] !== undefined) {
-            const expectedDefaultValue = defaultStructuredDescription[key];
+            const expectedTypeInDefault = typeof defaultStructuredDescription[key];
+            const isExpectedArray = Array.isArray(defaultStructuredDescription[key]);
+            const actualValue = finalResponseData[key];
 
-            if (typeof expectedDefaultValue === 'string') {
-                cleanedResultData[key] = cleanAndTrimText(finalResponseData[key]);
-            } else if (Array.isArray(expectedDefaultValue)) {
-                if (Array.isArray(finalResponseData[key])) { // Ensure the AI's response is also an array
-                    cleanedResultData[key] = finalResponseData[key].map(item => {
+            // Handle strings
+            if (expectedTypeInDefault === 'string') {
+                if (typeof actualValue === 'string') {
+                    cleanedResultData[key] = cleanAndTrimText(actualValue);
+                } else {
+                    // AI sent non-string for an expected string field
+                    cleanedResultData[key] = defaultStructuredDescription[key]; // Default to empty string
+                    console.warn(`Key '${key}' from AI was not a string (expected string). Set to default.`);
+                }
+            } 
+            // Handle arrays
+            else if (isExpectedArray) {
+                if (Array.isArray(actualValue)) { // Ensure the AI's response is also an array
+                    cleanedResultData[key] = actualValue.map(item => {
+                        // Clean individual items within the array (strings and objects within arrays)
                         if (typeof item === 'string') return cleanAndTrimText(item);
                         if (typeof item === 'object' && item !== null) {
                             const cleanedItem = {};
@@ -316,7 +327,7 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
                             }
                             return cleanedItem;
                         }
-                        return item;
+                        return item; // Return non-string/non-object as is
                     }).filter(item => {
                         // Filter out empty strings or objects where all values are empty after cleaning
                         if (typeof item === 'string') return item.length > 0;
@@ -325,16 +336,23 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
                     });
                 } else {
                     // AI sent something not an array for an expected array field
-                    cleanedResultData[key] = expectedDefaultValue; // Default to empty array
+                    cleanedResultData[key] = defaultStructuredDescription[key]; // Default to empty array
                     console.warn(`Key '${key}' from AI was not an array (expected array). Set to default.`);
                 }
-            } else if (typeof expectedDefaultValue === 'object' && expectedDefaultValue !== null) {
-                // For direct object copies if there were any, but our top-level are strings/arrays.
-                // This will catch if AI provides a non-array object for an array key, and we just assign it directly IF it's not a primitive.
-                cleanedResultData[key] = finalResponseData[key];
+            }
+            // If it's an object (which our top-level expected fields are not, other than personality_type_info which is handled earlier)
+            // or if it's a new unexpected top-level object, just copy it as is.
+            else if (typeof expectedDefaultValue === 'object' && expectedDefaultValue !== null) {
+                // This case handles general objects. Given our default schema, this is unlikely for direct top-level keys
+                // but included for robustness if schema changes or AI deviates.
+                 cleanedResultData[key] = actualValue;
+            } else {
+                // Catch-all for unexpected types that are present, but don't match expected string/array/object types
+                cleanedResultData[key] = defaultStructuredDescription[key];
+                console.warn(`Key '${key}' from AI was an unexpected primitive type. Set to default.`);
             }
         } else {
-            // Key expected in output but not present in AI response, or was null/undefined, so use its default empty value
+            // Key expected in output but not present in AI response (or was null/undefined), so use its default empty value
             cleanedResultData[key] = defaultStructuredDescription[key];
             console.warn(`Key '${key}' expected but not found/valid in AI response. Using default empty value.`);
         }
