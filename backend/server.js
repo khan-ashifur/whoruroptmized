@@ -57,18 +57,18 @@ app.get('/', (req, res) => {
 // Define default empty structured object for reliable frontend rendering
 // IMPORTANT: Updated to include type, name, description_line1/2/3 to match expected output from AI and frontend
 const defaultStructuredDescription = {
-    type: "", 
-    name: "", 
-    description_line1: "", 
-    description_line2: "", 
-    description_line3: "", 
-    general_summary: "",
-    strengths: [],
-    challenges: [],
-    career_advice: [],
-    relationship_tips: [],
-    self_improvement_habits: [],
-    coach_message: ""
+    type: "", 
+    name: "", 
+    description_line1: "", 
+    description_line2: "", 
+    description_line3: "", 
+    general_summary: "",
+    strengths: [],
+    challenges: [],
+    career_advice: [],
+    relationship_tips: [],
+    self_improvement_habits: [],
+    coach_message: ""
 };
 
 // Define defaultStructuredDescriptionKeys globally for consistent mapping in regex fallback
@@ -76,12 +76,12 @@ const defaultStructuredDescriptionKeys = Object.keys(defaultStructuredDescriptio
 
 // Function to clean individual text items (e.g., list items)
 const cleanAndTrimText = (text) => {
-    if (typeof text !== 'string') return "";
-    return text.replace(/^- /, '') // Remove leading dash and space
-               .replace(/(\d+\.?\s*[\-.]?\s*)/g, '') // Remove numbers (e.g., "1.", "2. ") and their separators
-               .replace(/[🔥⚠️🧭❤️🧠🗣️✅•]/g, '') // Remove emojis and common bullet symbols
-               .replace(/\s+/g, ' ') // Replace multiple spaces/newlines with single space
-               .trim();
+    if (typeof text !== 'string') return "";
+    return text.replace(/^- /, '') // Remove leading dash and space
+               .replace(/(\d+\.?\s*[\-.]?\s*)/g, '') // Remove numbers (e.g., "1.", "2. ") and their separators
+               .replace(/[🔥⚠️🧭❤️🧠🗣️✅•]/g, '') // Remove emojis and common bullet symbols
+               .replace(/\s+/g, ' ') // Replace multiple spaces/newlines with single space
+               .trim();
 };
 
 
@@ -119,7 +119,7 @@ app.post('/generate-content', async (req, res) => {
 প্রিয় OpenAI,
 আপনি একজন অত্যন্ত দক্ষ এবং অভিজ্ঞ বাংলা ভাষাভাষী জীবন কোচ। আপনার ভাষার ব্যবহার হবে অত্যন্ত মার্জিত এবং শ্রদ্ধাপূর্ণ। আপনার প্রতিটি শব্দ, বাক্য এবং অনুচ্ছেদে কঠোরভাবে 'আপনি' সম্বোধন ব্যবহার করবেন, কোনো অবস্থাতেই 'তুমি' ব্যবহার করা যাবে না। আপনার উত্তর সংক্ষিপ্ত, সরাসরি এবং কার্যকর হবে। অহেতুক নাটকীয়তা, চটকদার শব্দচয়ন বা "জেন-জেড" স্টাইলের অভিব্যক্তি সম্পূর্ণরূপে পরিহার করুন। এমনভাবে লিখুন যেন একজন মধ্যবয়সী, চিন্তাশীল ব্যক্তি আপনার পরামর্শগুলি সহজে বুঝতে পারে এবং সেগুলো তার জীবনে প্রয়োগ করতে আগ্রহী হয়। আপনার লেখার ধরণ হবে আবেগপ্রবণ কিন্তু সহজ-সরল, স্পষ্ট এবং মার্জিত বাংলা ভাষায়।
 
-এই ব্যক্তিত্ব প্রোফাইলটি জংগিয়ান কগনিটিভ থিওরি এবং ১৬টি ব্যক্তিত্ব আর্কিটাইপের উপর ভিত্তি করে তৈরি হয়েছে।
+এই ব্যক্তিত্ব প্রোফাইলটি জংগিয়ান কগনিটিভ থিওরি এবং ১৬টি ব্যক্তিত্ব আর্কিটাইপের উপর ভিত্তি করে তৈরি হয়েছে।
 
 ব্যক্তিত্বের ধরণ "${mbtiTypeFromFrontend}" (${mbtiTypeName} - ${mbtiTypeDescription}) এর জন্য একটি গভীর অন্তর্দৃষ্টিপূর্ণ, আবেগপ্রবণ এবং সাংস্কৃতিকভাবে প্রাসঙ্গিক বর্ণনা একটি JSON অবজেক্ট আকারে তৈরি করুন। আপনার উত্তরে কোনো ধরনের ভূমিকা, অতিরিক্ত টেক্সট, বা "ব্যক্তিত্বের ধরণ:" এর মতো কোনো লাইন অন্তর্ভুক্ত করবেন না। আপনার উত্তরটি সরাসরি JSON অবজেক্ট দিয়ে শুরু হবে।
 
@@ -293,45 +293,45 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
         // Sub-prompts are already expected to be JSON from the AI
         finalResponseData = JSON.parse(generatedTextContent); // Assuming sub-prompts always return valid JSON
     }
-    
-    // Clean and validate the final response data before sending to frontend
-    let cleanedResultData = { ...defaultStructuredDescription };
+    
+    // Clean and validate the final response data before sending to frontend
+    let cleanedResultData = { ...defaultStructuredDescription };
 
-    for (const key in finalResponseData) {
-        if (defaultStructuredDescriptionKeys.includes(key)) {
-            if (typeof finalResponseData[key] === 'string') {
-                cleanedResultData[key] = cleanAndTrimText(finalResponseData[key]);
-            } else if (Array.isArray(finalResponseData[key])) {
-                cleanedResultData[key] = finalResponseData[key].map(item => {
-                    if (typeof item === 'string') return cleanAndTrimText(item);
-                    if (typeof item === 'object' && item !== null) {
-                        const cleanedItem = {};
-                        for (const subKey in item) {
-                            cleanedItem[subKey] = cleanAndTrimText(item[subKey]);
-                        }
-                        return cleanedItem;
-                    }
-                    return item;
-                }).filter(item => {
-                    if (typeof item === 'string') return item.length > 0;
-                    if (typeof item === 'object' && item !== null) return Object.values(item).some(val => typeof val === 'string' ? val.length > 0 : true);
-                    return false;
-                });
-            } else if (typeof finalResponseData[key] === 'object' && finalResponseData[key] !== null) {
-                if (['general_summary', 'coach_message', 'type', 'name', 'description_line1', 'description_line2', 'description_line3'].includes(key) && typeof finalResponseData[key] !== 'string') {
-                    cleanedResultData[key] = defaultStructuredDescription[key]; // Should be string, but AI gave object
-                    console.warn(`Key ${key} was an unexpected object for a string value. Set to default.`);
-                } else if (Array.isArray(defaultStructuredDescription[key]) && typeof finalResponseData[key] !== 'array') { // If AI gave object for an expected array
-                    cleanedResultData[key] = defaultStructuredDescription[key]; // Default to empty array
-                    console.warn(`Key ${key} was an unexpected object (expected array). Set to default.`);
-                } else {
-                    cleanedResultData[key] = finalResponseData[key];
-                }
-            }
-        } else {
-            console.warn(`Unexpected key '${key}' found in AI response and ignored.`);
-        }
-    }
+    for (const key in finalResponseData) {
+        if (defaultStructuredDescriptionKeys.includes(key)) {
+            if (typeof finalResponseData[key] === 'string') {
+                cleanedResultData[key] = cleanAndTrimText(finalResponseData[key]);
+            } else if (Array.isArray(finalResponseData[key])) {
+                cleanedResultData[key] = finalResponseData[key].map(item => {
+                    if (typeof item === 'string') return cleanAndTrimText(item);
+                    if (typeof item === 'object' && item !== null) {
+                        const cleanedItem = {};
+                        for (const subKey in item) {
+                            cleanedItem[subKey] = cleanAndTrimText(item[subKey]);
+                        }
+                        return cleanedItem;
+                    }
+                    return item;
+                }).filter(item => {
+                    if (typeof item === 'string') return item.length > 0;
+                    if (typeof item === 'object' && item !== null) return Object.values(item).some(val => typeof val === 'string' ? val.length > 0 : true);
+                    return false;
+                });
+            } else if (typeof finalResponseData[key] === 'object' && finalResponseData[key] !== null) {
+                if (['general_summary', 'coach_message', 'type', 'name', 'description_line1', 'description_line2', 'description_line3'].includes(key) && typeof finalResponseData[key] !== 'string') {
+                    cleanedResultData[key] = defaultStructuredDescription[key]; // Should be string, but AI gave object
+                    console.warn(`Key ${key} was an unexpected object for a string value. Set to default.`);
+                } else if (Array.isArray(defaultStructuredDescription[key]) && typeof finalResponseData[key] !== 'array') { // If AI gave object for an expected array
+                    cleanedResultData[key] = defaultStructuredDescription[key]; // Default to empty array
+                    console.warn(`Key ${key} was an unexpected object (expected array). Set to default.`);
+                } else {
+                    cleanedResultData[key] = finalResponseData[key];
+                }
+            }
+        } else {
+            console.warn(`Unexpected key '${key}' found in AI response and ignored.`);
+        }
+    }
 
 
     const finalResponse = {
@@ -341,3 +341,52 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
             parts: [
               {
                 text: JSON.stringify(cleanedResultData) // Stringify the cleaned data before sending to frontend
+              }
+            ]
+          }
+        }
+      ]
+    };
+
+    console.log("Sending final response to frontend:", JSON.stringify(finalResponse, null, 2));
+    res.json(finalResponse);
+
+  } catch (error) {
+    console.error("--- OpenAI API Call Failed or Unhandled Error ---");
+    console.error("  Error message:", error.message);
+    console.error("  Error name:", error.name);
+    if (error.status) console.error("  HTTP Status:", error.status);
+    if (error.code) console.error("  OpenAI Error Code:", error.code);
+    if (error.type) console.error("  OpenAI Error Type:", error.type);
+    if (error.param) console.error("  OpenAI Error Param:", error.param);
+    if (error.response && error.response.data) {
+        console.error("  Full error object (raw):", JSON.stringify(error.response.data, null, 2));
+    } else {
+        console.error("  Full error object (raw):", JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
+    }
+
+    const errorMessage = error.message || 'An unknown error occurred with the OpenAI API.';
+    const statusCode = error.status || 500;
+
+    res.status(statusCode).json({ error: errorMessage });
+  }
+});
+
+app.use((err, req, res, next) => {
+  console.error('--- Unhandled Application Error ---');
+  console.error('Error details:', err);
+  res.status(500).json({ error: err.message || 'Internal Server Error (Unhandled)' });
+});
+
+app.use((req, res) => {
+  res.status(404).json({
+    error: 'Endpoint not found',
+    method: req.method,
+    path: req.originalUrl
+  });
+});
+
+app.listen(port, '0.0.0.0', () => {
+  console.log(`✅ Server running on http://0.0.0.0:${port}`);
+  console.log(`Frontend URL for CORS: ${frontendUrl}`);
+});
