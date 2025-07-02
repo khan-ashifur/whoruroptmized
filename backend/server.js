@@ -119,7 +119,7 @@ app.post('/generate-content', async (req, res) => {
 
 এই ব্যক্তিত্ব প্রোফাইলটি জংগিয়ান কগনিটিভ থিওরি এবং ১৬টি ব্যক্তিত্ব আর্কিটাইপের উপর ভিত্তি করে তৈরি হয়েছে।
 
-ব্যক্তিত্বের ধরণ "${mbtiTypeFromFrontend}" (${mbtiTypeName} - ${mbtiTypeDescription}) এর জন্য একটি গভীর অন্তর্দৃষ্টিপূর্ণ, আবেগপ্রবণ এবং সাংস্কৃতিকভাবে প্রাসঙ্গিক বর্ণনা একটি JSON অবজেক্ট আকারে তৈরি করুন। আপনার উত্তরে কোনো ধরনের ভূমিকা, অতিরিক্ত টেক্সট, বা "ব্যক্তিত্বের ধরণ:" এর মতো কোনো লাইন অন্তর্ভুক্ত করবেন না। আপনার উত্তরটি সরাসরি JSON অবজেক্ট দিয়ে শুরু হবে।
+ব্যক্তিত্বের ধরণ "${mbtiTypeFromFrontend}" (${mbtiTypeName} - ${mbtiTypeDescription}) এর জন্য একটি গভীর অন্তর্দৃষ্টিপূর্ণ, আবেগপ্রবণ এবং সাংস্কৃতিকভাবে প্রাসঙ্গিক বর্ণনা একটি JSON অবজেক্ট আকারে তৈরি করুন। আপনার উত্তরে কোনো ধরনের ভূমিকা, অতিরিক্ত টেক্সট, বা "ব্যক্তিত্বের ধরণ:" এর মতো কোনো লাইন অন্তর্ভুক্ত করবেন না। আপনার উত্তরটি সরাসরি JSON অবজেクト দিয়ে শুরু হবে।
 
 JSON অবজেক্টের নিম্নলিখিত কীগুলি এবং তাদের মানগুলি থাকতে হবে:
 - \`personality_type_info\`: (object) এই অবজেক্টে নিম্নলিখিত কীগুলি থাকবে:
@@ -296,51 +296,59 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
     // *** CRITICAL MODIFIED SECTION: Directly populating cleanedResultData ***
     let cleanedResultData = {}; // Start with an empty object
 
-    // Populate cleanedResultData by iterating over the default structure keys
-    // This ensures all expected keys are present, even if AI misses them.
-    for (const key of defaultStructuredDescriptionKeys) {
-        // If the key exists in AI's parsed response and is not explicitly null/undefined
-        if (finalResponseData.hasOwnProperty(key) && finalResponseData[key] !== null && finalResponseData[key] !== undefined) {
-            const expectedDefaultValue = defaultStructuredDescription[key];
+    // Populate cleanedResultData by explicitly assigning each field and cleaning it
+    // This is a direct, robust copy to ensure data integrity and presence of expected fields.
+    
+    // String fields
+    cleanedResultData.type = cleanAndTrimText(finalResponseData.type || "");
+    cleanedResultData.name = cleanAndTrimText(finalResponseData.name || "");
+    cleanedResultData.description_line1 = cleanAndTrimText(finalResponseData.description_line1 || "");
+    cleanedResultData.description_line2 = cleanAndTrimText(finalResponseData.description_line2 || "");
+    cleanedResultData.description_line3 = cleanAndTrimText(finalResponseData.description_line3 || "");
+    cleanedResultData.general_summary = cleanAndTrimText(finalResponseData.general_summary || "");
+    cleanedResultData.coach_message = cleanAndTrimText(finalResponseData.coach_message || "");
 
-            if (typeof expectedDefaultValue === 'string') {
-                cleanedResultData[key] = cleanAndTrimText(finalResponseData[key]);
-            } else if (Array.isArray(expectedDefaultValue)) {
-                if (Array.isArray(finalResponseData[key])) { // Ensure the AI's response is also an array
-                    cleanedResultData[key] = finalResponseData[key].map(item => {
-                        if (typeof item === 'string') return cleanAndTrimText(item);
-                        if (typeof item === 'object' && item !== null) {
-                            const cleanedItem = {};
-                            for (const subKey in item) {
-                                cleanedItem[subKey] = cleanAndTrimText(item[subKey]);
-                            }
-                            return cleanedItem;
-                        }
-                        return item;
-                    }).filter(item => {
-                        // Filter out empty strings or objects where all values are empty after cleaning
-                        if (typeof item === 'string') return item.length > 0;
-                        if (typeof item === 'object' && item !== null) return Object.values(item).some(val => typeof val === 'string' ? val.length > 0 : true);
-                        return false;
-                    });
-                } else {
-                    // AI sent something not an array for an expected array field
-                    cleanedResultData[key] = expectedDefaultValue; // Default to empty array
-                    console.warn(`Key '${key}' from AI was not an array (expected array). Set to default.`);
-                }
-            } else if (typeof expectedDefaultValue === 'object' && expectedDefaultValue !== null) {
-                // For direct object copies if there were any, but our top-level are strings/arrays.
-                // This will catch if AI provides a non-array object for an array key, and we just assign it directly IF it's not a primitive.
-                 cleanedResultData[key] = finalResponseData[key];
-            } else {
-                // Catch-all for unexpected types that are present, but don't match expected string/array/object types
-                cleanedResultData[key] = defaultStructuredDescription[key];
-                console.warn(`Key '${key}' from AI was an unexpected primitive type. Set to default.`);
-            }
-        } else {
-            // Key expected in output but not present in AI response (or was null/undefined), so use its default empty value
+    // Array fields
+    cleanedResultData.strengths = Array.isArray(finalResponseData.strengths) ? 
+        finalResponseData.strengths.map(item => ({
+            name: cleanAndTrimText(item.name || ""),
+            explanation: cleanAndTrimText(item.explanation || "")
+        })).filter(item => item.name || item.explanation) : [];
+
+    cleanedResultData.challenges = Array.isArray(finalResponseData.challenges) ? 
+        finalResponseData.challenges.map(item => ({
+            description: cleanAndTrimText(item.description || ""),
+            advice: cleanAndTrimText(item.advice || "")
+        })).filter(item => item.description || item.advice) : [];
+
+    cleanedResultData.career_advice = Array.isArray(finalResponseData.career_advice) ? 
+        finalResponseData.career_advice.map(item => ({
+            field: cleanAndTrimText(item.field || ""),
+            reason: cleanAndTrimText(item.reason || ""),
+            action: cleanAndTrimText(item.action || "")
+        })).filter(item => item.field || item.reason || item.action) : []; 
+
+    cleanedResultData.relationship_tips = Array.isArray(finalResponseData.relationship_tips) ? 
+        finalResponseData.relationship_tips.map(item => ({
+            general_behavior: cleanAndTrimText(item.general_behavior || ""),
+            tip: cleanAndTrimText(item.tip || "")
+        })).filter(item => item.general_behavior || item.tip) : [];
+
+    cleanedResultData.self_improvement_habits = Array.isArray(finalResponseData.self_improvement_habits) ? 
+        finalResponseData.self_improvement_habits.map(item => ({
+            habit: cleanAndTrimText(item.habit || ""),
+            benefit: cleanAndTrimText(item.benefit || "")
+        })).filter(item => item.habit || item.benefit) : [];
+    
+    // Final fallback to defaultStructuredDescription for any keys that were completely missing
+    // This loop ensures that cleanedResultData has ALL the keys defined in defaultStructuredDescription
+    // with their appropriate types, even if AI didn't provide them at all.
+    for (const key of defaultStructuredDescriptionKeys) {
+        if (!cleanedResultData.hasOwnProperty(key) || cleanedResultData[key] === null || cleanedResultData[key] === undefined || 
+            (typeof defaultStructuredDescription[key] === 'string' && cleanedResultData[key] === '') ||
+            (Array.isArray(defaultStructuredDescription[key]) && Array.isArray(cleanedResultData[key]) && cleanedResultData[key].length === 0))
+        {
             cleanedResultData[key] = defaultStructuredDescription[key];
-            console.warn(`Key '${key}' expected but not found/valid in AI response. Using default empty value.`);
         }
     }
     // --- END CRITICAL MODIFIED SECTION ---
