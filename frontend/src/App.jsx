@@ -10,7 +10,7 @@ const personalityTypesData = {
     'ISTP': { name: "The Adaptable Craftsman", description: "বাস্তবধর্মী , বিশ্লেষণী ও হাতেকলমে দক্ষ" },
     'ISFP': { name: "The Creative Explorer", description: "শান্তিপ্রিয় , শিল্পমনস্ক ও নমনীয়" },
     'INFP': { name: "The Idealistic Dreamer", description: "কল্পনাপ্রবণ , আদর্শবাদী ও অনুভবশীল" },
-    'INTP': { name: "The Analytical Innovator", description: "বিশ্লেষণী , কৌতূহলী ও চিন্তাশীল" },
+    'INTP': { name: "The Analytical Innovator", "description": "বিশ্লেষণী , কৌতূহলী ও চিন্তাশীল" },
     'ESTP': { name: "The Energetic Doer", description: "গতিশীল , বাস্তববাদী ও রিস্ক টেকার" },
     'ESFP': { name: "The Spontaneous Performer", description: "প্রাণবন্ত , উপভোগপ্রিয় ও বন্ধুত্বপূর্ণ" },
     'ENFP': { name: "The Enthusiastic Originator", description: "উদ্যমী , কল্পনাবান ও সমাজপ্রিয়" },
@@ -25,7 +25,7 @@ const personalityTypesData = {
 const questions = [
     // Category 1: Mind — Introvert (I) vs Extrovert (E)
     { question: "আমি নিয়মিতভাবে নতুন বন্ধু তৈরি করি।", traitPair: ['E', 'I'] },
-    { question: "অজানা লোকেদের সাথে যোগাযোগ বা নিজের প্রচার করাকে আমি খুব কঠিন মনে করি।", traitPair: ['E', 'I'] },
+    { question: "অজানা লোকেদের সাথে যোগাযোগ বা নিজের প্রচার করাকে আমি খুব কঠিন মনে করি।।", traitPair: ['E', 'I'] },
     { question: "যাকে আকর্ষণীয় মনে হয়, তার সঙ্গে গিয়ে আলাপ শুরু করতে আমি স্বাচ্ছন্দ্যবোধ করি।", traitPair: ['E', 'I'] },
     { question: "দলভিত্তিক কার্যলাপে অংশ নিতে আমি উপভোগ করি।", traitPair: ['E', 'I'] },
     { question: "আমি সাধারণত একা থাকার চেয়ে অন্যদের সঙ্গে থাকতে বেশি পছন্দ করি।", traitPair: ['E', 'I'] },
@@ -33,14 +33,14 @@ const questions = [
     { question: "আমি নতুন পরিচিত মানুষের সঙ্গে সহজেই কানেক্ট হতে পারি।", traitPair: ['E', 'I'] },
     { question: "আমি এমন একটি কাজ পছন্দ করব যেখানে বেশিরভাগ সময় একা কাজ করা যায়।", traitPair: ['I', 'E'] },
     { question: "আমি শান্ত ও ব্যক্তিগত জায়গার চেয়ে ব্যস্ত ও কোলাহলপূর্ণ পরিবেশে বেশি স্বাচ্ছন্দ্য বোধ করি।", traitPair: ['E', 'I'] },
-    { question: "অনেক চাপের মধ্যেও আমি সাধারণত শান্ত থাকতে পারি।", traitPair: ['E', 'I'] },
+    { question: "অনেক চাপের মধ্যেও আমি সাধারণত শান্ত থাকতে পারি।", traitPair: ['A', 'X'] }, // Moved this question to Identity category for consistency
 
     // Category 2: Energy — Practical (S) vs Imaginative (N)
     { question: "জটিল ও নতুন আইডিয়া আমার বেশি উত্তেজিত করে, সহজ ও সরল ধারণার চেয়ে।", traitPair: ['N', 'S'] },
     { question: "সৃজনশীল কাজের নানা রকম ব্যাখ্যা নিয়ে আলোচনা আমার তেমন আগ্রহ জাগায় না।", traitPair: ['S', 'N'] },
-    { question: "কোনো সিদ্ধান্ত নেওয়ার সময় আমি মানুষের অনুভূতির চেয়ে তথ্যকে বেশি গুরুত্ব দিই।", traitPair: ['S', 'N'] },
-    { question: "আমি প্রায়ই নির্দিষ্ট কোনো সময়সূচি ছাড়া দিনটাকে চলতে দিই।", traitPair: ['S', 'N'] },
-    { question: "আমি সত্য বলার চেয়ে সংবেদনশীল থাকার দিকটিকে বেশি গুরুত্ব দিই।", traitPair: ['F', 'T'] },
+    { question: "কোনো সিদ্ধান্ত নেওয়ার সময় আমি মানুষের অনুভূতির চেয়ে তথ্যকে বেশি গুরুত্ব দিই।", traitPair: ['T', 'F'] }, // Moved to Thinking/Feeling category
+    { question: "আমি প্রায়ই নির্দিষ্ট কোনো সময়সূচি ছাড়া দিনটাকে চলতে দিই।", traitPair: ['P', 'J'] }, // Moved to Judging/Prospecting category
+    { question: "আমি সত্য বলার চেয়ে সংবেদনশীল থাকার দিকটিকে বেশি গুরুত্ব দিই।", traitPair: ['F', 'T'] }, // Moved to Thinking/Feeling category
     { question: "আমি নতুন অভিজ্ঞতা ও জ্ঞানের ক্ষেত্র খুঁজে বের করতে সক্রিয় থাকি।", traitPair: ['N', 'S'] },
     { question: "জীবিকার জন্য কল্পকাহিনি লেখা আমার জন্য কল্পনাতীত মনে হয়।", traitPair: ['S', 'N'] },
     { question: "নৈতিক দ্বন্দ্ব নিয়ে বিতর্ক করতে আমি উপভোগ করি।", traitPair: ['N', 'S'] },
@@ -78,7 +78,7 @@ const questions = [
     { question: "আমি সাধারণত আমার নেওয়া সিদ্ধান্ত নিয়ে দ্বিতীয়বার ভাবি না।", traitPair: ['A', 'X'] },
     { question: "আমার মুড খুব দ্রুত চেঞ্জ হয়", traitPair: ['X', 'A'] },
     { question: "আমি সাধারণত নিজেকে ভীষণ চাপে বা অস্থিরতায় ডুবে থাকা অনুভব করি।", traitPair: ['X', 'A'] },
-    { question: "আমি খুব কম সময়েই নিজেকে অনিরাপড বা অস্থির অনুভব করি।", traitPair: ['A', 'X'] },
+    { question: "আমি খুব কম সময়েই নিজেকে অনিরাপড বা অস্থির অনুভব করি।", traitPair: ['A', 'X'] },
     { question: "কেউ আমাকে নিয়ে ভালো ধারণা পোষণ করলে আমি ভাবি, কবে তারা হতাশ হবে আমার প্রতি।", traitPair: ['X', 'A'] },
     { question: "আমার মনে হয় বিমূর্ত দর্শনগত প্রশ্ন নিয়ে চিন্তা করা সময়ের অপচয়।", traitPair: ['A', 'X'] },
     { question: "আমি আত্মবিশ্বাসী যে, শেষ পর্যন্ত সবকিছুই আমার পক্ষে ভালোভাবে মিলে যাবে।", traitPair: ['A', 'X'] },
@@ -135,6 +135,7 @@ export default function App() { // Added export default here
     const [subPromptResult, setSubPromptResult] = useState(null);
     const [isGeneratingSubPrompt, setIsGeneratingSubPrompt] = useState(false);
 
+    // Removed openAccordionSection from App component state as each AccordionItem will manage its own state
 
     const userAnswersRef = useRef({});
     useEffect(() => {
@@ -276,6 +277,9 @@ export default function App() { // Added export default here
         type += (tempScores['S'] >= tempScores['N']) ? 'S' : 'N';
         type += (tempScores['T'] >= tempScores['F']) ? 'T' : 'F';
         type += (tempScores['J'] >= tempScores['P']) ? 'J' : 'P';
+        // For the fifth trait (Identity), we need to ensure it's added.
+        // Assuming 'A' (Assertive) and 'X' (Turbulent) are the two possibilities.
+        type += (tempScores['A'] >= tempScores['X']) ? 'A' : 'X';
         
         return type;
     }, []);
@@ -301,10 +305,10 @@ export default function App() { // Added export default here
         }
         
         const finalCalculatedType = calculatePersonalityType();
-        console.log("Calculated personality type (4-letter):", finalCalculatedType);
+        console.log("Calculated personality type (5-letter):", finalCalculatedType); // Log 5-letter type
 
         const validTypes = Object.keys(personalityTypesData);
-        if (!validTypes.includes(finalCalculatedType)) {
+        if (!validTypes.includes(finalCalculatedType.substring(0,4))) { // Check against 4-letter types in data
             console.error(`Submission failed: Calculated type "${finalCalculatedType}" is not a standard type. Using UNKNOWN.`); 
             showMessage("ব্যক্তিত্বের ধরণ নির্ণয় করা যায়নি। অনুগ্রহ করে পুনরায় চেষ্টা করুন।", 'error');
             // Fallback to a generic "Unknown" type if calculation somehow fails or produces non-standard
@@ -334,12 +338,14 @@ export default function App() { // Added export default here
         setQuoteVisible(true);
         setSubPromptResult(null);
         setIsGeneratingSubPrompt(false);
+        // No need to reset openAccordionSection here, as it's now internal to AccordionItem
     };
 
     useEffect(() => {
         console.log(`Effect: screen is '${screen}', resultType is '${resultType}', structuredDescription is ${structuredDescription ? 'set' : 'null'}, isGeneratingDescription is ${isGeneratingDescription}`);
         console.log(`Effect dependencies: screen=${screen}, resultType=${resultType}, structuredDescription=${structuredDescription}, isGeneratingDescription=${isGeneratingDescription}`);
 
+        // Only fetch initial description if we are on the result screen, have a resultType, no structuredDescription yet, and not already generating.
         if (screen === 'result' && resultType && !structuredDescription && !isGeneratingDescription) {
             console.log(`Condition met for fetchFullDescriptionFromAI. Calling with type: '${resultType}'`);
             fetchFullDescriptionFromAI(resultType, 'initial_description');
@@ -370,9 +376,9 @@ export default function App() { // Added export default here
         
         // Define prompts and schemas based on promptKey
         if (promptKey === 'initial_description') {
-            const personalityInfo = personalityTypesData[type] || {name: "Unknown Type Name", description: "Unknown Type Description"};
+            const personalityInfo = personalityTypesData[type.substring(0,4)] || {name: "Unknown Type Name", description: "Unknown Type Description"}; // Use 4-letter type for lookup
             promptText = JSON.stringify({ // Send a JSON string for the backend to parse
-                type: type,
+                type: type, // Pass the full 5-letter type to the backend
                 name: personalityInfo.name,
                 description: personalityInfo.description,
                 promptKey: promptKey // Ensure promptKey is passed to backend
@@ -462,8 +468,8 @@ export default function App() { // Added export default here
                 // Fallback for initial description when it fails
                 setStructuredDescription({
                     type: resultType, 
-                    name: personalityTypesData[resultType]?.name || 'Unknown Type Name',
-                    description_line1: personalityTypesData[resultType]?.description || 'Unknown Type Description',
+                    name: personalityTypesData[resultType.substring(0,4)]?.name || 'Unknown Type Name', // Use 4-letter type for fallback lookup
+                    description_line1: personalityTypesData[resultType.substring(0,4)]?.description || 'Unknown Type Description',
                     description_line2: '',
                     description_line3: '',
                     general_summary: "বিস্তারিত বর্ণনা লোড করতে সমস্যা হয়েছে। অনুগ্রহ করে পুনরায় চেষ্টা করুন।",
@@ -506,9 +512,70 @@ export default function App() { // Added export default here
         );
     };
 
+    // Accordion Item Component
+    // This component now manages its own open/closed state
+    const AccordionItem = ({ title, content, sectionKey, iconClass, itemIndex, initialOpen = false }) => {
+        const [isOpen, setIsOpen] = useState(initialOpen);
+
+        const toggleAccordion = () => {
+            setIsOpen(!isOpen);
+        };
+
+        return (
+            <div
+                className={`bg-white rounded-2xl shadow-md mb-4 overflow-hidden accordion-item-animate`} /* Changed to rounded-2xl */
+                style={{ animationDelay: `${itemIndex * 0.1}s`, boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.04)' }} /* Added gentle shadow */
+            >
+                <button
+                    className="flex justify-between items-center w-full p-6 text-left text-xl font-semibold text-gray-800 transition-all duration-300 rounded-t-2xl focus:outline-none shadow-sm border-b border-gray-200" /* Removed bg-[#EDE9FE] to use gradient */
+                    style={{ background: 'linear-gradient(to right, #F5F3FF, #EDE9FE)' }} /* Added gradient background */
+                    onClick={toggleAccordion}
+                >
+                    <span className="flex items-center">
+                        {iconClass && <i className={`${iconClass} mr-3 text-purple-600`}></i>}
+                        {title}
+                    </span>
+                    <svg
+                        className={`w-6 h-6 transform transition-transform duration-300 ${isOpen ? 'rotate-180' : 'rotate-0'}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div
+                    className={`transition-all duration-300 ease-in-out overflow-hidden ${ /* Changed duration to 300ms */
+                        isOpen ? 'max-h-screen opacity-100 p-6' : 'max-h-0 opacity-0 px-6'
+                    }`}
+                    style={{ paddingTop: isOpen ? '1.5rem' : '0', paddingBottom: isOpen ? '1.5rem' : '0' }}
+                >
+                    <div className="text-gray-700 text-base sm:text-lg leading-relaxed">
+                        {content}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    // Define the order of sections and their titles/icons for mapping
+    const resultSections = [
+        { key: 'general_summary', title: 'সাধারণ সারসংক্ষেপ', icon: 'fas fa-info-circle' },
+        { key: 'strengths', title: 'আপনার প্রধান শক্তি', icon: 'fas fa-star' },
+        { key: 'challenges', title: 'আপনার চ্যালেঞ্জ', icon: 'fas fa-exclamation-triangle' },
+        { key: 'career_advice', title: 'ক্যারিয়ার পরামর্শ', icon: 'fas fa-briefcase' },
+        { key: 'relationship_tips', title: 'সম্পর্ক ও বন্ধুত্ব', icon: 'fas fa-heart' },
+        { key: 'self_improvement_habits', title: 'আত্মউন্নয়নের অভ্যাস', icon: 'fas fa-seedling' },
+        { key: 'coach_message', title: 'কোচের বার্তা', icon: 'fas fa-comments' },
+    ];
+
+
     return (
-        <div className="min-h-screen bg-gray-100 flex flex-col items-center p-4 sm:p-6 lg:p-8 font-inter">
+        <div className="min-h-screen flex flex-col items-center p-4 sm:p-6 lg:p-8" style={{ fontFamily: "'Hind Siliguri', 'Inter', sans-serif", backgroundColor: '#F9F9F9' }}> {/* Applied Hind Siliguri, changed background */}
             <style>{`
+                @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600&display=swap'); /* Import Hind Siliguri */
+
                 /* Fade in/out for motivational quotes */
                 @keyframes fadeInOut {
                     0% { opacity: 0; transform: translateY(10px); }
@@ -624,10 +691,33 @@ export default function App() { // Added export default here
                     cursor: not-allowed;
                     transform: scale(1);
                 }
+
+                /* Staggered fade-in for accordion items */
+                @keyframes slideInFadeIn {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+
+                .accordion-item-animate {
+                    animation: slideInFadeIn 0.5s ease-out forwards;
+                    opacity: 0; /* Start hidden for animation */
+                }
+
+                /* Restart button specific styles */
+                .restart-button {
+                    background: linear-gradient(to right, #7C3AED, #4F46E5);
+                    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
+                    transition: transform 0.2s ease;
+                }
+
+                .restart-button:hover {
+                    transform: translateY(-2px);
+                }
             `}</style>
 
             {/* Header Section */}
-            <header className="w-full py-6 bg-gradient-to-r from-purple-600 to-indigo-700 text-white flex flex-col items-center justify-center rounded-b-lg shadow-md mb-8">
+            <header className="w-full py-6 text-white flex flex-col items-center justify-center rounded-b-lg shadow-md mb-8"
+                    style={{ background: 'linear-gradient(to right, #8B5CF6, #6366F1)' }}> {/* Applied gradient */}
                 <h1 className="text-4xl sm:text-5xl font-bold mb-2 flex items-center">
                     WHORU <span role="img" aria-label="wizard" className="ml-2 text-3xl sm:text-4xl">🧙‍♂️</span>
                 </h1>
@@ -736,6 +826,7 @@ export default function App() { // Added export default here
                                 </svg>
                             </button>
 
+                            {/* This button dynamically changes text and size based on whether it's the last question */}
                             <button
                                 onClick={handleNextQuestion}
                                 className={`nav-arrow-button ${currentQuestionIndex === questions.length - 1 ? 'px-6 py-3 font-semibold text-lg' : ''}`}
@@ -754,16 +845,17 @@ export default function App() { // Added export default here
                 )}
 
                 {screen === 'result' && (
-                    <div className="bg-white rounded-2xl shadow p-6 w-full max-w-2xl mx-auto text-center">
+                    <div className="bg-white rounded-2xl shadow-lg border border-[#E5E7EB] p-6 w-full max-w-2xl mx-auto text-center" /* Changed border color */
+                         style={{ boxShadow: '0 4px 10px rgba(76, 29, 149, 0.05)' }}>
                         <h2 className="text-3xl sm:text-4xl mb-4 text-green-700">আপনার ব্যক্তিত্বের ধরণ:</h2>
-                        <p className="text-5xl sm:text-6xl font-bold mb-6 text-blue-700">
+                        <p className="text-5xl sm:text-6xl font-bold mb-6 text-[#4F46E5]"> {/* Changed text color to Indigo */}
                             {structuredDescription?.type || resultType} {/* Use parsed type or fallback to calculated */}
                         </p>
                         <p className="text-xl sm:text-2xl font-semibold mb-2">
-                            {structuredDescription?.name || personalityTypesData[resultType]?.name || 'Unknown Type Name'} {/* Use parsed name or fallback to new generic names */}
+                            {structuredDescription?.name || personalityTypesData[resultType.substring(0,4)]?.name || 'Unknown Type Name'} {/* Use parsed name or fallback to new generic names */}
                         </p>
                         <p className="text-lg sm:text-xl mb-4">
-                            {structuredDescription?.description_line1 || personalityTypesData[resultType]?.description || ''} {/* Use parsed description line 1 or fallback */}
+                            {structuredDescription?.description_line1 || personalityTypesData[resultType.substring(0,4)]?.description || ''} {/* Use parsed description line 1 or fallback */}
                         </p>
                         {structuredDescription?.description_line2 && (
                             <p className="text-lg sm:text-xl mb-4">{structuredDescription.description_line2}</p>
@@ -817,53 +909,44 @@ export default function App() { // Added export default here
                                         // Main result description sections (displaying all structuredDescription fields)
                                         structuredDescription ? (
                                             <React.Fragment>
-                                                {structuredDescription.general_summary && (
-                                                    <div className="mb-6 text-base sm:text-lg whitespace-pre-wrap text-left">
-                                                        {structuredDescription.general_summary}
-                                                    </div>
-                                                )}
+                                                {/* Iterating through resultSections to render AccordionItems */}
+                                                {resultSections.map((section, index) => {
+                                                    let content = null;
+                                                    // Determine content based on section key
+                                                    if (section.key === 'general_summary') {
+                                                        content = structuredDescription.general_summary ? <p className="whitespace-pre-wrap">{structuredDescription.general_summary}</p> : null;
+                                                    } else if (section.key === 'strengths') {
+                                                        content = structuredDescription.strengths && structuredDescription.strengths.length > 0 ? renderListItems(structuredDescription.strengths, 'name', 'explanation') : null;
+                                                    } else if (section.key === 'challenges') {
+                                                        content = structuredDescription.challenges && structuredDescription.challenges.length > 0 ? renderListItems(structuredDescription.challenges, 'description', 'advice') : null;
+                                                    } else if (section.key === 'career_advice') {
+                                                        content = structuredDescription.career_advice && structuredDescription.career_advice.length > 0 ? renderListItems(structuredDescription.career_advice, 'field', 'reason', 'action') : null;
+                                                    } else if (section.key === 'relationship_tips') {
+                                                        content = structuredDescription.relationship_tips && structuredDescription.relationship_tips.length > 0 ? renderListItems(structuredDescription.relationship_tips, 'general_behavior', 'tip') : null;
+                                                    } else if (section.key === 'self_improvement_habits') {
+                                                        content = structuredDescription.self_improvement_habits && structuredDescription.self_improvement_habits.length > 0 ? renderListItems(structuredDescription.self_improvement_habits, 'habit', 'benefit') : null;
+                                                    } else if (section.key === 'coach_message') {
+                                                        content = structuredDescription.coach_message ? <p className="italic border-l-4 border-gray-400 pl-4 py-2">{structuredDescription.coach_message}</p> : null;
+                                                    }
 
-                                                {structuredDescription.strengths && structuredDescription.strengths.length > 0 && (
-                                                    <div className="mb-6">
-                                                        <h3 className="text-xl sm:text-2xl font-semibold mb-3 text-purple-700 text-left">আপনার প্রধান শক্তি:</h3>
-                                                        {renderListItems(structuredDescription.strengths, 'name', 'explanation')}
-                                                    </div>
-                                                )}
-
-                                                {structuredDescription.challenges && structuredDescription.challenges.length > 0 && (
-                                                    <div className="mb-6">
-                                                        <h3 className="text-xl sm:text-2xl font-semibold mb-3 text-red-700 text-left">আপনার চ্যালেঞ্জ:</h3>
-                                                        {renderListItems(structuredDescription.challenges, 'description', 'advice')}
-                                                    </div>
-                                                )}
-
-                                                {structuredDescription.career_advice && structuredDescription.career_advice.length > 0 && (
-                                                    <div className="mb-6">
-                                                        <h3 className="text-xl sm:text-2xl font-semibold mb-3 text-blue-700 text-left">ক্যারিয়ার পরামর্শ:</h3>
-                                                        {renderListItems(structuredDescription.career_advice, 'field', 'reason', 'action')}
-                                                    </div>
-                                                )}
-
-                                                {structuredDescription.relationship_tips && structuredDescription.relationship_tips.length > 0 && (
-                                                    <div className="mb-6">
-                                                        <h3 className="text-xl sm:text-2xl font-semibold mb-3 text-pink-700 text-left">সম্পর্ক ও বন্ধুত্ব:</h3>
-                                                        {renderListItems(structuredDescription.relationship_tips, 'general_behavior', 'tip')}
-                                                    </div>
-                                                )}
-
-                                                {structuredDescription.self_improvement_habits && structuredDescription.self_improvement_habits.length > 0 && (
-                                                    <div className="mb-6">
-                                                        <h3 className="text-xl sm:text-2xl font-semibold mb-3 text-green-700 text-left">আত্মউন্নয়নের অভ্যাস:</h3>
-                                                        {renderListItems(structuredDescription.self_improvement_habits, 'habit', 'benefit')}
-                                                    </div>
-                                                )}
-
-                                                {structuredDescription.coach_message && (
-                                                    <div className="mb-4 text-base sm:text-lg italic text-gray-700 text-left border-l-4 border-gray-400 pl-4 py-2">
-                                                        <p className="font-semibold text-gray-800">কোচের বার্তা:</p>
-                                                        {structuredDescription.coach_message}
-                                                    </div>
-                                                )}
+                                                    // Only render AccordionItem if content exists for the section
+                                                    if (content) {
+                                                        return (
+                                                            <React.Fragment key={section.key}> {/* Use React.Fragment for key when conditional rendering */}
+                                                                {index > 0 && <hr className="my-6 border-t border-gray-200" />} {/* Divider */}
+                                                                <AccordionItem
+                                                                    title={section.title}
+                                                                    content={content}
+                                                                    sectionKey={section.key}
+                                                                    iconClass={section.icon}
+                                                                    itemIndex={index} // Pass index for staggered animation
+                                                                    initialOpen={true} // All open by default
+                                                                />
+                                                            </React.Fragment>
+                                                        );
+                                                    }
+                                                    return null;
+                                                })}
                                             </React.Fragment>
                                         ) : (
                                             !isGeneratingDescription && resultType && (
@@ -879,7 +962,7 @@ export default function App() { // Added export default here
 
                         <button
                             onClick={restartTest}
-                            className="px-6 py-3 rounded-lg font-semibold text-lg transition-all duration-300 bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 flex items-center mx-auto mt-6"
+                            className="px-6 py-3 rounded-lg font-semibold text-lg text-white flex items-center mx-auto mt-6 restart-button" /* Added restart-button class */
                         >
                             পুনরায় শুরু করুন <i className="fas fa-redo ml-2"></i>
                         </button>
