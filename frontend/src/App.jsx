@@ -523,7 +523,7 @@ export default function App() { // Added export default here
 
         return (
             <div
-                className={`bg-white rounded-2xl shadow-md mb-4 overflow-hidden accordion-item-animate`} /* Changed to rounded-2xl */
+                className={`bg-white rounded-2xl mb-4 overflow-hidden accordion-item-animate`} /* Changed to rounded-2xl, removed shadow-md to use custom shadow */
                 style={{ animationDelay: `${itemIndex * 0.1}s`, boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.04)' }} /* Added gentle shadow */
             >
                 <button
@@ -551,7 +551,7 @@ export default function App() { // Added export default here
                     }`}
                     style={{ paddingTop: isOpen ? '1.5rem' : '0', paddingBottom: isOpen ? '1.5rem' : '0' }}
                 >
-                    <div className="text-gray-700 text-base sm:text-lg leading-relaxed">
+                    <div className="text-gray-800 text-base sm:text-lg leading-relaxed"> {/* Changed text-gray-700 to text-gray-800 */}
                         {content}
                     </div>
                 </div>
