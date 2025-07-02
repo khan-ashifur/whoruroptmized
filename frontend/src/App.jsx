@@ -305,7 +305,7 @@ export default function App() { // Added export default here
 
         const validTypes = Object.keys(personalityTypesData);
         if (!validTypes.includes(finalCalculatedType)) {
-            console.error(`Submission failed: Calculated type "${finalCalculatedType}" is not a standard type. Using UNKNOWN.`); // *** MBTI reference was here ***
+            console.error(`Submission failed: Calculated type "${finalCalculatedType}" is not a standard type. Using UNKNOWN.`); 
             showMessage("ব্যক্তিত্বের ধরণ নির্ণয় করা যায়নি। অনুগ্রহ করে পুনরায় চেষ্টা করুন।", 'error');
             // Fallback to a generic "Unknown" type if calculation somehow fails or produces non-standard
             setResultType('UNKNOWN'); 

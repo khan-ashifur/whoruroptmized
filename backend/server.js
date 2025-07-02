@@ -131,7 +131,7 @@ JSON অবজেক্টের নিম্নলিখিত কীগুল�
 - \`general_summary\`: (string) একটি সমৃদ্ধ, কাব্যিক অনুচ্ছেদ যা ব্যক্তির ভেতরের প্রকৃতি, আবেগিক গভীরতা, সিদ্ধান্ত গ্রহণের ধরণ এবং তারা পৃথিবীকে কীভাবে দেখে তা বর্ণনা করবে। নরম, কোচিং-স্টাইলের ভাষা ব্যবহার করুন যাতে "আহ্, এটা সত্যিই আমি" এমন অনুভূতি তৈরি হয়। এতে নিম্নলিখিত দুটি লাইন অবশ্যই অন্তর্ভুক্ত করবেন: "সবার মধ্যে একটু আশার আলো ছড়াতে ভালোবাসেন, যদিও মাঝে মাঝে আপনিই নিজের জন্য সেই আলো পেতে চান।" এবং "মানুষ প্রায়ই বুঝতে পারে না—আপনার চিন্তার কতটা গভীরতা।" এই লাইনগুলো প্রাকৃতিক ভাবে অনুচ্ছেদে মিশে যাবে।
 - \`strengths\`: (array of objects) ৫টি প্রধান শক্তির তালিকা। প্রতিটি অবজেক্টে \`name\` (string, বাংলায়) এবং \`explanation\` (string, ১-২ লাইনের ব্যাখ্যা) থাকতে হবে।
 - \`challenges\`: (array of objects) ৩টি ব্যক্তিত্বের চ্যালেঞ্জের তালিকা। প্রতিটি অবজেক্টে \`description\` (string, সংক্ষিপ্ত আবেগিক চ্যালেঞ্জ) এবং \`advice\` (string, উষ্ণ, কোচ-স্টাইলের পরামর্শ) থাকতে হবে।
-- \`career_advice\`: (array of objects) ৩-৫টি পেশার তালিকা যা ব্যক্তির প্রকৃতির সাথে সামঞ্জস্যপূর্ণ, আধুনিক পেশা যেমন - কন্টেন্ট ক্রিয়েটর, ডেটা অ্যানালিস্ট, স্টার্টআপ উদ্যোক্তা, ডিজিটাল মার্কেটিং স্পেশালিস্ট, কমিউনিটি ম্যানেজার, ফ্রিল্যান্স লেখক, সফটওয়্যার ডেভেলভার, প্রজেক্ট ম্যানেজার, সামাজিক কর্মী, শিক্ষক, কাউন্সেলর, ইভেন্ট অর্গানাইজার ইত্যাদি অন্তর্ভুক্ত করুন। প্রতিটি অবজেক্টে \`field\` (string, বাংলায়), \`reason\` (string, কেন এই পেশা উপযুক্ত), এবং \`action\` (string, ঐচ্ছিক, ১-লাইনের পদক্ষেপ) থাকতে হবে।
+- \`career_advice\`: (array of objects) ৩-৫টি পেশার তালিকা যা ব্যক্তির প্রকৃতির সাথে সামঞ্জস্যপূর্ণ, আধুনিক পেশা যেমন - কন্টেন্ট ক্রিয়েটর, ডেটা অ্যানালিস্ট, স্টার্টআপ উদ্যোক্তা, ডিজিটাল মার্কেটিং স্পেশালিস্ট, কমিউনিটি ম্যানেজার, ফ্রিল্যান্স লেখক, সফটওয়্যার ডেভেলপার, প্রজেক্ট ম্যানেজার, সামাজিক কর্মী, শিক্ষক, কাউন্সেলর, ইভেন্ট অর্গানাইজার ইত্যাদি অন্তর্ভুক্ত করুন। প্রতিটি অবজেক্টে \`field\` (string, বাংলায়), \`reason\` (string, কেন এই পেশা উপযুক্ত), এবং \`action\` (string, ঐচ্ছিক, ১-লাইনের পদক্ষেপ) থাকতে হবে।
 - \`relationship_tips\`: (array of objects) ৩-৫টি অন্তর্দৃষ্টির তালিকা। প্রতিটি অবজেক্টে \`general_behavior\` (string, প্রেম/বন্ধুত্বে সাধারণ আচরণ) এবং \`tip\` (string, সম্পর্ক উন্নত করার জন্য ব্যবহারিক/আবেগিক পরামর্শ) থাকতে হবে।
 - \`self_improvement_habits\`: (array of objects) ৩টি দৈনিক বা মানসিকতার অভ্যাসের তালিকা। প্রতিটি অবজেক্টে \`habit\` (string, প্রস্তাবিত অভ্যাস) এবং \`benefit\` (string, এর মানসিক/ব্যক্তিগত সুবিধা) থাকতে হবে।
 - \`coach_message\`: (string) একটি চূড়ান্ত আবেগপ্রম্পট যা একজন জ্ঞানী বাঙালি জীবন কোচের মতো শোনাবে, যা গভীর প্রতিফলন এবং আরও অন্বেষণের আকাঙ্ক্ষা জাগাবে, সর্বদা 'আপনি' সম্বোধন ব্যবহার করে। এটি অবশ্যই সহজ-সরল এবং মার্জিত বাংলা ভাষায় হবে, কোনো অহেতুক নাটকীয়তা বা চটকদার শব্দ ব্যবহার করবেন না।
@@ -294,48 +294,57 @@ Output must be a valid JSON object. Do not include explanations outside the JSON
     
     // Clean and validate the final response data before sending to frontend
     // *** CRITICAL MODIFIED SECTION: Directly populating cleanedResultData ***
-    let cleanedResultData = { ...defaultStructuredDescription }; // Start with all expected keys from default
+    let cleanedResultData = {}; // Start with an empty object
 
-    // Directly assign from finalResponseData and clean individual fields
-    cleanedResultData.type = cleanAndTrimText(finalResponseData.type || "");
-    cleanedResultData.name = cleanAndTrimText(finalResponseData.name || "");
-    cleanedResultData.description_line1 = cleanAndTrimText(finalResponseData.description_line1 || "");
-    cleanedResultData.description_line2 = cleanAndTrimText(finalResponseData.description_line2 || "");
-    cleanedResultData.description_line3 = cleanAndTrimText(finalResponseData.description_line3 || "");
-    cleanedResultData.general_summary = cleanAndTrimText(finalResponseData.general_summary || "");
-    cleanedResultData.coach_message = cleanAndTrimText(finalResponseData.coach_message || "");
+    // Populate cleanedResultData by iterating over the default structure keys
+    // This ensures all expected keys are present, even if AI misses them.
+    for (const key of defaultStructuredDescriptionKeys) {
+        // If the key exists in AI's parsed response and is not explicitly null/undefined
+        if (finalResponseData.hasOwnProperty(key) && finalResponseData[key] !== null && finalResponseData[key] !== undefined) {
+            const expectedDefaultValue = defaultStructuredDescription[key];
 
-    // Handle array fields specifically
-    const processArrayField = (sourceArray, itemSchemaKeys) => {
-        if (!Array.isArray(sourceArray)) {
-            return []; // Return empty array if source is not an array
-        }
-        return sourceArray.map(item => {
-            const cleanedItem = {};
-            if (typeof item === 'object' && item !== null) {
-                for (const key of itemSchemaKeys) {
-                    if (item[key]) { // Check if property exists before cleaning
-                        cleanedItem[key] = cleanAndTrimText(item[key]);
-                    }
-                }
-            } else if (typeof item === 'string') {
-                // Fallback for simple string in array if AI gives it
-                if (itemSchemaKeys.length > 0) {
-                    cleanedItem[itemSchemaKeys[0]] = cleanAndTrimText(item); // Assign to first key in schema
+            if (typeof expectedDefaultValue === 'string') {
+                cleanedResultData[key] = cleanAndTrimText(finalResponseData[key]);
+            } else if (Array.isArray(expectedDefaultValue)) {
+                if (Array.isArray(finalResponseData[key])) { // Ensure the AI's response is also an array
+                    cleanedResultData[key] = finalResponseData[key].map(item => {
+                        if (typeof item === 'string') return cleanAndTrimText(item);
+                        if (typeof item === 'object' && item !== null) {
+                            const cleanedItem = {};
+                            for (const subKey in item) {
+                                cleanedItem[subKey] = cleanAndTrimText(item[subKey]);
+                            }
+                            return cleanedItem;
+                        }
+                        return item;
+                    }).filter(item => {
+                        // Filter out empty strings or objects where all values are empty after cleaning
+                        if (typeof item === 'string') return item.length > 0;
+                        if (typeof item === 'object' && item !== null) return Object.values(item).some(val => typeof val === 'string' ? val.length > 0 : true);
+                        return false;
+                    });
                 } else {
-                    return cleanAndTrimText(item); // If schema is just strings
+                    // AI sent something not an array for an expected array field
+                    cleanedResultData[key] = expectedDefaultValue; // Default to empty array
+                    console.warn(`Key '${key}' from AI was not an array (expected array). Set to default.`);
                 }
+            } else if (typeof expectedDefaultValue === 'object' && expectedDefaultValue !== null) {
+                // For direct object copies if there were any, but our top-level are strings/arrays.
+                // This will catch if AI provides a non-array object for an array key, and we just assign it directly IF it's not a primitive.
+                 cleanedResultData[key] = finalResponseData[key];
+            } else {
+                // Catch-all for unexpected types that are present, but don't match expected string/array/object types
+                cleanedResultData[key] = defaultStructuredDescription[key];
+                console.warn(`Key '${key}' from AI was an unexpected primitive type. Set to default.`);
             }
-            return cleanedItem;
-        }).filter(item => Object.keys(item).length > 0 && Object.values(item).some(val => typeof val === 'string' ? val.length > 0 : true));
-    };
+        } else {
+            // Key expected in output but not present in AI response (or was null/undefined), so use its default empty value
+            cleanedResultData[key] = defaultStructuredDescription[key];
+            console.warn(`Key '${key}' expected but not found/valid in AI response. Using default empty value.`);
+        }
+    }
+    // --- END CRITICAL MODIFIED SECTION ---
 
-    cleanedResultData.strengths = processArrayField(finalResponseData.strengths, ['name', 'explanation']);
-    cleanedResultData.challenges = processArrayField(finalResponseData.challenges, ['description', 'advice']);
-    cleanedResultData.career_advice = processArrayField(finalResponseData.career_advice, ['field', 'reason', 'action']);
-    cleanedResultData.relationship_tips = processArrayField(finalResponseData.relationship_tips, ['general_behavior', 'tip']);
-    cleanedResultData.self_improvement_habits = processArrayField(finalResponseData.self_improvement_habits, ['habit', 'benefit']);
-    // *** END CRITICAL MODIFIED SECTION ***
 
     const finalResponse = {
       candidates: [
