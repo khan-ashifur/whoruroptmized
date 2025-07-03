@@ -17,7 +17,7 @@ const personalityTypesData = {
     'ENTP': { name: "The Inventive Debater", "description": "যুক্তিপূর্ণ , উদ্ভাবনী ও বিতর্কপ্রিয়" },
     'ESTJ': { name: "The Efficient Organizer", description: "সংগঠক , কর্তৃত্বশীল ও বাস্তববাদী" },
     'ESFJ': { name: "The Harmonious Supporter", description: "যত্নশীল , সহানুভূতিশীল ও সামাজিক" },
-    'ENFJ': { name: "The Charismatic Inspirer", description: "নেতৃস্থানীয় , সহানুভূতিশীল ও উৎসাহদায়ী" },
+    'ENFJ': { name: "The Charismatic Inspirer", description: "নেতৃস্থানীয় , সহানুভূতিশীল ও উৎসাহদায়ী" }, // Removed extra 'f' here
     'ENTJ': { name: "The Decisive Leader", description: "কৌশলী , আত্মবিশ্বাসী ও নেতৃত্বদক্ষ" },
 };
 
@@ -118,7 +118,7 @@ export default function App() { // Added export default here
     const [screen, setScreen] = useState('start');
     const [subScreen, setSubScreen] = useState(null);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-    const [questionVisible, setQuestionVisible] = useState(false);
+    // Removed questionVisible state as it's no longer needed for the new animation approach
     const [userAnswers, setUserAnswers] = useState({});
     const [resultType, setResultType] = useState('');
     // structuredDescription will now hold the full parsed JSON object from the backend
@@ -146,15 +146,16 @@ export default function App() { // Added export default here
         console.log("App component initialized. Total questions:", questions.length);
     }, []);
 
-    useEffect(() => {
-        if (screen === 'test') {
-            setQuestionVisible(false);
-            const timer = setTimeout(() => {
-                setQuestionVisible(true);
-            }, 50);
-            return () => clearTimeout(timer);
-        }
-    }, [currentQuestionIndex, screen]);
+    // Removed the useEffect that controlled questionVisible state, as it's replaced by key prop
+    // useEffect(() => {
+    //     if (screen === 'test') {
+    //         setQuestionVisible(false);
+    //         const timer = setTimeout(() => {
+    //             setQuestionVisible(true);
+    //         }, 50);
+    //         return () => clearTimeout(timer);
+    //     }
+    // }, [currentQuestionIndex, screen]);
 
     useEffect(() => {
         let quoteDisplayTimer;
@@ -385,9 +386,21 @@ export default function App() { // Added export default here
             });
 
         } else if (promptKey === 'career_sub_prompt') {
+            // THIS IS THE SECTION TO MODIFY FOR DIVERSE CAREER SUGGESTIONS
+            // The prompt sent to the AI should explicitly ask for a mix of traditional and modern careers.
+            // This prompt will be sent as part of the JSON payload to your backend.
+            const personalityInfo = personalityTypesData[type.substring(0,4)] || {name: "Unknown Type Name", description: "Unknown Type Description"};
             promptText = JSON.stringify({
-                type: type, // Pass the MBTI type for sub-prompts too
-                promptKey: promptKey
+                type: type, // Pass the full 5-letter type to the backend
+                name: personalityInfo.name, // Pass name to backend
+                description: personalityInfo.description, // Pass description to backend
+                promptKey: promptKey,
+                // === START MODIFICATION FOR DIVERSE CAREERS ===
+                // This is where you would add instructions for the AI.
+                // The backend will then construct the final AI prompt using this information.
+                // For example, you might add a field like:
+                career_diversity_instruction: "Suggest a diverse range of career paths, including both modern/emerging roles (e.g., tech, digital marketing) and well-established traditional professions (e.g., doctor, lawyer, engineer, teacher, sales, finance, civil service, arts), that align with this personality type's strengths and characteristics. Provide a blend of both types of careers.",
+                // === END MODIFICATION FOR DIVERSE CAREERS ===
             });
         } else if (promptKey === 'relationship_sub_prompt') {
             promptText = JSON.stringify({
@@ -477,7 +490,7 @@ export default function App() { // Added export default here
                 });
                 console.log("Set fallback structured description.");
             } else {
-                setSubPromptResult({message: "বিস্তারিত তথ্য লোড করতে সমস্যা হয়েছে। অনুগ্রহ করে পুনরায় চেষ্টা করুন।", items: []});
+                setSubPromptResult({message: "বিস্তারিত তথ্য লোড করতে সমস্যা হয়েছে। অনুগ্রহ করে পুনরায় চেষ্টা করুন.", items: []});
                 console.log("Set fallback sub-prompt result.");
             }
         } finally {
@@ -576,6 +589,16 @@ export default function App() { // Added export default here
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600&display=swap'); /* Import Hind Siliguri */
 
+                /* Animation for floating question mark */
+                @keyframes float {
+                    0% { transform: translateY(0px); }
+                    50% { transform: translateY(-5px); }
+                    100% { transform: translateY(0px); }
+                }
+                .float-animation {
+                    animation: float 2s ease-in-out infinite;
+                }
+
                 /* Fade in/out for motivational quotes */
                 @keyframes fadeInOut {
                     0% { opacity: 0; transform: translateY(10px); }
@@ -594,6 +617,8 @@ export default function App() { // Added export default here
                 }
                 .question-fade-in {
                     animation: fadeIn 0.5s ease-out forwards;
+                    /* Ensure this animation only runs once per render */
+                    animation-fill-mode: forwards; /* Keep the element in its end state */
                 }
 
                 /* Custom styling for vertical radio buttons */
@@ -716,9 +741,9 @@ export default function App() { // Added export default here
             `}</style>
 
             {/* Header Section */}
-            <header className="w-full py-6 text-white flex flex-col items-center justify-center rounded-b-lg shadow-md mb-8"
-                    style={{ background: 'linear-gradient(to right, #8B5CF6, #6366F1)' }}> {/* Applied gradient */}
-                <h1 className="text-4xl sm:text-5xl font-bold mb-2 flex items-center">
+            <header className="w-full py-10 text-white flex flex-col items-center justify-center rounded-b-lg shadow-md mb-8"
+                    style={{ background: 'linear-gradient(to right, #8B5CF6, #6366F1)' }}> {/* Increased py-10 */}
+                <h1 className="text-4xl sm:text-5xl font-extrabold mb-2 flex items-center"> {/* Changed to font-extrabold */}
                     WHORU <span role="img" aria-label="wizard" className="ml-2 text-3xl sm:text-4xl">🧙‍♂️</span>
                 </h1>
                 <p className="text-xl sm:text-2xl font-light flex items-center">
@@ -727,9 +752,10 @@ export default function App() { // Added export default here
                 {screen === 'start' && (
                     <button
                         onClick={() => setScreen('test')}
-                        className="mt-4 px-6 py-2 bg-white text-purple-700 font-semibold rounded-full shadow-lg hover:bg-gray-200 transition-all duration-300 transform hover:scale-105"
+                        className="relative mt-6 px-8 py-3 bg-white text-purple-700 font-semibold rounded-full shadow-lg hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 overflow-hidden" // Added relative, px-8 py-3, overflow-hidden
                     >
                         শুরু করুন
+                        {/* Removed the floating question mark */}
                     </button>
                 )}
             </header>
@@ -739,31 +765,33 @@ export default function App() { // Added export default here
                 {screen === 'start' && (
                     <>
                         {/* Description Box 1 */}
-                        <div className="bg-[#E6E6FA] text-black rounded-2xl shadow p-6 w-full md:w-1/2">
-                            <h2 className="text-xl sm:text-2xl font-bold mb-4">
+                        <div className="bg-white text-black rounded-2xl shadow-lg border border-[#E5E7EB] p-6 w-full md:w-1/2 transition-all duration-300 hover:shadow-xl hover:scale-[1.01]"> {/* Changed bg, added border, hover */}
+                            <h2 className="text-2xl sm:text-3xl font-extrabold mb-4 flex items-center gap-2"> {/* Increased font size, added gap */}
+                                <i className="fas fa-lightbulb text-yellow-500"></i> {/* Icon */}
                                 একটু সময় দিন... নিজেকে আরও ভালোভাবে জানার জন্য।
                             </h2>
-                            <p className="mb-2 text-base sm:text-lg">কখনও কি মনে হয়েছে — আপনি আসলে কে?</p>
-                            <p className="mb-2 text-base sm:text-lg">
+                            <p className="mb-2 text-base sm:text-lg leading-relaxed">কখনও কি মনে হয়েছে — আপনি আসলে কে?</p>
+                            <p className="mb-2 text-base sm:text-lg leading-relaxed">
                                 কেন কিছু সিদ্ধান্ত আপনি সহজে নেন, আবার কিছুতে দ্বিধা অনুভব করেন?
                             </p>
-                            <p className="mb-2 text-base sm:text-lg">
+                            <p className="mb-2 text-base sm:text-lg leading-relaxed">
                                 কেন কারও সাথে সহজেই বন্ধুত্ব হয়, আবার কারও সাথে দূরত্ব থাকে?
                             </p>
-                            <p className="mb-2 text-base sm:text-lg">
+                            <p className="mb-2 text-base sm:text-lg leading-relaxed">
                                 এই সহজ, ছোট্ট টেস্টটি আপনার ব্যক্তিত্বের গভীরতর স্তরগুলো উন্মোচন করবে।
                             </p>
-                            <p className="text-base sm:text-lg">
+                            <p className="text-base sm:text-lg leading-relaxed">
                                 আপনার চিন্তার ধরণ, অনুভূতির ধরণ, শক্তি আর চ্যালেঞ্জ — সবকিছুর এক নতুন আয়না আপনি দেখতে পাবেন।
                             </p>
                         </div>
 
                         {/* Description Box 2 */}
-                        <div className="bg-[#E6E6FA] text-black rounded-2xl shadow p-6 w-full md:w-1/2">
-                            <h2 className="text-xl sm:text-2xl font-bold mb-4">
+                        <div className="bg-white text-black rounded-2xl shadow-lg border border-[#E5E7EB] p-6 w-full md:w-1/2 transition-all duration-300 hover:shadow-xl hover:scale-[1.01]"> {/* Changed bg, added border, hover */}
+                            <h2 className="text-2xl sm:text-3xl font-extrabold mb-4 flex items-center gap-2"> {/* Increased font size, added gap */}
+                                <i className="fas fa-chart-line text-blue-500"></i> {/* Icon */}
                                 আপনার জন্য এই টেস্ট কেন গুরুত্বপূর্ণ?
                             </h2>
-                            <ul className="list-disc list-inside space-y-2 text-base sm:text-lg">
+                            <ul className="list-disc list-inside space-y-2 text-base sm:text-lg leading-relaxed">
                                 <li>নিজের ভেতরের জগৎকে আরও ভালোভাবে বুঝবেন</li>
                                 <li>কোন পরিবেশে আপনি সবচেয়ে স্বচ্ছন্দ — তা জানতে পারবেন</li>
                                 <li>কোন কাজ বা সম্পর্ক আপনাকে আনন্দ দেয় — সেটাও স্পষ্ট হবে</li>
@@ -789,8 +817,9 @@ export default function App() { // Added export default here
                             </div>
                         )}
 
-                        {/* Question Text with fade-in animation */}
-                        <div className={`mt-8 mb-10 text-xl sm:text-2xl font-bold text-gray-800 leading-relaxed px-4 min-h-[64px] transition-opacity duration-500 ${questionVisible ? 'opacity-100 question-fade-in' : 'opacity-0'}`}>
+                        {/* Question Text with fixed height and fade-in animation */}
+                        {/* Using key to re-trigger animation on question change */}
+                        <div key={currentQuestionIndex} className={`mt-8 mb-10 text-xl sm:text-2xl font-bold text-gray-800 leading-relaxed px-4 h-[120px] flex items-center justify-center text-center question-fade-in`}> {/* Changed min-h to fixed h, added flex properties */}
                             {questions[currentQuestionIndex]?.question || ''}
                         </div>
 
